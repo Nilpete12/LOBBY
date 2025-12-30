@@ -20,10 +20,10 @@ export default function Hero() {
         {/* Headline */}
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
           The hills are calling. <br className="hidden md:block" />
-          <span className="text-slate-400">Ride with locals.</span>
+          <span className="text-slate-500">Ride with locals.</span>
         </h1>
 
-        <p className="text-lg text-slate-500 max-w-2xl mb-8 font-light leading-relaxed">
+        <p className="text-lg text-slate-600 max-w-2xl mb-8 font-normal leading-relaxed">
           Skip the haggling. Connect directly with trusted drivers for local trips and outstation adventures.
         </p>
 

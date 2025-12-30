@@ -5,6 +5,8 @@ import Footer from './Components/Footer';
 import ErrorPage from './Pages/Error';
 import Sign from './Pages/Sign';
 import Findride from './Pages/Findride';
+import Support from './Pages/Support';
+import Driverpage from './Pages/Driverpage';
 
 function App() {
   return (
@@ -16,6 +18,9 @@ function App() {
             <Route path="*" element={<ErrorPage />} />
             <Route path="/Auth" element={<Sign />} />
             <Route path="/search" element={<Findride />} />
+            <Route path="/Support" element={<Support />} />
+            <Route path="/Driver" element={<Driverpage />} />
+
             
             
           </Routes>

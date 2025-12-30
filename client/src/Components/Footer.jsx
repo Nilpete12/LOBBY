@@ -29,7 +29,7 @@ export default function Footer() {
             <h4 className="text-white font-bold mb-6">Platform</h4>
             <ul className="space-y-4 text-sm">
               <li><Link to="/search" className="hover:text-white transition">Find a Ride</Link></li>
-              <li><Link to="/drive" className="hover:text-white transition">Driver Sign Up</Link></li>
+              <li><Link to="/driver" className="hover:text-white transition">Driver Sign Up</Link></li>
               <li><Link to="/auth" className="hover:text-white transition">Log In</Link></li>
               <li><Link to="/search" className="hover:text-white transition">Popular Routes</Link></li>
             </ul>
@@ -39,7 +39,7 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-bold mb-6">Company</h4>
             <ul className="space-y-4 text-sm">
-              <li><Link to="/contact" className="hover:text-white transition">About Us</Link></li>
+              <li><Link to="/Support" className="hover:text-white transition">About Us</Link></li>
               <li><Link to="#" className="hover:text-white transition">Admin Login</Link></li>
               <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
               <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>

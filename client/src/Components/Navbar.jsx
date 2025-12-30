@@ -14,8 +14,8 @@ export default function Navbar() {
         {/* Desktop Links - Hidden on Mobile */}
         <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
           <Link to="/search" className="hover:text-black transition">Find a Ride</Link>
-          <Link to="/contact" className="hover:text-black transition">Support</Link>
-          <Link to="/drive" className="hover:text-black transition">For Drivers</Link>
+          <Link to="/Support" className="hover:text-black transition">Support</Link>
+          <Link to="/Driver" className="hover:text-black transition">For Drivers</Link>
         </div>
 
         {/* CTA Buttons */}

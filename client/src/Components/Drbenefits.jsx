@@ -1,0 +1,51 @@
+import { Wallet, Clock, Users, Shield } from 'lucide-react';
+
+export default function DriverBenefits() {
+  const benefits = [
+    {
+      icon: <Wallet size={32} />,
+      title: "0% Commission",
+      desc: "We don't take a cut from your rides. You pay a small monthly subscription, and every rupee you earn is yours."
+    },
+    {
+      icon: <Clock size={32} />,
+      title: "Flexible Schedule",
+      desc: "No shifts. No penalties. Toggle your status to 'Available' whenever you want to work."
+    },
+    {
+      icon: <Users size={32} />,
+      title: "Direct Connection",
+      desc: "Riders call you directly. Negotiate outstation trips to Dawki or Cherrapunji on your own terms."
+    },
+    {
+      icon: <Shield size={32} />,
+      title: "Community Trust",
+      desc: "Build your reputation with our star rating system. Good drivers get more calls automatically."
+    }
+  ];
+
+  return (
+    <section className="py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">Why drive with LOBBY?</h2>
+          <p className="text-slate-500 max-w-2xl mx-auto">
+            We are building a directory, not a dispatch service. You are the boss of your own taxi business.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {benefits.map((item, i) => (
+            <div key={i} className="p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-lg transition group">
+              <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm mb-6 group-hover:scale-110 transition">
+                {item.icon}
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h3>
+              <p className="text-slate-500 leading-relaxed text-sm">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
