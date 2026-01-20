@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 
 // Import the helper
 import Scrolltotop from './Components/Scrolltotop';
+import { AuthProvider } from './context/Authcontext'; 
 
 // Structure Components
 import Navbar from './Components/Navbar';
@@ -17,6 +18,7 @@ import AdminPage from './Pages/Adminpage';
 import ErrorPage from './Pages/Error';
 import PrivacyPolicy from './Pages/Privacypolicy';
 import TermsPage from './Pages/Terms';
+import DriverDashboard from './Pages/Driverdashboard';
 
 // --- LAYOUT COMPONENT (Handles the Logic) ---
 function Layout() {
@@ -41,7 +43,8 @@ function Layout() {
             <Route path="/Auth" element={<Sign />} />
             <Route path="/search" element={<Findride />} />
             <Route path="/Support" element={<Support />} />
-            <Route path="/Driver" element={<Driverpage />} />
+            <Route path="/Drive" element={<Driverpage />} />
+            <Route path="/Drive/Dashboard" element={<DriverDashboard />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/privacypolicy" element={<PrivacyPolicy />} />
             <Route path="/T&C" element={<TermsPage />} />
@@ -50,7 +53,7 @@ function Layout() {
 
       {/* Conditionally render Footer */}
       {!isAdmin && <Footer />} 
-      
+    
     </div>
   );
 }
@@ -58,10 +61,12 @@ function Layout() {
 // --- MAIN APP COMPONENT ---
 function App() {
   return (
-    <Router>
-      <Scrolltotop />
-      <Layout />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Scrolltotop />
+        <Layout />
+      </Router>
+    </AuthProvider>
   );
 }
 

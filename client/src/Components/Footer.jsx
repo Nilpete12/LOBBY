@@ -15,7 +15,7 @@ export default function Footer() {
               LOBBY<span className="text-blue-500">.</span>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed mb-6">
-              The trusted driver directory for Shillong and the North East. Connecting locals directly.
+              The trusted drive directory for Shillong and the North East. Connecting locals directly.
             </p>
             <div className="flex gap-4">
               <a href="#" className="hover:text-white transition"><Instagram size={20} /></a>
@@ -29,7 +29,7 @@ export default function Footer() {
             <h4 className="text-white font-bold mb-6">Platform</h4>
             <ul className="space-y-4 text-sm">
               <li><Link to="/search" className="hover:text-white transition">Find a Ride</Link></li>
-              <li><Link to="/driver" className="hover:text-white transition">Driver Sign Up</Link></li>
+              <li><Link to="/drive" className="hover:text-white transition">Driver Sign Up</Link></li>
               <li><Link to="/auth" className="hover:text-white transition">Log In</Link></li>
               <li><Link to="/search" className="hover:text-white transition">Popular Routes</Link></li>
             </ul>

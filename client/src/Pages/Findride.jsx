@@ -1,84 +1,140 @@
+import { Search, MapPin, Star, Phone, Shield, Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import SearchHeader from '../Components/SearchHeader';
-import FilterBar from '../Components/Filter';
-import RideCard from '../Components/Ridecard';
 
 export default function SearchPage() {
-  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState('');
   const [drivers, setDrivers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  
-  // 1. Get the query from URL (e.g. ?q=Shillong)
-  const initialQuery = searchParams.get('q') || '';
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  // 2. Function to fetch data from Backend
-  const fetchDrivers = async (query) => {
+  // 1. Fetch Drivers on Load
+  useEffect(() => {
+    fetchDrivers();
+  }, []);
+
+  const fetchDrivers = async (query = '') => {
     setLoading(true);
+    setError('');
     try {
-      // If query exists, search. If not, fetch all.
-      const url = query 
-        ? `http://localhost:5000/api/drivers/search?destination=${query}`
-        : `http://localhost:5000/api/drivers/search`; // You might need to add a "get all" endpoint later
-
+      // Build URL: if query exists, add it ?destination=Guwahati
+      const url = `http://localhost:5000/api/drivers/search${query ? `?destination=${query}` : ''}`;
+      
       const res = await fetch(url);
       const data = await res.json();
-      setDrivers(data);
-    } catch (error) {
-      console.error("Failed to fetch drivers:", error);
+      
+      if (Array.isArray(data)) {
+        setDrivers(data);
+      } else {
+        // Safety: If server returns {message: "error"}, don't crash
+        setDrivers([]); 
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("Could not connect to server. Is it running?");
     } finally {
       setLoading(false);
     }
   };
 
-  // 3. Run fetch when page loads or query changes
-  useEffect(() => {
-    fetchDrivers(initialQuery);
-  }, [initialQuery]);
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchDrivers(searchQuery);
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-20"> {/* pt-20 to clear fixed navbar */}
-      
-      {/* Search Header (Sticky) */}
-      <SearchHeader onSearch={(text) => fetchDrivers(text)} />
-      
-      {/* Filter Bar */}
-      <FilterBar />
-
-      {/* Results Container */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
+    <div className="min-h-screen bg-slate-50 pt-24 pb-12">
+      <div className="max-w-3xl mx-auto px-6">
         
-        {/* Result Count */}
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-slate-900">
-            {loading ? 'Searching...' : `${drivers.length} Drivers Found`}
-          </h2>
-          {!loading && initialQuery && <p className="text-slate-500 text-sm">Showing results for "{initialQuery}"</p>}
+        {/* Search Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Find a Ride</h1>
+          <form onSubmit={handleSearch} className="relative flex items-center">
+            <MapPin className="absolute left-4 text-slate-400" size={20} />
+            <input 
+              type="text" 
+              placeholder="Where do you want to go? (e.g. Dawki)" 
+              className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-200 shadow-sm outline-none focus:border-blue-500 transition font-medium text-lg"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button className="absolute right-2 bg-slate-900 text-white p-2.5 rounded-xl hover:bg-black transition">
+              <Search size={20} />
+            </button>
+          </form>
         </div>
 
-        {/* List Grid */}
-        <div className="space-y-4">
-          {loading ? (
-             // Simple Loading Skeleton
-             <div className="animate-pulse space-y-4">
-               {[1,2,3].map(i => <div key={i} className="h-40 bg-slate-200 rounded-2xl"></div>)}
-             </div>
-          ) : (
-            drivers.map(driver => (
-              <RideCard key={driver.id} driver={driver} />
-            ))
-          )}
+        {/* Filters (Visual Only for now) */}
+        <div className="flex gap-3 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+          {['All Rides', 'Hatchback', 'SUV', 'Top Rated'].map((filter, i) => (
+            <button key={i} className="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm font-bold text-slate-600 hover:border-slate-900 hover:text-slate-900 transition whitespace-nowrap">
+              {filter}
+            </button>
+          ))}
+        </div>
 
-          {!loading && drivers.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-slate-400 text-lg">No drivers found for this route.</p>
-              <button onClick={() => fetchDrivers('')} className="text-blue-600 font-bold mt-2 hover:underline">
-                View all drivers
-              </button>
+        {/* Results Area */}
+        {loading ? (
+          <div className="text-center py-20 text-slate-400">Loading drivers...</div>
+        ) : error ? (
+          <div className="text-center py-20 text-red-500 font-bold">{error}</div>
+        ) : drivers.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="inline-flex bg-slate-100 p-4 rounded-full mb-4 text-slate-400">
+              <Search size={32} />
             </div>
-          )}
+            <h3 className="text-lg font-bold text-slate-900">No active drivers found</h3>
+            <p className="text-slate-500">Try searching for a different location or check back later.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {drivers.map((driver) => (
+              <RideCard key={driver._id || driver.id} driver={driver} />
+            ))}
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+// --- Helper Component: Ride Card ---
+function RideCard({ driver }) {
+  // Fallback data if driver profile is incomplete
+  const vehicle = driver.vehicle || "Standard Taxi";
+  const routes = driver.routes && driver.routes.length > 0 ? driver.routes.join(", ") : "Local City Run";
+  
+  return (
+    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition group">
+      <div className="flex justify-between items-start">
+        
+        {/* Driver Info */}
+        <div className="flex gap-4">
+          <div className="w-14 h-14 bg-slate-900 rounded-full flex items-center justify-center text-white font-bold text-xl">
+            {driver.fullName.charAt(0)}
+          </div>
+          <div>
+            <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition">
+              {driver.fullName}
+            </h3>
+            <div className="flex items-center gap-1 text-slate-500 text-sm mb-1">
+              <Star size={14} className="text-yellow-400 fill-yellow-400" />
+              <span className="font-bold text-slate-900">{driver.rating || 5.0}</span>
+              <span>• {vehicle}</span>
+            </div>
+            <div className="flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded w-fit">
+               <MapPin size={12} /> Routes: {routes}
+            </div>
+          </div>
         </div>
 
+        {/* Action Button */}
+        <a 
+          href={`tel:${driver.phone}`} 
+          className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg shadow-green-200 transition"
+        >
+          <Phone size={20} />
+        </a>
       </div>
     </div>
   );
