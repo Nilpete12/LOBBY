@@ -8,6 +8,7 @@ const User = require('./models/User');
 const Message = require('./models/Message');
 const bcrypt = require('bcryptjs'); // <--- Import this
 const jwt = require('jsonwebtoken'); // <--- Import this
+const Analytics = require('./models/Analytics');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -184,9 +185,47 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// DRIVER SEARCH (Still mock data for now, until we make a Driver Schema)
-// ... Keep your mock drivers array here for search functionality ...
-// ... (Paste the mock drivers array from previous step here) ...
+// --- ANALYTICS ROUTES ---
+
+// A. Track an Event (Called when rider clicks "Call")
+app.post('/api/analytics/track', async (req, res) => {
+  try {
+    const { type, driverId } = req.body;
+    const newEvent = new Analytics({ type, driverId });
+    await newEvent.save();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false });
+  }
+});
+
+// B. Get Dashboard Stats (Called by Admin Page)
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    // Run all counts in parallel for speed
+    const [totalUsers, drivers, totalCalls] = await Promise.all([
+      User.countDocuments({ role: 'rider' }),
+      User.find({ role: 'driver' }),
+      Analytics.countDocuments({ type: 'call_click' })
+    ]);
+
+    const activeDrivers = drivers.filter(d => d.isAvailable).length;
+    const pendingDrivers = drivers.filter(d => !d.isVerified).length;
+
+    res.json({
+      success: true,
+      stats: {
+        totalUsers,
+        totalDrivers: drivers.length,
+        activeDrivers,
+        pendingDrivers,
+        totalCalls
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Stats failed" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

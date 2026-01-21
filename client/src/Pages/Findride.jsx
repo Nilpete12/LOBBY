@@ -103,6 +103,19 @@ function RideCard({ driver }) {
   // Fallback data if driver profile is incomplete
   const vehicle = driver.vehicle || "Standard Taxi";
   const routes = driver.routes && driver.routes.length > 0 ? driver.routes.join(", ") : "Local City Run";
+
+  // 1. New Tracking Function
+  const handleCall = async () => {
+    try {
+      await fetch('http://localhost:5000/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'call_click', driverId: driver._id })
+      });
+    } catch (err) {
+      console.error("Tracking failed", err);
+    }
+  };
   
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition group">
@@ -131,6 +144,7 @@ function RideCard({ driver }) {
         {/* Action Button */}
         <a 
           href={`tel:${driver.phone}`} 
+          onClick={handleCall} // <--- Attach the tracker here
           className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg shadow-green-200 transition"
         >
           <Phone size={20} />
