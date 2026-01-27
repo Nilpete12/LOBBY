@@ -36,3 +36,14 @@ LOBBY is a specialized ride-hailing web application designed for direct driver-t
    ```bash
    git clone [https://github.com/yourusername/lobby.git](https://github.com/yourusername/lobby.git)
    cd lobby
+
+COPYRIGHT NOTICE
+
+Copyright (c) 2026 [Nilesh Sen / Khalong Kichu]. All Rights Reserved.
+
+This source code is the proprietary property of [Nilesh Sen / Khalong Kichu]. 
+
+1. You may strictly view this code for educational or portfolio evaluation purposes only.
+2. You are strictly prohibited from copying, modifying, distributing, selling, or using this code (in whole or in part) for any commercial or non-commercial purpose.
+3. Unauthozired use will be prosecuted to the full extent of the law.
+
