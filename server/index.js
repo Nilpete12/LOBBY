@@ -1,13 +1,14 @@
 require('dotenv').config(); // Load .env variables
 const express = require('express');
-const mongoose = require('mongoose'); // Import Mongoose
+const mongoose = require('mongoose'); // Import mongoose
 const cors = require('cors');
 
 // Import Models
 const User = require('./models/User');
 const Message = require('./models/Message');
-const bcrypt = require('bcryptjs'); // <--- Import this
-const jwt = require('jsonwebtoken'); // <--- Import this
+const Complaint = require('./models/Complaint'); 
+const bcrypt = require('bcryptjs'); 
+const jwt = require('jsonwebtoken');
 const Analytics = require('./models/Analytics');
 const { upload } = require('./cloudinaryconfig');
 
@@ -69,6 +70,7 @@ app.get('/api/rider/history', async (req, res) => {
 });
 
 
+
 // 1. SEARCH DRIVERS (Connected to DB)
 app.get('/api/drivers/search', async (req, res) => {
   try {
@@ -106,13 +108,85 @@ app.post('/api/driver/update', async (req, res) => {
   }
 });
 
+// --- 1. POST: Save a new complaint (Public & Private) ---
+app.post('/api/complaints', async (req, res) => {
+  try {
+    const { userId, name, email, role, topic, message } = req.body;
+    
+    const newComplaint = new Complaint({
+      userId, name, email, role, topic, message
+    });
+    
+    await newComplaint.save();
+    res.json({ success: true, message: "Complaint logged" });
+  } catch (err) {
+    console.error("Complaint Error:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- 2. GET: Admin fetches all complaints ---
+app.get('/api/admin/complaints', async (req, res) => {
+  try {
+    const complaints = await Complaint.find().sort({ createdAt: -1 });
+    res.json({ success: true, complaints });
+  } catch (err) {
+    res.status(500).json({ success: false });
+  }
+});
+
+// --- 3. PUT: Admin marks as resolved ---
+app.put('/api/admin/complaints/:id', async (req, res) => {
+  try {
+    await Complaint.findByIdAndUpdate(req.params.id, { status: 'resolved' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false });
+  }
+});
+
+// 5. ADMIN: Delete/Reject a User
+app.delete('/api/admin/user/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await User.findByIdAndDelete(id);
+    res.json({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Could not delete user" });
+  }
+});
+
+// TEMP: Fix Rider Roles
+app.get('/api/fix-riders', async (req, res) => {
+  try {
+    // Find everyone who is NOT a driver AND NOT an admin
+    const result = await User.updateMany(
+      { role: { $nin: ['driver', 'admin'] } }, 
+      { $set: { role: 'rider' } }
+    );
+    res.json({ message: "Fixed riders!", modified: result.modifiedCount });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 // 3. ADMIN: Get All Users (For the Dashboard Table)
 app.get('/api/admin/users', async (req, res) => {
   try {
-    // Fetch all drivers sorted by newest first
-    const drivers = await User.find({ role: 'driver' }).sort({ createdAt: -1 }).select('-password');
-    res.json({ success: true, users: drivers });
+    // 1. Fetch everyone
+    const allUsers = await User.find({}).select('-password');
+    
+    // 2. DEBUG: Print everyone found to the terminal
+    console.log("\n--- 🔍 SERVER FOUND THESE USERS ---");
+    allUsers.forEach(u => {
+      console.log(`👤 Name: ${u.fullName} | Role: "${u.role}"`);
+    });
+    console.log("-----------------------------------\n");
+
+    // 3. Send to frontend
+    res.json({ success: true, users: allUsers });
   } catch (error) {
+    console.error("Fetch Error:", error);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
@@ -245,22 +319,41 @@ app.post('/api/analytics/track', async (req, res) => {
 });
 
 // B. Get Dashboard Stats (Called by Admin Page)
+// B. Get Dashboard Stats (Called by Admin Page)
 app.get('/api/admin/stats', async (req, res) => {
   try {
-    // Run all counts in parallel for speed
-    const [totalUsers, drivers, totalCalls] = await Promise.all([
+    console.log("\n--- 🔍 DEBUG: ADMIN STATS REQUESTED ---");
+
+    // 1. Fetch RAW data to see what exists
+    const allUsers = await User.find({});
+    console.log(`📊 TOTAL USERS IN DB: ${allUsers.length}`);
+    
+    // Log roles to see if they are 'driver', 'Driver', or undefined
+    const roles = allUsers.map(u => `${u.fullName} (${u.role})`);
+    console.log("   👉 User Roles:", roles);
+
+    // 2. Run the specific counts
+    const [totalRiders, drivers, totalCalls] = await Promise.all([
       User.countDocuments({ role: 'rider' }),
       User.find({ role: 'driver' }),
       Analytics.countDocuments({ type: 'call_click' })
     ]);
 
+    console.log(`   👉 Riders Count (role='rider'): ${totalRiders}`);
+    console.log(`   👉 Drivers Found (role='driver'): ${drivers.length}`);
+    console.log(`   👉 Total Calls: ${totalCalls}`);
+
     const activeDrivers = drivers.filter(d => d.isAvailable).length;
     const pendingDrivers = drivers.filter(d => !d.isVerified).length;
+
+    console.log(`   👉 Active Drivers (isAvailable=true): ${activeDrivers}`);
+    console.log(`   👉 Pending Drivers (isVerified=false): ${pendingDrivers}`);
+    console.log("------------------------------------------\n");
 
     res.json({
       success: true,
       stats: {
-        totalUsers,
+        totalUsers: totalRiders, // Note: You might want (riders + drivers) here
         totalDrivers: drivers.length,
         activeDrivers,
         pendingDrivers,
@@ -268,6 +361,7 @@ app.get('/api/admin/stats', async (req, res) => {
       }
     });
   } catch (error) {
+    console.error("❌ Stats Error:", error);
     res.status(500).json({ success: false, message: "Stats failed" });
   }
 });

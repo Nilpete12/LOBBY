@@ -8,6 +8,28 @@ export default function RiderDashboard() {
   const navigate = useNavigate();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showComplaint, setShowComplaint] = useState(false);
+  const [complaintText, setComplaintText] = useState("");
+
+  const handleReport = async () => {
+  if (!complaintText) return;
+
+  await fetch("http://localhost:5000/api/complaints", { // <--- Direct URL
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId: user._id,      // Assuming you have 'user' from context/props
+      name: user.fullName,
+      email: user.email,
+      role: 'rider',
+      topic: 'Rider Issue',
+      message: complaintText
+    })
+  });
+  setShowComplaint(false);
+  setComplaintText("");
+  alert("Issue reported to Admin.");
+};
 
   useEffect(() => {
     if (!user) { navigate('/auth'); return; }
@@ -53,7 +75,7 @@ export default function RiderDashboard() {
             <LogOut size={20}/> Logout
           </button>
         </div>
-
+        
         {/* Recent Contacts Section */}
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 min-h-100">
           <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
@@ -103,8 +125,33 @@ export default function RiderDashboard() {
               ))}
             </div>
           )}
+          
         </div>
+        <button 
+  onClick={() => setShowComplaint(true)}
+  className="mt-4 text-sm font-bold text-red-500 hover:text-red-700 underline"
+>
+  Report an Issue
+</button>
 
+{/* The Modal */}
+{showComplaint && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl text-center items-center">
+      <h3 className="font-bold text-2xl mb-2">Report an Issue</h3>
+      <textarea
+        className="w-full border p-3 rounded-lg mb-4 h-32"
+        placeholder="Describe what happened..."
+        value={complaintText}
+        onChange={(e) => setComplaintText(e.target.value)}
+      />
+      <div className="flex justify-end gap-3">
+        <button onClick={() => setShowComplaint(false)} className="text-slate-500 font-bold text-sm">Cancel</button>
+        <button onClick={handleReport} className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm">Submit</button>
+      </div>
+    </div>
+  </div>
+)}
       </div>
     </div>
   );

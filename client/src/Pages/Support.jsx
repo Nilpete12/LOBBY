@@ -49,17 +49,65 @@ export default function ContactPage() {
   };
 
   // 5. Handle Submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (validate()) {
-      // Simulate API call
-      console.log("Form submitted:", formData);
-      setIsSubmitted(true);
-      setFormData({ firstName: '', lastName: '', email: '', topic: 'General Inquiry', message: '' });
-      
-      // Reset success message after 5 seconds
-      setTimeout(() => setIsSubmitted(false), 5000);
+    // Check validation first
+    if (!validate()) return;
+
+    try {
+      // 1. Save to YOUR Database (for Admin Panel)
+    await fetch("http://localhost:5000/api/complaints", { // <--- Direct URL
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        role: 'guest',
+        topic: formData.topic,
+        message: formData.message
+      })
+    });
+      // Create the data object for Web3Forms
+      const payload = {
+        access_key: "e68d204c-a95f-4b2a-b1aa-5a06f72082e7", // <--- PASTE YOUR KEY HERE
+        subject: `New Support Message from ${formData.firstName}`, // Custom subject line
+        from_name: "Lobby App Support",
+        ...formData // Spreads: firstName, lastName, email, message, etc.
+      };
+
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        // Show the green success message
+        setIsSubmitted(true);
+        
+        // Clear the form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          topic: 'General Inquiry',
+          message: ''
+        });
+
+        // Hide success message after 5 seconds
+        setTimeout(() => setIsSubmitted(false), 5000);
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting form", error);
+      alert("Error submitting form. Please check your connection.");
     }
   };
 
@@ -87,7 +135,7 @@ export default function ContactPage() {
               </div>
               <h3 className="font-bold text-slate-900">Call Us</h3>
               <p className="text-slate-500 text-sm mt-1 mb-3">Mon-Fri from 9am to 6pm</p>
-              <a href="tel:+919863000000" className="text-blue-600 font-bold hover:underline">+91 98630 00000</a>
+              <a href="tel:+918413096076" className="text-blue-600 font-bold hover:underline">+91 84130 96076</a>
             </div>
 
             <div className="bg-linear-to-br from-purple-100/90 to-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
@@ -96,7 +144,14 @@ export default function ContactPage() {
               </div>
               <h3 className="font-bold text-slate-900">Email Us</h3>
               <p className="text-slate-500 text-sm mt-1 mb-3">For general inquiries</p>
-              <a href="mailto:support@lobby.com" className="text-purple-600 font-bold hover:underline">support@lobby.com</a>
+              <a 
+  href="mailto:khalongkichu348@gmail.com"
+  target="_blank" 
+  rel="noopener noreferrer"
+  className="text-purple-600 font-bold hover:underline"
+>
+  khalongkichu348@gmail.com
+</a>
             </div>
           </section>
 
