@@ -1,6 +1,6 @@
-# LOBBY - Direct-Connect Ride Platform 🚖
+# THE LOBBY - Direct-Connect Ride Platform 🚖
 
-LOBBY is a specialized ride-hailing web application designed for direct driver-to-rider connection. Unlike traditional apps, LOBBY focuses on transparency and direct communication, allowing riders to search for verified drivers by route/destination and connect via phone call instantly.
+THE LOBBY is a specialized ride-hailing web application designed for direct driver-to-rider connection. Unlike traditional apps, LOBBY focuses on transparency and direct communication, allowing riders to search for verified drivers by route/destination and connect via phone call instantly.
 
 ## 🚀 Key Features
 
@@ -46,4 +46,5 @@ This source code is the proprietary property of [Nilesh Sen / Khalong Kichu].
 1. You may strictly view this code for educational or portfolio evaluation purposes only.
 2. You are strictly prohibited from copying, modifying, distributing, selling, or using this code (in whole or in part) for any commercial or non-commercial purpose.
 3. Unauthozired use will be prosecuted to the full extent of the law.
+
 
