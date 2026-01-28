@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, Clock, Trash2, Search } from 'lucide-react';
+import API_BASE_URL from '../config';
 
 export default function UserTable({ role, limit }) {
   const [users, setUsers] = useState([]);
@@ -9,7 +10,7 @@ export default function UserTable({ role, limit }) {
   const fetchUsers = async () => {
     try {
       // FIX: Direct Localhost URL
-      const res = await fetch('http://localhost:5000/api/admin/users');
+      const res = await fetch(`${API_BASE_URL}/admin/users`);
       const data = await res.json();
       if (data.success) {
         console.log("🔥 RAW DATA FROM SERVER:", data.users); // <--- Add this spy
@@ -35,7 +36,7 @@ export default function UserTable({ role, limit }) {
   const handleApprove = async (id) => {
     if(!window.confirm("Verify this driver?")) return;
     // FIX: Direct Localhost URL
-    await fetch('http://localhost:5000/api/admin/approve', {
+    await fetch(`${API_BASE_URL}/admin/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
@@ -46,7 +47,7 @@ export default function UserTable({ role, limit }) {
   const handleDelete = async (id) => {
     if(!window.confirm("Are you sure? This will permanently delete this user.")) return;
     // FIX: Direct Localhost URL
-    await fetch(`http://localhost:5000/api/admin/user/${id}`, {
+    await fetch(`${API_BASE_URL}/admin/user/${id}`, {
       method: 'DELETE'
     });
     fetchUsers();

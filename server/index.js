@@ -15,7 +15,10 @@ const { upload } = require('./cloudinaryconfig');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+  origin: true, // Allow all origins for the initial setup
+  credentials: true
+}));
 app.use(express.json());
 
 // --- 1. CONNECT TO MONGODB ---

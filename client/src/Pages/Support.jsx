@@ -1,5 +1,6 @@
 import { Mail, MapPin, Phone, MessageSquare, ChevronDown, ChevronUp, CheckCircle, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
+import API_BASE_URL from '../config';
 
 export default function ContactPage() {
   // 1. Form State
