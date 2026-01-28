@@ -1,6 +1,6 @@
 import { Search, MapPin, Star, Phone, Shield, Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext'; 
+import { useAuth } from '../context/Authcontext'; 
 import API_BASE_URL from '../config';
 
 export default function SearchPage() {
