@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 
 // Import the helper
 import Scrolltotop from './Components/Scrolltotop';
-import { AuthProvider } from './context/AuthContext'; 
+import { AuthProvider } from './Context/AuthContext'; 
 
 // Structure Components
 import Navbar from './Components/Navbar';
