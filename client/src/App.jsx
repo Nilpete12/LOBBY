@@ -20,6 +20,7 @@ import PrivacyPolicy from './Pages/Privacypolicy';
 import TermsPage from './Pages/Terms';
 import DriverDashboard from './Pages/Driverdashboard';
 import RiderDashboard from './Pages/RiderDashboard';
+import AboutPage from './Pages/About';
 
 // --- LAYOUT COMPONENT (Handles the Logic) ---
 function Layout() {
@@ -50,6 +51,7 @@ function Layout() {
             <Route path="/privacypolicy" element={<PrivacyPolicy />} />
             <Route path="/T&C" element={<TermsPage />} />
             <Route path="/account" element={<RiderDashboard />} />
+            <Route path="/about" element={<AboutPage />} />
         </Routes>
       </main>
 
