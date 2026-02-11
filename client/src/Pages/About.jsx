@@ -61,7 +61,7 @@ export default function AboutPage() {
             name="Khalong Kichu" 
             role="Product & Operations"
             image="https://api.dicebear.com/7.x/avataaars/svg?seed=veget"
-            bio="The visionary ensuring LOBBY delivers the best experience for both riders and drivers across the city."
+            bio="The visionary ensuring THE LOBBY delivers the best experience for both riders and drivers across the city."
             links={{ github: "https://github.com/khalongkichu348-ops", linkedin: "https://www.linkedin.com/in/khalong-kichu-89a93b2a0/" }}
           />
 
