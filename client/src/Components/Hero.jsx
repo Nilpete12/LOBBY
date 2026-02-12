@@ -23,8 +23,8 @@ export default function Hero() {
           <span className="text-slate-500">Ride with locals.</span>
         </h1>
 
-        <p className="text-lg text-slate-600 max-w-2xl mb-8 font-normal leading-relaxed">
-          Call, Confirm and Go!  
+        <p className="text-xl text-slate-600 max-w-2xl mb-8 font-semibold font-style: italic leading-relaxed">
+          "Call, Confirm and Go!" 
         </p>
 
         {/* Buttons */}

@@ -65,7 +65,7 @@ export default function Footer() {
 
         {/* Bottom Section: Copyright */}
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-          <p>&copy; {new Date().getFullYear()} LOBBY Platform. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} THE LOBBY Platform. All rights reserved.</p>
           <p>Made with ❤️ in the hills.</p>
         </div>
 

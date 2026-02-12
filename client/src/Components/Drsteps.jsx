@@ -36,7 +36,7 @@ export default function JoinSteps() {
                Sign Up Now
              </button>
              </a>
-             <p className="text-xs text-blue-200 mt-4">Takes less than 5 minutes</p>
+             <p className="text-xs text-black mt-4">Takes less than 5 minutes</p>
           </div>
         </div>
 

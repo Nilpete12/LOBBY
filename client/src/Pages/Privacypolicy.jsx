@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
         <div className="prose prose-slate prose-lg text-slate-600">
           
           <p className="lead text-xl text-slate-800 font-medium mb-8">
-            At LOBBY, we value your trust. This policy explains how we handle your personal data when you use our platform to find rides in Shillong and across Meghalaya.
+            At THE LOBBY, we value your trust. This policy explains how we handle your personal data when you use our platform to find rides in Shillong and across Meghalaya.
           </p>
 
           <section className="mb-10">
