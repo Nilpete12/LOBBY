@@ -24,7 +24,7 @@ export default function Hero() {
         </h1>
 
         <p className="text-2xl text-slate-600 max-w-2xl mb-8 font-bold font-style: italic leading-relaxed">
-          Call, Confirm and Go!
+          Call. Confirm. Go!
         </p>
 
         {/* Buttons */}
