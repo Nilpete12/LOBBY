@@ -146,12 +146,12 @@ export default function ContactPage() {
               <h3 className="font-bold text-slate-900">Email Us</h3>
               <p className="text-slate-500 text-sm mt-1 mb-3">For general inquiries</p>
               <a 
-  href="mailto:khalongkichu348@gmail.com"
+  href="mailto:thelobby500@gmail.com"
   target="_blank" 
   rel="noopener noreferrer"
   className="text-purple-600 font-bold hover:underline"
 >
-  khalongkichu348@gmail.com
+  thelobby500@gmail.com
 </a>
             </div>
           </section>
