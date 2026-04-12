@@ -11,6 +11,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Analytics = require('./models/Analytics');
 const { upload } = require('./cloudinaryconfig');
+const { verifyDriverDocument } = require('./aiVerification');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -369,15 +370,34 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
-// 6. UPLOAD IMAGE ENDPOINT
-// This route accepts a file, uploads it, and updates the user's profile in DB
+// 6. UPLOAD IMAGE ENDPOINT (UPGRADED WITH AI VISION)
+// This route accepts a file, uploads it to Cloudinary, and runs AI if it's a license
 app.post('/api/driver/upload', upload.single('image'), async (req, res) => {
   try {
-    const { userId, type } = req.body; // type = 'profile' or 'car'
-    const imageUrl = req.file.path; // Cloudinary gives us this URL automatically
+    // We added driverName so the AI knows who to look for
+    const { userId, type, driverName } = req.body; 
+    const imageUrl = req.file.path; 
 
-    // Update the specific field dynamically
-    const updateField = type === 'profile' ? { profilePic: imageUrl } : { carPic: imageUrl };
+    let updateField = {};
+    let aiResult = null;
+
+    if (type === 'profile') {
+      updateField = { profilePic: imageUrl };
+    } else if (type === 'car') {
+      updateField = { carPic: imageUrl };
+    } else if (type === 'license') {
+      // --- TRIGGER AI VISION ---
+      aiResult = await verifyDriverDocument(imageUrl, driverName);
+      
+      const documentStatus = aiResult.isVerified ? 'Approved' : 'Pending Manual Review';
+      
+      updateField = { 
+        licenseUrl: imageUrl,
+        verificationStatus: documentStatus,
+        aiNotes: aiResult.reason,
+        isVerified: aiResult.isVerified
+      };
+    }
 
     const user = await User.findByIdAndUpdate(
       userId, 
@@ -385,9 +405,16 @@ app.post('/api/driver/upload', upload.single('image'), async (req, res) => {
       { new: true }
     ).select('-password');
 
-    res.json({ success: true, user, imageUrl });
+    // Send back the user, image, and AI data if it was a license
+    res.json({ 
+      success: true, 
+      user, 
+      imageUrl,
+      ...(type === 'license' && { aiData: aiResult }) 
+    });
+
   } catch (error) {
-    console.error("Upload Error:", error);
+    console.error("Upload/AI Error:", error);
     res.status(500).json({ success: false, message: "Upload failed" });
   }
 });

@@ -17,6 +17,9 @@ const UserSchema = new mongoose.Schema({
   
   profilePic: { type: String, default: "" }, // URL from Cloudinary
   carPic:     { type: String, default: "" }, // URL from Cloudinary
+  licenseUrl: { type: String, default: '' },
+  verificationStatus: { type: String, default: 'Pending' }, // 'Pending', 'Approved', 'Rejected'
+  aiNotes: { type: String, default: '' },
   
   createdAt: { type: Date, default: Date.now },
 });

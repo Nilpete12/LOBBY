@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud } from 'lucide-react';
+import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText } from 'lucide-react';
 import { useAuth } from '../context/Authcontext';
 import API_BASE_URL from '../config';
 
@@ -18,6 +18,7 @@ export default function DriverDashboard() {
 
   const [isOnline, setIsOnline] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadingLicense, setUploadingLicense] = useState(false); // NEW STATE FOR AI
 
   // --- 1. LOAD DATA ---
   useEffect(() => {
@@ -89,6 +90,49 @@ export default function DriverDashboard() {
     const newStatus = !isOnline;
     setIsOnline(newStatus);
     handleUpdate(newStatus);
+  };
+
+  // --- 3. AI LICENSE UPLOAD HANDLER ---
+  const handleLicenseUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingLicense(true);
+
+    const uploadData = new FormData();
+    uploadData.append('image', file);
+    uploadData.append('userId', driver._id || driver.id);
+    uploadData.append('type', 'license'); 
+    uploadData.append('driverName', driver.fullName); // Crucial for AI matching
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/driver/upload`, {
+        method: 'POST',
+        body: uploadData
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        // Update state with new AI data
+        setDriver(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Show result to driver
+        if (data.user.verificationStatus === 'Approved') {
+          alert('✅ AI Verification Successful! Your license is approved.');
+        } else {
+          alert('⏳ Uploaded! Awaiting manual admin review (AI could not read the name clearly).');
+        }
+      } else {
+        alert("Upload failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert('❌ Server error during license upload.');
+    } finally {
+      setUploadingLicense(false);
+    }
   };
 
   const handleLogout = () => { logout(); navigate('/'); };
@@ -233,7 +277,54 @@ export default function DriverDashboard() {
                 </div>
               </div>
 
-              <button onClick={() => handleUpdate()} className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-black transition flex items-center justify-center gap-2">
+              {/* --- NEW: DRIVING LICENSE UPLOAD (AI POWERED) --- */}
+              <div>
+                <div className="flex justify-between items-end mb-1">
+                  <label className="text-xs font-bold text-slate-400 uppercase ml-1">Driving License</label>
+                  {driver.verificationStatus && (
+                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                      driver.verificationStatus === 'Approved' ? 'bg-green-100 text-green-700' : 
+                      driver.verificationStatus === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
+                      'bg-orange-100 text-orange-700'
+                    }`}>
+                      {driver.verificationStatus}
+                    </span>
+                  )}
+                </div>
+                
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition relative overflow-hidden group">
+                  
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    {uploadingLicense ? (
+                      <div className="text-blue-600 flex flex-col items-center font-medium">
+                        <Loader2 size={28} className="animate-spin mb-2" />
+                        <span className="animate-pulse text-sm">AI Scanning...</span>
+                      </div>
+                    ) : driver.licenseUrl ? (
+                       <div className="text-green-600 flex flex-col items-center font-medium">
+                         <FileText size={28} className="mb-2" />
+                         <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition">Update License</span>
+                       </div>
+                    ) : (
+                      <>
+                        <FileText size={28} className="mb-2 text-slate-400" />
+                        <p className="text-sm text-slate-500 font-bold mt-1">Upload License</p>
+                        <p className="text-xs text-slate-400 mt-1">AI Auto-Verification</p>
+                      </>
+                    )}
+                  </div>
+                  
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleLicenseUpload}
+                    disabled={uploadingLicense}
+                  />
+                </label>
+              </div>
+
+              <button onClick={() => handleUpdate()} className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-black transition flex items-center justify-center gap-2 mt-4">
                 {isSaving ? "Saving..." : "Save Details"} <Save size={18}/>
               </button>
             </div>
@@ -249,7 +340,6 @@ export default function DriverDashboard() {
 async function handleImageUpload(file, type, driver, setDriver) {
   if (!file) return;
 
-  // 1. Optimistic UI: Don't wait, show loading or something (optional)
   const formData = new FormData();
   formData.append('image', file);
   formData.append('userId', driver._id || driver.id);
@@ -258,12 +348,11 @@ async function handleImageUpload(file, type, driver, setDriver) {
   try {
     const res = await fetch(`${API_BASE_URL}/driver/upload`, {
       method: 'POST',
-      body: formData // No Content-Type header needed for FormData!
+      body: formData 
     });
     
     const data = await res.json();
     if (data.success) {
-      // 2. Update Local State & Storage
       setDriver(data.user);
       localStorage.setItem('user', JSON.stringify(data.user));
       alert(`${type === 'profile' ? 'Profile' : 'Car'} photo updated!`);
