@@ -16,7 +16,7 @@ export default function TermsPage() {
         <div className="prose prose-slate prose-lg text-slate-600">
           
           <p className="text-lg mb-8">
-            Welcome to LOBBY. By accessing or using our website and services, you agree to be bound by these terms. If you do not agree, please do not use our platform.
+            Welcome to THE LOBBY. By accessing or using our website and services, you agree to be bound by these terms. If you do not agree, please do not use our platform.
           </p>
 
           <section className="mb-10">
@@ -27,10 +27,10 @@ export default function TermsPage() {
               For the purposes of these Terms:
             </p>
             <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
-              <li><strong>"Service"</strong> means the LOBBY website, mobile applications, APIs and related features that facilitate connections between Riders and Drivers.</li>
+              <li><strong>"Service"</strong> means THE LOBBY website, mobile applications, APIs and related features that facilitate connections between Riders and Drivers.</li>
               <li><strong>"Rider"</strong> means a user who requests transportation through the Service.</li>
               <li><strong>"Driver"</strong> means a user who offers transportation through the Service.</li>
-              <li><strong>"Account"</strong> means a user account registered with LOBBY.</li>
+              <li><strong>"Account"</strong> means a user account registered with THE LOBBY.</li>
               <li><strong>"Personal Data"</strong> means information that identifies or can be used to identify an individual.</li>
             </ul>
           </section>
@@ -40,10 +40,10 @@ export default function TermsPage() {
               <FileText size={20} /> 1. The Service
             </h3>
             <p className="mb-4">
-              LOBBY is a <strong>directory service</strong> that connects independent drivers with potential passengers. We are not a transportation carrier.
+             THE LOBBY is a <strong>directory service</strong> that connects independent drivers with potential passengers. We are not a transportation carrier.
             </p>
             <div className="shadow p-4 rounded-xl border border-slate-200 mb-4 text-sm">
-              <strong>Key Distinction:</strong> We do not employ drivers. The contract for transportation is directly between the Rider and the Driver. LOBBY is not a party to that agreement.
+              <strong>Key Distinction:</strong> We do not employ drivers. The contract for transportation is directly between the Rider and the Driver. THE LOBBY is not a party to that agreement.
             </div>
           </section>
 
@@ -55,7 +55,7 @@ export default function TermsPage() {
               <li>You must be at least 18 years old to create a driver account.</li>
               <li>You agree to provide accurate, current, and complete information during registration and to update that information promptly if it changes.</li>
               <li>Riders agree to pay the fare negotiated directly with the driver unless otherwise processed through our payment system.</li>
-              <li>Drivers agree to maintain valid vehicle insurance, registration, and licenses required by their applicable jurisdiction (for example, the State of Meghalaya).</li>
+              <li>Drivers agree to maintain valid vehicle insurance, registration, and licenses required by their applicable jurisdiction (for example, the State of Nagaland).</li>
               <li>Users must follow all local laws and regulations when using the Service.</li>
             </ul>
           </section>
@@ -84,17 +84,17 @@ export default function TermsPage() {
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">4. Driver Verification, Safety and Insurance</h3>
             <p className="mb-4 text-sm">
-              Drivers must provide accurate verification documents and certify that they carry required insurance and licenses. LOBBY may perform identity and document verification checks and may suspend or remove Drivers who fail verification or who present safety risks.
+              Drivers must provide accurate verification documents and certify that they carry required insurance and licenses. THE LOBBY may perform identity and document verification checks and may suspend or remove Drivers who fail verification or who present safety risks.
             </p>
             <p className="mb-4 text-sm">
-              LOBBY is not a carrier and does not provide insurance for trips; Drivers are responsible for maintaining insurance as required by law. Riders and Drivers should report safety incidents immediately via our <a href="/support" className="text-blue-600 underline">support</a> channel so we can investigate.
+             THE LOBBY is not a carrier and does not provide insurance for trips; Drivers are responsible for maintaining insurance as required by law. Riders and Drivers should report safety incidents immediately via our <a href="/support" className="text-blue-600 underline">support</a> channel so we can investigate.
             </p>
           </section>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">5. Payments and Disputes</h3>
             <p className="mb-4 text-sm">
-              Where LOBBY facilitates payments, payments are processed by third-party payment processors and are subject to their terms. We use industry-standard measures to protect payment information, but we do not store full payment card details ourselves unless explicitly stated and in compliance with applicable standards (e.g., PCI-DSS).
+              Where THE LOBBY facilitates payments, payments are processed by third-party payment processors and are subject to their terms. We use industry-standard measures to protect payment information, but we do not store full payment card details ourselves unless explicitly stated and in compliance with applicable standards (e.g., PCI-DSS).
             </p>
             <p className="mb-4 text-sm">
               Fare disputes should be reported to support within 30 days of the trip. We may withhold driver payouts while investigating disputes that raise reasonable concerns.
@@ -106,24 +106,24 @@ export default function TermsPage() {
               <AlertTriangle size={20} /> 6. Limitation of Liability
             </h3>
             <p className="mb-4 text-sm">
-              To the fullest extent permitted by law, LOBBY shall not be liable for any indirect, incidental, special, punitive, exemplary or consequential damages arising out of or related to these Terms or the use of the Service, even if LOBBY has been advised of the possibility of such damages.
+              To the fullest extent permitted by law, THE LOBBY shall not be liable for any indirect, incidental, special, punitive, exemplary or consequential damages arising out of or related to these Terms or the use of the Service, even if THE LOBBY has been advised of the possibility of such damages.
             </p>
             <p className="mb-4 text-sm">
-              Except where prohibited by law, LOBBY’s aggregate liability arising out of or related to these Terms will not exceed the total fees actually paid by you to LOBBY in the 12 months preceding the claim. Nothing in these Terms limits liability for death or personal injury caused by our negligence or for other liabilities that cannot be excluded or limited by applicable law.
+              Except where prohibited by law, THE LOBBY’s aggregate liability arising out of or related to these Terms will not exceed the total fees actually paid by you to THE LOBBY in the 12 months preceding the claim. Nothing in these Terms limits liability for death or personal injury caused by our negligence or for other liabilities that cannot be excluded or limited by applicable law.
             </p>
           </section>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">7. Indemnification</h3>
             <p className="mb-4 text-sm">
-              You agree to indemnify and hold harmless LOBBY, its affiliates, officers, directors, employees and agents from and against any and all claims, losses, liabilities, expenses (including reasonable attorneys’ fees) and damages arising out of or related to your breach of these Terms, your negligent or intentional acts, or your violation of any law or third-party rights.
+              You agree to indemnify and hold harmless THE LOBBY, its affiliates, officers, directors, employees and agents from and against any and all claims, losses, liabilities, expenses (including reasonable attorneys’ fees) and damages arising out of or related to your breach of these Terms, your negligent or intentional acts, or your violation of any law or third-party rights.
             </p>
           </section>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">8. Termination and Suspension</h3>
             <p className="mb-4 text-sm">
-              We may suspend or terminate your access to the Service for violations of these Terms, for suspicious activity, or for actions we reasonably believe may harm other users or LOBBY. Where practicable, we will provide notice and an opportunity to cure; however, for serious or repeated violations we may suspend or terminate immediately. Upon termination, your right to use the Service stops and we may delete or anonymize your data in accordance with our retention policies.
+              We may suspend or terminate your access to the Service for violations of these Terms, for suspicious activity, or for actions we reasonably believe may harm other users or THE LOBBY. Where practicable, we will provide notice and an opportunity to cure; however, for serious or repeated violations we may suspend or terminate immediately. Upon termination, your right to use the Service stops and we may delete or anonymize your data in accordance with our retention policies.
             </p>
             <p className="mb-4 text-sm">
               Termination does not relieve you of obligations incurred prior to termination, including outstanding payment obligations and indemnification obligations.
@@ -161,14 +161,14 @@ export default function TermsPage() {
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">13. Intellectual Property</h3>
             <p className="mb-4 text-sm">
-              All content, branding and software provided by LOBBY are owned by or licensed to LOBBY. You may not copy, reproduce, or create derivative works except as expressly authorized. By submitting reviews, photos, or other content you grant LOBBY a non-exclusive, worldwide, royalty-free license to use that content to provide and promote the Service.
+              All content, branding and software provided by THE LOBBY are owned by or licensed to THE LOBBY. You may not copy, reproduce, or create derivative works except as expressly authorized. By submitting reviews, photos, or other content you grant THE LOBBY a non-exclusive, worldwide, royalty-free license to use that content to provide and promote the Service.
             </p>
           </section>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">14. Governing Law and Dispute Resolution</h3>
             <p className="mb-4 text-sm">
-              These Terms shall be governed by the laws of India without regard to conflicts of laws principles. Except where local consumer protection law provides otherwise, disputes will be subject to the exclusive jurisdiction of the courts located in Shillong, Meghalaya.
+              These Terms shall be governed by the laws of India without regard to conflicts of laws principles. Except where local consumer protection law provides otherwise, disputes will be subject to the exclusive jurisdiction of the courts located in Nagaland.
             </p>
           </section>
 
