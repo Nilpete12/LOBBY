@@ -184,7 +184,7 @@ export default function PrivacyPolicy() {
               For questions about this privacy policy, data practices, or to exercise your data rights, contact our Data Protection Officer:
             </p>
             <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-sm"><strong>Email:</strong> <a href="mailto:privacy@lobby.example.com" className="text-blue-600 underline">privacy@lobby.example.com</a></p>
+              <p className="text-sm"><strong>Email:</strong> <a href="mailto:thelobby500@gmail.com" className="text-blue-600 underline">privacy@lobby.example.com</a></p>
               <p className="text-sm mt-2"><strong>Mailing Address:</strong> Data Protection Officer, THE LOBBY, Shillong, Meghalaya, India</p>
               <p className="text-sm mt-2"><strong>Response Time:</strong> We aim to respond to all inquiries within 30 days.</p>
             </div>
