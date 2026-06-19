@@ -182,7 +182,7 @@ export default function TermsPage() {
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">16. Contact</h3>
             <p className="mb-4 text-sm">
-              If you have questions about these Terms, data practices, or want to report a security or safety issue, contact us at <a href="mailto:support@lobby.example" className="text-blue-600 underline">support@lobby.example</a> or visit our <a href="/support" className="text-blue-600 underline">support center</a>.
+              If you have questions about these Terms, data practices, or want to report a security or safety issue, contact us at <a href="mailto:thelobby500@gmail.com" className="text-blue-600 underline">support@lobby.example</a> or visit our <a href="/support" className="text-blue-600 underline">support center</a>.
             </p>
           </section>
 
