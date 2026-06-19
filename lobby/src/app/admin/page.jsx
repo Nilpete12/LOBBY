@@ -196,7 +196,7 @@ const resolveComplaint = async (id) => {
         onClose={() => setSidebarOpen(false)} 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}
-        onLogout={() => { setIsAuthenticated(false); navigate('/'); }} 
+        onLogout={() => { setIsAuthenticated(false); router.push('/'); }} 
       />
 
       <main className="flex-1 md:ml-0 p-4 md:p-8 w-full h-screen overflow-y-auto">
