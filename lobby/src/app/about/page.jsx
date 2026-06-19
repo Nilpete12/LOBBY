@@ -53,7 +53,7 @@ export default function AboutPage() {
             name="Nilesh Sen" 
             role="Lead Developer & Architect"
             image="https://api.dicebear.com/7.x/avataaars/svg?seed=happy"
-            bio="Full-stack developer passionate about building scalable web applications and solving real-world problems through code."
+            bio="The technical bulldozer behind the platform. The force that keeps things moving in THE LOBBY."
             links={{ github: "https://github.com/Nilpete12", linkedin: "https://www.linkedin.com/in/nilesh-sen-a76642284/"}}
           />
 

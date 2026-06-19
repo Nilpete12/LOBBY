@@ -17,7 +17,7 @@ export default function AdminLogin({ onLogin }) {
     // --- MOCK AUTHENTICATION LOGIC ---
     // In a real app, this fetches your Node.js backend
     setTimeout(() => {
-      if (email === "admin@lobby.com" && password === "admin123") {
+      if (email === "thelobby500@gmail.com" && password === "thelobby123") {
         onLogin(); // Tell parent component we are in
       } else {
         setError("Invalid credentials. Access denied.");
