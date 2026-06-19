@@ -52,9 +52,9 @@ export default function RiderDashboard() {
     };
 
     fetchHistory();
-  }, [user, navigate]);
+  }, [user, router]);
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = () => { logout(); router.push('/'); };
 
   if (!user) return null;
 
@@ -92,7 +92,7 @@ export default function RiderDashboard() {
           ) : history.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-slate-400 mb-4">You haven't contacted any drivers yet.</p>
-              <button onClick={() => navigate('/search')} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-black transition">
+              <button onClick={() => router.push('/search')} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-black transition">
                 Find a Ride
               </button>
             </div>
