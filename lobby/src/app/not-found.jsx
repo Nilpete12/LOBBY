@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import { Map, ArrowLeft, Home } from 'lucide-react';
+import Link from 'next/link';
 
 export default function ErrorPage() {
   const router = useRouter();
