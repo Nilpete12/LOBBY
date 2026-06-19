@@ -15,7 +15,7 @@ export default function TermsPage() {
         <div className="prose prose-slate prose-lg text-slate-600">
           
           <p className="text-lg mb-8">
-            Welcome to LOBBY. By accessing or using our website and services, you agree to be bound by these terms. If you do not agree, please do not use our platform.
+            Welcome to THE LOBBY. By accessing or using our website and services, you agree to be bound by these terms. If you do not agree, please do not use our platform.
           </p>
 
           <section className="mb-10">
@@ -23,10 +23,10 @@ export default function TermsPage() {
               <FileText size={20} /> 1. The Service
             </h3>
             <p className="mb-4">
-              LOBBY is a <strong>directory service</strong> that connects independent drivers with potential passengers. We are not a transportation carrier.
+             THE LOBBY is a <strong>directory service</strong> that connects independent drivers with potential passengers. We are not a transportation carrier.
             </p>
             <div className="shadow p-4 rounded-xl border border-slate-200 mb-4 text-sm">
-              <strong>Key Distinction:</strong> We do not employ drivers. The contract for transportation is directly between the Rider and the Driver. LOBBY is not a party to that agreement.
+              <strong>Key Distinction:</strong> We do not employ drivers. The contract for transportation is directly between the Rider and the Driver. THE LOBBY is not a party to that agreement.
             </div>
           </section>
 
@@ -38,7 +38,7 @@ export default function TermsPage() {
               <li>You must be at least 18 years old to create a driver account.</li>
               <li>You agree to provide accurate, current, and complete information during registration.</li>
               <li>Riders agree to pay the fare negotiated directly with the driver.</li>
-              <li>Drivers agree to maintain valid vehicle insurance, registration, and licenses required by the State of Meghalaya.</li>
+              <li>Drivers agree to maintain valid vehicle insurance, registration, and licenses required by the State of Nagaland.</li>
             </ul>
           </section>
 
@@ -47,7 +47,7 @@ export default function TermsPage() {
               <AlertTriangle size={20} /> 3. Limitation of Liability
             </h3>
             <p className="mb-4">
-              To the fullest extent permitted by law, LOBBY shall not be liable for any indirect, incidental, or consequential damages arising out of the use of the service, including but not limited to damages for loss of profits, goodwill, or personal injury.
+              To the fullest extent permitted by law,THE LOBBY shall not be liable for any indirect, incidental, or consequential damages arising out of the use of the service, including but not limited to damages for loss of profits, goodwill, or personal injury.
             </p>
           </section>
 
@@ -61,7 +61,7 @@ export default function TermsPage() {
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">5. Jurisdiction</h3>
             <p>
-              These Terms shall be governed by the laws of India. Any disputes arising from these terms shall be subject to the exclusive jurisdiction of the courts in Shillong, Meghalaya.
+              These Terms shall be governed by the laws of India. Any disputes arising from these terms shall be subject to the exclusive jurisdiction of the courts in Nagaland.
             </p>
           </section>
 
