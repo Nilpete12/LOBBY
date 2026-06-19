@@ -1,5 +1,5 @@
 "use client";
-import { ArrowRight, Github, Linkedin, Mail, Heart, Globe, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Mail, Heart, Globe, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AboutPage() {
