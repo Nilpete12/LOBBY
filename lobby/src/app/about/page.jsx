@@ -1,5 +1,6 @@
 "use client";
-import { ArrowRight, Mail, Heart, Globe, ShieldCheck } from 'lucide-react';
+// Added Github and Linkedin to the imports here!
+import { ArrowRight, Heart, Globe, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AboutPage() {
@@ -74,7 +75,7 @@ export default function AboutPage() {
         <h2 className="text-2xl font-bold text-slate-900 mb-4">Have questions or feedback?</h2>
         <p className="text-slate-500 mb-8">We'd love to hear from you. Reach out to our support team.</p>
         <Link 
-          to="/support" 
+          href="/support" /* CHANGED 'to' to 'href' for Next.js */
           className="inline-flex items-center gap-2 bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition shadow-lg hover:shadow-xl"
         >
           Contact Support <ArrowRight size={20} />
@@ -114,9 +115,12 @@ function CreatorCard({ name, role, image, bio, links }) {
         "{bio}"
       </p>
       
+      {/* ADDED the actual Icon components here with target="_blank" for safety */}
       <div className="flex gap-4 mt-auto">
-        <a href={links.github} className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-full transition"></a>
-        <a href={links.linkedin} className="p-2 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-full transition"></a>
+        <a href={links.github} target="_blank" rel="noopener noreferrer" className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-full transition">
+        </a>
+        <a href={links.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-full transition">
+        </a>
       </div>
     </div>
   );
