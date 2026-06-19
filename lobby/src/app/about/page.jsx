@@ -115,8 +115,8 @@ function CreatorCard({ name, role, image, bio, links }) {
       </p>
       
       <div className="flex gap-4 mt-auto">
-        <a href={links.github} className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-full transition"><Github size={20} /></a>
-        <a href={links.linkedin} className="p-2 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-full transition"><Linkedin size={20} /></a>
+        <a href={links.github} className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-full transition"></a>
+        <a href={links.linkedin} className="p-2 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-full transition"></a>
       </div>
     </div>
   );
