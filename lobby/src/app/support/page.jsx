@@ -16,6 +16,8 @@ export default function ContactPage() {
   // 2. Error & Success State
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
 
   // 3. Handle Input Changes
   const handleChange = (e) => {
@@ -27,23 +29,38 @@ export default function ContactPage() {
     }
   };
 
-  // 4. Validation Logic
+  // 4. Validation Logic with Specific Messages
   const validate = () => {
     const newErrors = {};
     
-    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
+    // First Name validation
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    } else if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = "First name must be at least 2 characters";
     }
 
+    // Last Name validation
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+    } else if (formData.lastName.trim().length < 2) {
+      newErrors.lastName = "Last name must be at least 2 characters";
+    }
+    
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    // Message validation
     if (!formData.message.trim()) {
       newErrors.message = "Message cannot be empty";
-    } else if (formData.message.length < 10) {
-      newErrors.message = "Message is too short (min 10 chars)";
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = "Message must be at least 10 characters";
+    } else if (formData.message.trim().length > 5000) {
+      newErrors.message = "Message cannot exceed 5000 characters";
     }
 
     setErrors(newErrors);
@@ -53,29 +70,37 @@ export default function ContactPage() {
   // 5. Handle Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
     
     // Check validation first
     if (!validate()) return;
 
+    setIsSubmitting(true);
+
     try {
       // 1. Save to YOUR Database (for Admin Panel)
-    await fetch(`${API_BASE_URL}/complaints`, { // <--- Direct URL
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
-        role: 'guest',
-        topic: formData.topic,
-        message: formData.message
-      })
-    });
+      const dbResponse = await fetch(`${API_BASE_URL}/complaints`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          role: 'guest',
+          topic: formData.topic,
+          message: formData.message
+        })
+      });
+
+      if (!dbResponse.ok) {
+        throw new Error('Failed to save message to database');
+      }
+
       // Create the data object for Web3Forms
       const payload = {
-        access_key: "e68d204c-a95f-4b2a-b1aa-5a06f72082e7", // <--- PASTE YOUR KEY HERE
-        subject: `New Support Message from ${formData.firstName}`, // Custom subject line
+        access_key: "e68d204c-a95f-4b2a-b1aa-5a06f72082e7",
+        subject: `New Support Message from ${formData.firstName}`,
         from_name: "Lobby App Support",
-        ...formData // Spreads: firstName, lastName, email, message, etc.
+        ...formData
       };
 
       const res = await fetch("https://api.web3forms.com/submit", {
@@ -105,11 +130,13 @@ export default function ContactPage() {
         // Hide success message after 5 seconds
         setTimeout(() => setIsSubmitted(false), 5000);
       } else {
-        alert("Something went wrong. Please try again.");
+        setFormError("Something went wrong. Please try again.");
       }
     } catch (error) {
       console.error("Error submitting form", error);
-      alert("Error submitting form. Please check your connection.");
+      setFormError("Network error. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -128,7 +155,7 @@ export default function ContactPage() {
 
       <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12">
         
-        {/* --- LEFT COLUMN: Info & FAQ (Unchanged) --- */}
+        {/* --- LEFT COLUMN: Info & FAQ --- */}
         <div className="space-y-8">
           <section className="grid sm:grid-cols-2 gap-4">
             <div className="bg-linear-to-br from-blue-100/90 to-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
@@ -147,13 +174,13 @@ export default function ContactPage() {
               <h3 className="font-bold text-slate-900">Email Us</h3>
               <p className="text-slate-500 text-sm mt-1 mb-3">For general inquiries</p>
               <a 
-  href="mailto:thelobby500@gmail.com"
-  target="_blank" 
-  rel="noopener noreferrer"
-  className="text-purple-600 font-bold hover:underline"
->
-  thelobby500@gmail.com
-</a>
+                href="mailto:thelobby500@gmail.com"
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-purple-600 font-bold hover:underline"
+              >
+                thelobby500@gmail.com
+              </a>
             </div>
           </section>
 
@@ -190,7 +217,7 @@ export default function ContactPage() {
           </section>
         </div>
 
-        {/* --- RIGHT COLUMN: Contact Form (UPDATED) --- */}
+        {/* --- RIGHT COLUMN: Contact Form (IMPROVED) --- */}
         <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-lg shadow-slate-200/50 h-fit">
           <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
             <MessageSquare className="text-blue-500" /> Send a message
@@ -201,14 +228,21 @@ export default function ContactPage() {
               <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle size={32} />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Message Sent!</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Message Sent! ✓</h3>
               <p className="text-slate-500">Thank you for reaching out. Our support team will get back to you within 24 hours.</p>
-              <button onClick={() => setIsSubmitted(false)} className="mt-6 text-sm font-bold text-slate-900 hover:underline">
+              <button onClick={() => setIsSubmitted(false)} className="mt-6 text-sm font-bold text-blue-600 hover:underline transition">
                 Send another message
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Form-level error */}
+              {formError && (
+                <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm font-semibold rounded-lg flex items-center gap-2" role="alert">
+                  <AlertCircle size={16} /> {formError}
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 {/* First Name */}
                 <div>
@@ -218,9 +252,20 @@ export default function ContactPage() {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition ${errors.firstName ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`} 
+                    placeholder="John"
+                    className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition focus:ring-2 ${
+                      errors.firstName 
+                        ? 'border-red-500 focus:border-red-500 ring-red-200' 
+                        : 'border-slate-200 focus:border-blue-500 ring-blue-100'
+                    }`}
+                    aria-invalid={!!errors.firstName}
+                    aria-describedby={errors.firstName ? "firstName-error" : undefined}
                   />
-                  {errors.firstName && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.firstName}</p>}
+                  {errors.firstName && (
+                    <p id="firstName-error" className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle size={10} /> {errors.firstName}
+                    </p>
+                  )}
                 </div>
 
                 {/* Last Name */}
@@ -231,9 +276,20 @@ export default function ContactPage() {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition ${errors.lastName ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`} 
+                    placeholder="Doe"
+                    className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition focus:ring-2 ${
+                      errors.lastName 
+                        ? 'border-red-500 focus:border-red-500 ring-red-200' 
+                        : 'border-slate-200 focus:border-blue-500 ring-blue-100'
+                    }`}
+                    aria-invalid={!!errors.lastName}
+                    aria-describedby={errors.lastName ? "lastName-error" : undefined}
                   />
-                  {errors.lastName && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.lastName}</p>}
+                  {errors.lastName && (
+                    <p id="lastName-error" className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle size={10} /> {errors.lastName}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -245,9 +301,20 @@ export default function ContactPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition ${errors.email ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`} 
+                  placeholder="you@example.com"
+                  className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition focus:ring-2 ${
+                    errors.email 
+                      ? 'border-red-500 focus:border-red-500 ring-red-200' 
+                      : 'border-slate-200 focus:border-blue-500 ring-blue-100'
+                  }`}
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
                 />
-                {errors.email && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.email}</p>}
+                {errors.email && (
+                  <p id="email-error" className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle size={10} /> {errors.email}
+                  </p>
+                )}
               </div>
 
               {/* Topic */}
@@ -257,30 +324,52 @@ export default function ContactPage() {
                   name="topic"
                   value={formData.topic}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 transition text-slate-700"
+                  className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 focus:ring-2 ring-blue-100 transition text-slate-700"
                 >
                   <option>General Inquiry</option>
                   <option>Lost Item</option>
                   <option>Driver Complaint</option>
                   <option>Payment Issue</option>
+                  <option>Safety Concern</option>
+                  <option>Feedback</option>
                 </select>
               </div>
 
               {/* Message */}
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Message <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
+                  Message <span className="text-red-500">*</span>
+                  <span className="float-right text-slate-400 font-normal text-xs">{formData.message.length}/5000</span>
+                </label>
                 <textarea 
-                  rows="4" 
+                  rows="5" 
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition ${errors.message ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
-                ></textarea>
-                {errors.message && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.message}</p>}
+                  placeholder="Please describe your issue or inquiry..."
+                  maxLength="5000"
+                  className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition focus:ring-2 resize-none ${
+                    errors.message 
+                      ? 'border-red-500 focus:border-red-500 ring-red-200' 
+                      : 'border-slate-200 focus:border-blue-500 ring-blue-100'
+                  }`}
+                  aria-invalid={!!errors.message}
+                  aria-describedby={errors.message ? "message-error" : undefined}
+                />
+                {errors.message && (
+                  <p id="message-error" className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle size={10} /> {errors.message}
+                  </p>
+                )}
               </div>
 
-              <button type="submit" className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-black transition shadow-lg">
-                Send Message
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-slate-800 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                aria-busy={isSubmitting}
+              >
+                {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
             </form>
           )}
@@ -291,14 +380,15 @@ export default function ContactPage() {
   );
 }
 
-// Helper Component for FAQ (Same as before)
+// Helper Component for FAQ
 function FaqItem({ question, answer }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden transition-all">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center p-4 text-left font-bold text-slate-800 hover:bg-slate-50"
+        className="w-full flex justify-between items-center p-4 text-left font-bold text-slate-800 hover:bg-slate-50 transition"
+        aria-expanded={isOpen}
       >
         {question}
         {isOpen ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
