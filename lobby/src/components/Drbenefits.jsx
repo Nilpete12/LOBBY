@@ -15,7 +15,7 @@ export default function DriverBenefits() {
     {
       icon: <Users size={32} />,
       title: "Direct Connection",
-      desc: "Riders call you directly. Negotiate outstation trips to Dawki or Cherrapunji on your own terms."
+      desc: "Riders call you directly. Get paid as per the rates set by the ANTA and NTWTA"
     },
     {
       icon: <Shield size={32} />,
