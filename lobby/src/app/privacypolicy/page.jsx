@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link';
-import { Shield, Lock, Eye, AlertTriangle } from 'lucide-react';
+import { Shield, Lock, Eye, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export default function PrivacyPolicy() {
   return (
@@ -227,7 +227,7 @@ export default function PrivacyPolicy() {
               For information about your rights and responsibilities when using our platform, please review our:
             </p>
             <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-              <p className="text-sm"><a href="/terms" className="text-blue-600 font-bold underline">→ Terms of Service</a></p>
+              <p className="text-sm"><Link href="/terms" className="text-blue-600 font-bold underline">→ Terms of Service</Link></p>
               <p className="text-xs text-slate-600 mt-1">Learn about user responsibilities, service limitations, and dispute resolution procedures.</p>
             </div>
           </section>
