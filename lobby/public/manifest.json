@@ -1,6 +1,6 @@
 {
-  "name": "LOBBY - Direct Rides",
-  "short_name": "LOBBY",
+  "name": "THE LOBBY",
+  "short_name": "THE LOBBY",
   "description": "A decentralized ride-hailing platform connecting riders directly with local drivers. Features role-based dashboards, real-time availability tracking, and secure admin verification.",
   "start_url": "/",
   "scope": "/",
@@ -52,7 +52,7 @@
     },
     {
       "name": "Become a Driver",
-      "short_name": "Drive",
+      "short_name": "Driver",
       "description": "Sign up as a driver",
       "url": "/auth/driver-signup",
       "icons": [
