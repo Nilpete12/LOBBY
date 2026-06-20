@@ -269,7 +269,6 @@ export default function AuthPage() {
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-24 sm:px-6 md:px-10">
         <div className="w-full max-w-md">
 
-<<<<<<< HEAD
           {/* MAIN API ERROR */}
           {status.mainError && (
             <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 text-sm font-semibold rounded-lg flex items-center gap-2">
@@ -450,16 +449,6 @@ export default function AuthPage() {
             >
               {isLogin ? 'Create account' : 'Sign in'}
             </button>
-=======
-          {/* HEADER */}
-          <div className="mb-6 text-center md:text-left">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1">
-              {isLogin ? 'Welcome back' : 'Create account'}
-            </h1>
-            <p className="text-sm sm:text-base text-slate-500">
-              {isLogin ? 'Sign in to access your account.' : 'Join as a Rider or Driver.'}
-            </p>
->>>>>>> 462fbbf06dc6cbd608c4914f6384d98a81e6d7e9
           </div>
 
           {/* CARD */}
