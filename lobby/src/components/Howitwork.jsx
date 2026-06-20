@@ -23,7 +23,7 @@ export default function HowItWorks() {
     <section className="py-24 border-slate-200 border-y bg-linear-to-t from-blue-300/10 to-blue-0">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">How LOBBY works</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">How THE LOBBY works</h2>
           <p className="text-slate-500">We keep it simple. No hidden algorithms, just direct connections.</p>
         </div>
 
