@@ -22,7 +22,7 @@ export default function DriverHero() {
           </h1>
           
           <p className="text-xl text-slate-400 mb-8 leading-relaxed w-1/2">
-            Stop paying huge commissions. Join THE LOBBY to connect directly with riders in in your city and keep 100% of your fare.
+            Stop paying huge commissions. Join THE LOBBY to connect directly with riders in in your city and keep 100% of the fare.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
