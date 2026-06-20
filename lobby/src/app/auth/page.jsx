@@ -252,6 +252,7 @@ export default function AuthPage() {
                       onChange={handleChange}
                       type="email"
                       placeholder="name@example.com"
+                    
                       className={`w-full bg-slate-50 border pl-11 pr-4 py-3 rounded-xl outline-none font-medium
                         ${errors.email ? 'border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
                     />
