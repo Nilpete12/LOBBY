@@ -14,13 +14,13 @@ export default function Hero() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
           </span>
-          Live in Shillong.
+          Live in Mokokchung.
         </div>
 
         {/* Headline */}
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
-          The hills are calling. <br className="hidden md:block" />
-          <span className="text-slate-500">Ride with locals.</span>
+          Get There. <br className="hidden md:block" />
+          <span className="text-slate-500">The Local Way.</span>
         </h1>
 
         <p className="text-2xl text-slate-600 max-w-2xl mb-8 font-bold font-style: italic leading-relaxed">
