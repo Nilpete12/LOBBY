@@ -3,6 +3,7 @@ import { Search, MapPin, Star, Phone, Shield, Filter } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/Authcontext';
+import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
 import API_BASE_URL from '@/config';
 
 export default function SearchPage() {
@@ -77,14 +78,17 @@ export default function SearchPage() {
           ))}
         </div>
 
-                {/* Results Area */}
+        {/* Results Area */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-            <Loader2 className="w-10 h-10 animate-spin text-black mb-4" />
-            <p className="font-medium animate-pulse">Searching for drivers...</p>
-          </div>
+          <SearchResultsSkeletons count={3} />
         ) : error ? (
-          <div className="text-center py-20 text-red-500 font-bold">{error}</div>
+          <div className="text-center py-20 bg-red-50 border border-red-200 rounded-2xl">
+            <div className="inline-flex bg-red-100 p-4 rounded-full mb-4 text-red-400">
+              <Search size={32} />
+            </div>
+            <p className="text-red-600 font-bold text-lg">{error}</p>
+            <p className="text-red-500 text-sm mt-2">Please check your connection and try again.</p>
+          </div>
         ) : drivers.length === 0 ? (
           <div className="text-center py-20">
             <div className="inline-flex bg-slate-100 p-4 rounded-full mb-4 text-slate-400">
@@ -107,7 +111,7 @@ export default function SearchPage() {
 }
 
 // --- Helper Component: Ride Card ---
-function RideCard({ driver }) {
+function RideCard({ driver, currentUser }) {
   // Fallback data if driver profile is incomplete
   const vehicle = driver.vehicle || "Standard Taxi";
   const routes = driver.routes && driver.routes.length > 0 ? driver.routes.join(", ") : "Local City Run";
@@ -157,8 +161,8 @@ function RideCard({ driver }) {
               </div>
             </div>
 
-            {/* Call Button */}
-            <a href={`tel:${driver.phone}`} onClick={handleCall} className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg shadow-green-200 transition">
+            {/* Call Button - Sticky on mobile */}
+            <a href={`tel:${driver.phone}`} onClick={handleCall} className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg shadow-green-200 transition shrink-0">
               <Phone size={20} />
             </a>
           </div>
