@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link';
-import { Shield, Lock, Eye } from 'lucide-react';
+import { Shield, Lock, Eye, AlertTriangle } from 'lucide-react';
 
 export default function PrivacyPolicy() {
   return (
