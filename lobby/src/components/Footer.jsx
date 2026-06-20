@@ -16,7 +16,7 @@ export default function Footer() {
              THE LOBBY<span className="text-blue-500">.</span>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed mb-6">
-              The trusted drive directory for Shillong and the North East. Connecting locals directly.
+              The trusted drive directory for Nagalang. Connecting locals directly.
             </p>
             <div className="flex gap-4">
               {/* <a href="#" className="hover:text-white transition"><Instagram size={20} /></a>
