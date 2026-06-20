@@ -59,7 +59,7 @@ export default function InstallPopup() {
           <img src="/favicon 512.png" alt="Lobby App" className="w-full h-full object-cover" />
         </div>
         <div>
-          <h3 className="font-bold text-lg leading-tight">Install LOBBY App</h3>
+          <h3 className="font-bold text-lg leading-tight">Install THE LOBBY</h3>
           <p className="text-slate-400 text-sm mt-0.5">Faster booking, offline access.</p>
         </div>
       </div>
