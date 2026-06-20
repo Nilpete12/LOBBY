@@ -1,3 +1,4 @@
+"use client";
 import { LayoutDashboard, Users, Car, Settings, LogOut, X, MessagesSquare } from 'lucide-react';
 
 export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLogout }) {

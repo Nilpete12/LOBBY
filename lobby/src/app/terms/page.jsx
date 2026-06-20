@@ -1,4 +1,5 @@
 "use client";
+import Link from 'next/link';
 import { FileText, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export default function TermsPage() {
@@ -10,7 +11,7 @@ export default function TermsPage() {
         <div className="mb-12 border-b border-slate-100 pb-8">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Terms of Service</h1>
           <p className="text-slate-500 text-lg">Effective Date: January 1, 2026</p>
-          <p className="text-sm text-slate-500 mt-2">For details about how we collect and use personal data, see our <a href="/privacy" className="text-blue-600 underline">Privacy Policy</a>.</p>
+          <p className="text-sm text-slate-500 mt-2">For details about how we collect and use personal data, see our <Link href="/privacypolicy" className="text-blue-600 underline">Privacy Policy</Link>.</p>
         </div>
 
         {/* Content */}
@@ -66,7 +67,7 @@ export default function TermsPage() {
               <AlertTriangle size={20} /> 3. Security, Data and Privacy
             </h3>
             <p className="mb-4">
-              We take the security and privacy of user data seriously. Our <a href="/privacy" className="text-blue-600 underline">Privacy Policy</a> describes what Personal Data we collect, how we use it, how long we retain it, and how users can exercise their rights.
+              We take the security and privacy of user data seriously. Our <Link href="/privacypolicy" className="text-blue-600 underline">Privacy Policy</Link> describes what Personal Data we collect, how we use it, how long we retain it, and how users can exercise their rights.
             </p>
             <h4 className="font-semibold">Data Security</h4>
             <p className="mb-4 text-sm">
@@ -141,7 +142,7 @@ export default function TermsPage() {
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">10. Recordings and Logs</h3>
             <p className="mb-4 text-sm">
-              We may record calls, messages, and trip data for quality assurance, safety investigations and fraud detection. By using the Service you consent to such recordings where permitted by law. We retain logs and trip records as described in our <a href="/privacy" className="text-blue-600 underline">Privacy Policy</a>.
+              We may record calls, messages, and trip data for quality assurance, safety investigations and fraud detection. By using the Service you consent to such recordings where permitted by law. We retain logs and trip records as described in our <Link href="/privacypolicy" className="text-blue-600 underline">Privacy Policy</Link>.
             </p>
           </section>
 

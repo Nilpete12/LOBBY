@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function JoinSteps() {
   return (
     <section className="py-24 bg-slate-900 text-white border-t border-slate-800">
@@ -31,11 +33,11 @@ export default function JoinSteps() {
           <div className="bg-linear-to-b from-blue-300/50 to-white rounded-3xl p-10 md:p-14 text-center">
              <h3 className="text-2xl font-bold mb-4 text-slate-900">Ready to hit the road?</h3>
              <p className="text-slate-900 mb-8">Join over 500+ drivers in Shillong today.</p>
-             <a href="/Auth">
-             <button className="w-full bg-white text-slate-900 font-bold py-4 rounded-xl hover:bg-blue-50 transition shadow-lg">
-               Sign Up Now
-             </button>
-             </a>
+             <Link href="/auth" className="w-full block">
+               <button className="w-full bg-white text-slate-900 font-bold py-4 rounded-xl hover:bg-blue-50 transition shadow-lg">
+                 Sign Up Now
+               </button>
+             </Link>
              <p className="text-xs text-black mt-4">Takes less than 5 minutes</p>
           </div>
         </div>

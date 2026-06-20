@@ -85,7 +85,7 @@ export default function AdminLogin({ onLogin }) {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <Link to="/" className="text-slate-500 text-sm hover:text-white transition flex items-center justify-center gap-2">
+          <Link href="/" className="text-slate-500 text-sm hover:text-white transition flex items-center justify-center gap-2">
             <ArrowLeft size={16} /> Return to Website
           </Link>
         </div>

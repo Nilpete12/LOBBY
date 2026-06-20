@@ -55,7 +55,7 @@ export default function DriverDashboard() {
       } catch (err) { console.error(err); }
     };
     syncProfile();
-  }, [navigate, logout]); 
+  }, [logout, router]); 
 
 
   // --- 2. UPDATE TEXT DETAILS ---
@@ -136,7 +136,7 @@ export default function DriverDashboard() {
     }
   };
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = () => { logout(); router.push('/'); };
 
   if (!driver) return <div className="p-20 text-center text-slate-400 font-bold">Loading...</div>;
   const isVerified = driver.isVerified === true;

@@ -1,4 +1,5 @@
 "use client";
+import Link from 'next/link';
 import { Shield, Lock, Eye } from 'lucide-react';
 
 export default function PrivacyPolicy() {
@@ -10,7 +11,7 @@ export default function PrivacyPolicy() {
         <div className="mb-12 border-b border-slate-100 pb-8">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Privacy Policy</h1>
           <p className="text-slate-500 text-lg">Last updated: December 30, 2025</p>
-          <p className="text-sm text-slate-500 mt-2">For details about your rights and responsibilities when using our platform, see our <a href="/terms" className="text-blue-600 underline">Terms of Service</a>.</p>
+          <p className="text-sm text-slate-500 mt-2">For details about your rights and responsibilities when using our platform, see our <Link href="/terms" className="text-blue-600 underline">Terms of Service</Link>.</p>
         </div>
 
         {/* Content */}

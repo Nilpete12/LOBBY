@@ -1,3 +1,4 @@
+"use client";
 import { ArrowUpRight } from 'lucide-react';
 
 export default function StatsCard({ title, value, icon: Icon, trend, color }) {
