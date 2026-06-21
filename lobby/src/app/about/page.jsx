@@ -52,7 +52,7 @@ export default function AboutPage() {
           {/* CREATOR 1 */}
           <CreatorCard 
             name="Nilesh Sen" 
-            role="Lead Developer & Architect"
+            role="Chief Technical Officer"
             image="https://api.dicebear.com/7.x/avataaars/svg?seed=happy"
             bio="The technical bulldozer behind the platform. The force that keeps things moving in THE LOBBY."
             links={{ github: "https://github.com/Nilpete12", linkedin: "https://www.linkedin.com/in/nilesh-sen-a76642284/"}}
@@ -61,7 +61,7 @@ export default function AboutPage() {
           {/* CREATOR 2 */}
           <CreatorCard 
             name="Khalong Kichu" 
-            role="Product & Operations"
+            role="Chief Executive Officer"
             image="https://api.dicebear.com/7.x/avataaars/svg?seed=veget"
             bio="The visionary ensuring THE LOBBY delivers the best experience for both riders and drivers across the city."
             links={{ github: "https://github.com/khalongkichu348-ops", linkedin: "https://www.linkedin.com/in/khalong-kichu-89a93b2a0/" }}
