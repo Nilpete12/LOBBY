@@ -1,60 +1,56 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useUser, useClerk } from '@clerk/nextjs'; // <-- NEW CLERK HOOKS
 import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 export default function DriverDashboard() {
   const router = useRouter();
   
-  const [driver, setDriver] = useState(null);
+  // 1. CLERK AUTHENTICATION STATE
+  const { isLoaded, isSignedIn, user: clerkUser } = useUser();
+  const { signOut } = useClerk();
   
-  const [formData, setFormData] = useState({
-    vehicle: '',
-    phone: '',
-    routes: ''
-  });
-
+  // 2. MONGODB DRIVER STATE (Vehicle, Routes, Verification, etc.)
+  const [driverDbData, setDriverDbData] = useState(null);
+  
+  const [formData, setFormData] = useState({ vehicle: '', phone: '', routes: '' });
   const [isOnline, setIsOnline] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [uploadingLicense, setUploadingLicense] = useState(false); // NEW STATE FOR AI
+  const [uploadingLicense, setUploadingLicense] = useState(false);
 
-  // --- 1. LOAD DATA ---
+  // --- 1. LOAD DATA (CLERK + MONGODB SYNC) ---
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
+    // Wait for Clerk to load
+    if (!isLoaded) return;
+    
+    // Boot out unauthenticated users
+    if (!isSignedIn) { router.push('/sign-in'); return; }
 
-    if (!token || !userStr) { router.push('/auth'); return; }
-
-    try {
-      const cachedUser = JSON.parse(userStr);
-      setDriver(cachedUser);
-      setFormData({
-        vehicle: cachedUser.vehicle || '',
-        phone: cachedUser.phone || '',
-        routes: cachedUser.routes ? cachedUser.routes.join(', ') : ''
-      });
-      setIsOnline(cachedUser.isAvailable || false);
-    } catch (e) {
-      logout(); router.push('/auth'); return;
-    }
-
-    const syncProfile = async () => {
+    // Fetch the driver's specific details from MongoDB
+    const fetchDriverProfile = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/auth/me`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        // NOTE: Make sure your backend has a route that accepts a Clerk ID to return the driver document!
+        const res = await fetch(`${API_BASE_URL}/driver/${clerkUser.id}`);
         const data = await res.json();
-        if (data.success) {
-          setDriver(data.user);
-          localStorage.setItem('user', JSON.stringify(data.user)); 
-          setIsOnline(data.user.isAvailable);
+        
+        if (data.success && data.driver) {
+          setDriverDbData(data.driver);
+          setFormData({
+            vehicle: data.driver.vehicle || '',
+            phone: data.driver.phone || '',
+            routes: data.driver.routes ? data.driver.routes.join(', ') : ''
+          });
+          setIsOnline(data.driver.isAvailable || false);
         }
-      } catch (err) { console.error(err); }
+      } catch (err) { 
+        console.error("Failed to fetch MongoDB driver data", err); 
+      }
     };
-    syncProfile();
-  }, [logout, router]); 
-
+    
+    fetchDriverProfile();
+  }, [isLoaded, isSignedIn, clerkUser, router]); 
 
   // --- 2. UPDATE TEXT DETAILS ---
   const handleUpdate = async (newStatus) => {
@@ -66,7 +62,7 @@ export default function DriverDashboard() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: driver._id || driver.id,
+          clerkId: clerkUser.id, // Send Clerk ID instead of MongoDB _id
           vehicle: formData.vehicle,
           phone: formData.phone,
           routes: formData.routes.split(',').map(s => s.trim()).filter(Boolean),
@@ -76,9 +72,8 @@ export default function DriverDashboard() {
       
       const data = await res.json();
       if (data.success) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setDriver(data.user);
-        setIsOnline(data.user.isAvailable);
+        setDriverDbData(data.driver);
+        setIsOnline(data.driver.isAvailable);
         if (newStatus === undefined) alert("Profile Saved!");
       }
     } catch (err) { alert("Failed to save."); } 
@@ -100,9 +95,9 @@ export default function DriverDashboard() {
 
     const uploadData = new FormData();
     uploadData.append('image', file);
-    uploadData.append('userId', driver._id || driver.id);
+    uploadData.append('clerkId', clerkUser.id); // Send Clerk ID
     uploadData.append('type', 'license'); 
-    uploadData.append('driverName', driver.fullName); // Crucial for AI matching
+    uploadData.append('driverName', clerkUser.fullName);
 
     try {
       const res = await fetch(`${API_BASE_URL}/driver/upload`, {
@@ -113,12 +108,8 @@ export default function DriverDashboard() {
       const data = await res.json();
       
       if (data.success) {
-        // Update state with new AI data
-        setDriver(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        // Show result to driver
-        if (data.user.verificationStatus === 'Approved') {
+        setDriverDbData(data.driver);
+        if (data.driver.verificationStatus === 'Approved') {
           alert('✅ AI Verification Successful! Your license is approved.');
         } else {
           alert('⏳ Uploaded! Awaiting manual admin review (AI could not read the name clearly).');
@@ -134,11 +125,12 @@ export default function DriverDashboard() {
     }
   };
 
-  const handleLogout = () => { logout(); router.push('/'); };
+  const handleLogout = () => { signOut(() => router.push('/')); };
 
-  if (!driver) return <div className="p-20 text-center text-slate-400 font-bold">Loading...</div>;
-  const isVerified = driver.isVerified === true;
-
+  // Show loading while Clerk initializes OR while MongoDB data fetches
+  if (!isLoaded || !driverDbData) return <div className="p-20 text-center text-slate-400 font-bold flex items-center justify-center min-h-screen"><Loader2 className="animate-spin mr-2"/> Loading Dashboard...</div>;
+  
+  const isVerified = driverDbData.isVerified === true;
 
   return (
     <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6">
@@ -155,39 +147,32 @@ export default function DriverDashboard() {
           </div>
         )}
 
-        {/* --- HEADER (With Profile Pic Upload) --- */}
+        {/* --- HEADER --- */}
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
           <div className="flex items-center gap-6">
             
-            {/* PROFILE PICTURE UPLOADER */}
+            {/* PROFILE PICTURE (Uses Clerk's built-in image by default, or DB fallback) */}
             <div className="relative group">
               <div className="w-20 h-20 rounded-full overflow-hidden bg-slate-100 border-2 border-slate-200">
-                {driver.profilePic ? (
-                  <img src={driver.profilePic} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold text-2xl">
-                    {driver.fullName.charAt(0)}
-                  </div>
-                )}
+                <img src={driverDbData.profilePic || clerkUser.imageUrl} alt="Profile" className="w-full h-full object-cover" />
               </div>
               
-              {/* Overlay Button */}
               <label className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 cursor-pointer transition">
                 <Camera size={24} />
                 <input 
                   type="file" 
                   className="hidden" 
                   accept="image/*"
-                  onChange={(e) => handleImageUpload(e.target.files[0], 'profile', driver, setDriver)}
+                  onChange={(e) => handleImageUpload(e.target.files[0], 'profile', clerkUser.id, setDriverDbData)}
                 />
               </label>
             </div>
 
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">{driver.fullName}</h1>
+              <h1 className="text-2xl font-bold text-slate-900">{clerkUser.fullName}</h1>
               <p className="text-slate-500 text-sm flex items-center gap-2">
                 {isVerified ? <span className="text-green-600 font-bold">Verified Driver</span> : "Pending Approval"} 
-                • {driver.email}
+                • {clerkUser.primaryEmailAddress?.emailAddress}
               </p>
             </div>
           </div>
@@ -226,7 +211,6 @@ export default function DriverDashboard() {
             </div>
 
             <div className="space-y-4">
-              {/* Inputs */}
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase ml-1">Vehicle Model</label>
                 <div className="flex items-center bg-slate-50 rounded-xl px-4 border border-slate-200">
@@ -255,8 +239,8 @@ export default function DriverDashboard() {
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase ml-1">Vehicle Photo</label>
                 <div className="mt-2 relative h-32 w-full rounded-xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 group">
-                  {driver.carPic ? (
-                    <img src={driver.carPic} alt="Car" className="w-full h-full object-cover" />
+                  {driverDbData.carPic ? (
+                    <img src={driverDbData.carPic} alt="Car" className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
                       <UploadCloud size={24} />
@@ -270,23 +254,23 @@ export default function DriverDashboard() {
                       type="file" 
                       className="hidden" 
                       accept="image/*"
-                      onChange={(e) => handleImageUpload(e.target.files[0], 'car', driver, setDriver)}
+                      onChange={(e) => handleImageUpload(e.target.files[0], 'car', clerkUser.id, setDriverDbData)}
                     />
                   </label>
                 </div>
               </div>
 
-              {/* --- NEW: DRIVING LICENSE UPLOAD (AI POWERED) --- */}
+              {/* DRIVING LICENSE UPLOAD (AI POWERED) */}
               <div>
                 <div className="flex justify-between items-end mb-1">
                   <label className="text-xs font-bold text-slate-400 uppercase ml-1">Driving License</label>
-                  {driver.verificationStatus && (
+                  {driverDbData.verificationStatus && (
                     <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
-                      driver.verificationStatus === 'Approved' ? 'bg-green-100 text-green-700' : 
-                      driver.verificationStatus === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
+                      driverDbData.verificationStatus === 'Approved' ? 'bg-green-100 text-green-700' : 
+                      driverDbData.verificationStatus === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
                       'bg-orange-100 text-orange-700'
                     }`}>
-                      {driver.verificationStatus}
+                      {driverDbData.verificationStatus}
                     </span>
                   )}
                 </div>
@@ -299,7 +283,7 @@ export default function DriverDashboard() {
                         <Loader2 size={28} className="animate-spin mb-2" />
                         <span className="animate-pulse text-sm">AI Scanning...</span>
                       </div>
-                    ) : driver.licenseUrl ? (
+                    ) : driverDbData.licenseUrl ? (
                        <div className="text-green-600 flex flex-col items-center font-medium">
                          <FileText size={28} className="mb-2" />
                          <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition">Update License</span>
@@ -336,12 +320,12 @@ export default function DriverDashboard() {
 }
 
 // --- HELPER: HANDLE IMAGE UPLOAD ---
-async function handleImageUpload(file, type, driver, setDriver) {
+async function handleImageUpload(file, type, clerkId, setDriverDbData) {
   if (!file) return;
 
   const formData = new FormData();
   formData.append('image', file);
-  formData.append('userId', driver._id || driver.id);
+  formData.append('clerkId', clerkId); // Changed to send clerkId
   formData.append('type', type);
 
   try {
@@ -352,8 +336,7 @@ async function handleImageUpload(file, type, driver, setDriver) {
     
     const data = await res.json();
     if (data.success) {
-      setDriver(data.user);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      setDriverDbData(data.driver);
       alert(`${type === 'profile' ? 'Profile' : 'Car'} photo updated!`);
     } else {
       alert("Upload failed.");
