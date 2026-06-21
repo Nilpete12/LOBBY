@@ -2,7 +2,6 @@
 import { Search, MapPin, Star, Phone, Shield, Filter } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/Authcontext';
 import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
 import API_BASE_URL from '@/config';
 
@@ -11,7 +10,6 @@ export default function SearchPage() {
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { user } = useAuth();
 
   // 1. Fetch Drivers on Load
   useEffect(() => {

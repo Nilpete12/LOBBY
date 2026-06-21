@@ -2,11 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Phone, MapPin, Clock, LogOut, History } from 'lucide-react';
-import { useAuth } from '@/context/Authcontext';
 import API_BASE_URL from '@/config';
 
 export default function RiderDashboard() {
-  const { user, logout } = useAuth();
   const router = useRouter();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);

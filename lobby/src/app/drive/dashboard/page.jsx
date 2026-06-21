@@ -2,12 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText } from 'lucide-react';
-import { useAuth } from '@/context/Authcontext';
 import API_BASE_URL from '@/config';
 
 export default function DriverDashboard() {
   const router = useRouter();
-  const { logout } = useAuth();
   
   const [driver, setDriver] = useState(null);
   

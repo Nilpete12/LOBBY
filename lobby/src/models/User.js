@@ -4,7 +4,7 @@ const UserSchema = new mongoose.Schema({
   // Basic Info
   fullName: { type: String, required: true },
   email:    { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  clerkId: { type: String, unique: true },
   role:     { type: String, enum: ['rider', 'driver', 'admin'], default: 'rider' },
   
   // Driver Specific Fields (Optional for Riders)
