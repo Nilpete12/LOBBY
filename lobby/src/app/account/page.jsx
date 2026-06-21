@@ -1,43 +1,55 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Phone, MapPin, Clock, LogOut, History } from 'lucide-react';
+import { useUser, useClerk } from '@clerk/nextjs'; // <-- NEW CLERK HOOKS
+import { Phone, Clock, LogOut, History } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 export default function RiderDashboard() {
+  // Replace useAuth with Clerk's useUser
+  const { isLoaded, isSignedIn, user } = useUser(); 
+  const { signOut } = useClerk(); // Clerk's logout function
   const router = useRouter();
+  
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showComplaint, setShowComplaint] = useState(false);
   const [complaintText, setComplaintText] = useState("");
 
   const handleReport = async () => {
-  if (!complaintText) return;
+    if (!complaintText) return;
 
-  await fetch(`${API_BASE_URL}/complaints`, { // <--- Direct URL
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: user._id,      // Assuming you have 'user' from context/props
-      name: user.fullName,
-      email: user.email,
-      role: 'rider',
-      topic: 'Rider Issue',
-      message: complaintText
-    })
-  });
-  setShowComplaint(false);
-  setComplaintText("");
-  alert("Issue reported to Admin.");
-};
+    await fetch(`${API_BASE_URL}/complaints`, { 
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user.id, // Clerk's ID
+        name: user.fullName,
+        email: user.primaryEmailAddress?.emailAddress, // Clerk's email format
+        role: user.publicMetadata?.role || 'rider', // Clerk's role format
+        topic: 'Rider Issue',
+        message: complaintText
+      })
+    });
+    setShowComplaint(false);
+    setComplaintText("");
+    alert("Issue reported to Admin.");
+  };
 
   useEffect(() => {
-    if (!user) { router.push('/auth'); return; }
+    // Wait until Clerk is fully loaded to do anything
+    if (!isLoaded) return;
+    
+    // If they aren't logged in, boot them
+    if (!isSignedIn) { 
+      router.push('/sign-in'); 
+      return; 
+    }
 
     const fetchHistory = async () => {
       try {
-        // Fetch using the user's ID
-        const res = await fetch(`${API_BASE_URL}/rider/history?riderId=${user.id || user._id}`);
+        // Fetch using the user's Clerk ID
+        const res = await fetch(`${API_BASE_URL}/rider/history?riderId=${user.id}`);
         const data = await res.json();
         if (data.success) {
           setHistory(data.history);
@@ -50,10 +62,19 @@ export default function RiderDashboard() {
     };
 
     fetchHistory();
-  }, [user, router]);
+  }, [isLoaded, isSignedIn, user, router]);
 
-  const handleLogout = () => { logout(); router.push('/'); };
+  const handleLogout = () => { 
+    // Use Clerk's signOut, then redirect
+    signOut(() => router.push('/')); 
+  };
 
+  // Show a loading state while Clerk verifies the session
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center">Loading...</div>;
+  }
+
+  // Double check user exists before rendering to prevent crashes
   if (!user) return null;
 
   return (
@@ -64,11 +85,11 @@ export default function RiderDashboard() {
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex justify-between items-center mb-8">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold">
-              {user.fullName.charAt(0)}
+              {user.fullName?.charAt(0) || "U"}
             </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-900">{user.fullName}</h1>
-              <p className="text-slate-500 text-sm">Rider Account • {user.email}</p>
+              <p className="text-slate-500 text-sm">Rider Account • {user.primaryEmailAddress?.emailAddress}</p>
             </div>
           </div>
           <button onClick={handleLogout} className="p-3 text-red-400 hover:bg-red-50 rounded-xl transition flex items-center gap-2 text-sm font-bold">
@@ -128,30 +149,30 @@ export default function RiderDashboard() {
           
         </div>
         <button 
-  onClick={() => setShowComplaint(true)}
-  className="mt-4 text-sm font-bold text-red-500 hover:text-red-700 underline"
->
-  Report an Issue
-</button>
+          onClick={() => setShowComplaint(true)}
+          className="mt-4 text-sm font-bold text-red-500 hover:text-red-700 underline"
+        >
+          Report an Issue
+        </button>
 
-{/* The Modal */}
-{showComplaint && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-    <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl text-center items-center">
-      <h3 className="font-bold text-2xl mb-2">Report an Issue</h3>
-      <textarea
-        className="w-full border p-3 rounded-lg mb-4 h-32"
-        placeholder="Describe what happened..."
-        value={complaintText}
-        onChange={(e) => setComplaintText(e.target.value)}
-      />
-      <div className="flex justify-end gap-3">
-        <button onClick={() => setShowComplaint(false)} className="text-slate-500 font-bold text-sm">Cancel</button>
-        <button onClick={handleReport} className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm">Submit</button>
-      </div>
-    </div>
-  </div>
-)}
+        {/* The Modal */}
+        {showComplaint && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl text-center items-center">
+              <h3 className="font-bold text-2xl mb-2">Report an Issue</h3>
+              <textarea
+                className="w-full border p-3 rounded-lg mb-4 h-32"
+                placeholder="Describe what happened..."
+                value={complaintText}
+                onChange={(e) => setComplaintText(e.target.value)}
+              />
+              <div className="flex justify-end gap-3">
+                <button onClick={() => setShowComplaint(false)} className="text-slate-500 font-bold text-sm">Cancel</button>
+                <button onClick={handleReport} className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm">Submit</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
