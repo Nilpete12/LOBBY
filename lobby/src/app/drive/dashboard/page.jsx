@@ -43,7 +43,7 @@ export default function DriverDashboard() {
       return;
     }
 
-    // 5. Fetch the driver's specific details from MongoDB
+    // Inside your useEffect...
     const fetchDriverProfile = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/driver/${clerkUser.id}`);
@@ -57,9 +57,14 @@ export default function DriverDashboard() {
             routes: data.driver.routes ? data.driver.routes.join(', ') : ''
           });
           setIsOnline(data.driver.isAvailable || false);
+        } else {
+          // If the backend says "User not found", alert us!
+          alert(`Backend Error: ${data.message}`);
+          console.error("Backend response:", data);
         }
       } catch (err) { 
         console.error("Failed to fetch MongoDB driver data", err); 
+        alert("API Fetch completely failed. Check console.");
       }
     };
     

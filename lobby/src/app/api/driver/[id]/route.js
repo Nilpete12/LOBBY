@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 
-// The { params } object automatically captures the [id] from the folder name!
-export async function GET(request, { params }) {
+export async function GET(request, context) {
   try {
     await connectDB();
 
+    const params = await context.params;
+    
     // Search MongoDB using the clerkId we passed in the URL
     const driver = await User.findOne({ clerkId: params.id });
 
@@ -18,12 +19,12 @@ export async function GET(request, { params }) {
     }
 
     return NextResponse.json({ success: true, driver }, { status: 200 });
-
   } catch (error) {
-    console.error("Fetch Driver Error:", error);
+    console.error("CRASH DETAILS:", error.message, error.stack); 
+    
     return NextResponse.json(
-      { success: false, message: "Failed to fetch driver data" }, 
+      { success: false, message: `Backend crashed: ${error.message}` }, 
       { status: 500 }
     );
   }
-}
+}// <--- This final bracket is what went missing!
