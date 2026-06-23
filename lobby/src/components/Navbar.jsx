@@ -1,17 +1,31 @@
 "use client";
 import Link from 'next/link';
 import { Menu, X, ChevronRight, LogOut } from 'lucide-react';
-import { useState } from 'react';
-// 1. UPDATED IMPORT: Replaced SignedIn/SignedOut with Show
+import { useState, useEffect } from 'react';
 import { Show, SignInButton, SignOutButton, UserButton, useUser } from '@clerk/nextjs';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
-  const { user } = useUser(); 
-  const userRole = user?.publicMetadata?.role || 'rider';
+  // 1. Get Clerk user data and session state
+  const { user, isLoaded, isSignedIn } = useUser(); 
   
-  const dashboardLink = userRole === 'driver' ? '/drive/dashboard' : userRole === 'admin' ? '/admin' : '/account';
+  // 2. Get Next.js routing hooks
+  const router = useRouter(); 
+  const pathname = usePathname(); 
+  
+  // 3. Determine the user's role and where their dashboard is
+  const userRole = user?.publicMetadata?.role;  
+  const dashboardLink = userRole === 'driver' ? '/drive/dashboard' : userRole === 'rider' ? '/account' : '/onboarding';
+
+  // --- THE SECURITY GUARD ---
+  // If a user logs in but hasn't picked Rider/Driver yet, force them to the onboarding page.
+  useEffect(() => {
+    if (isLoaded && isSignedIn && !userRole && pathname !== '/onboarding') {
+      router.push('/onboarding');
+    }
+  }, [isLoaded, isSignedIn, userRole, pathname, router]);
 
   return (
     <>
@@ -34,7 +48,7 @@ export default function Navbar() {
           {/* --- DESKTOP AUTH BUTTONS --- */}
           <div className="hidden md:flex items-center gap-4">
             
-            {/* 2. UPDATED COMPONENT: Show when="signed-in" */}
+            {/* Show when logged in */}
             <Show when="signed-in">
               <div className="flex items-center gap-4">
                 <Link 
@@ -47,7 +61,7 @@ export default function Navbar() {
               </div>
             </Show>
 
-            {/* 3. UPDATED COMPONENT: Show when="signed-out" */}
+            {/* Show when logged out */}
             <Show when="signed-out">
               <SignInButton mode="modal">
                 <button className="text-sm font-bold text-slate-900 hover:text-blue-600 transition">
@@ -82,7 +96,7 @@ export default function Navbar() {
                   <UserButton afterSignOutUrl="/" />
                   <div>
                     <h3 className="font-bold text-lg text-slate-900">{user.fullName}</h3>
-                    <p className="text-slate-500 text-xs uppercase font-bold">{userRole}</p>
+                    <p className="text-slate-500 text-xs uppercase font-bold">{userRole || "Setting up..."}</p>
                   </div>
                 </div>
               )}

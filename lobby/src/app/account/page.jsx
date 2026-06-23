@@ -1,14 +1,13 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser, useClerk } from '@clerk/nextjs'; // <-- NEW CLERK HOOKS
+import { useUser, useClerk } from '@clerk/nextjs';
 import { Phone, Clock, LogOut, History } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 export default function RiderDashboard() {
-  // Replace useAuth with Clerk's useUser
   const { isLoaded, isSignedIn, user } = useUser(); 
-  const { signOut } = useClerk(); // Clerk's logout function
+  const { signOut } = useClerk();
   const router = useRouter();
   
   const [history, setHistory] = useState([]);
@@ -23,10 +22,10 @@ export default function RiderDashboard() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId: user.id, // Clerk's ID
+        userId: user.id,
         name: user.fullName,
-        email: user.primaryEmailAddress?.emailAddress, // Clerk's email format
-        role: user.publicMetadata?.role || 'rider', // Clerk's role format
+        email: user.primaryEmailAddress?.emailAddress,
+        role: user.publicMetadata?.role || 'rider',
         topic: 'Rider Issue',
         message: complaintText
       })
@@ -36,26 +35,33 @@ export default function RiderDashboard() {
     alert("Issue reported to Admin.");
   };
 
+  // --- THE FIXED USE-EFFECT ---
   useEffect(() => {
-    // Wait until Clerk is fully loaded to do anything
+    // 1. Wait for Clerk to load
     if (!isLoaded) return;
-    
-    // If they aren't logged in, boot them
-    if (!isSignedIn) { 
-      router.push('/sign-in'); 
-      return; 
+
+    // 2. Security Check: If not signed in, redirect
+    if (!isSignedIn) {
+      router.push('/');
+      return;
     }
 
+    // 3. Onboarding Check: If they have no role, force them to setup
+    if (!user?.publicMetadata?.role) {
+      router.push('/onboarding');
+      return;
+    }
+
+    // 4. If all checks pass, fetch their ride history
     const fetchHistory = async () => {
       try {
-        // Fetch using the user's Clerk ID
         const res = await fetch(`${API_BASE_URL}/rider/history?riderId=${user.id}`);
         const data = await res.json();
         if (data.success) {
           setHistory(data.history);
         }
       } catch (err) {
-        console.error("Failed to load history");
+        console.error("Failed to load history", err);
       } finally {
         setLoading(false);
       }
@@ -65,16 +71,13 @@ export default function RiderDashboard() {
   }, [isLoaded, isSignedIn, user, router]);
 
   const handleLogout = () => { 
-    // Use Clerk's signOut, then redirect
     signOut(() => router.push('/')); 
   };
 
-  // Show a loading state while Clerk verifies the session
   if (!isLoaded) {
-    return <div className="min-h-screen bg-slate-50 flex items-center justify-center">Loading...</div>;
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center font-bold text-slate-400">Loading Dashboard...</div>;
   }
 
-  // Double check user exists before rendering to prevent crashes
   if (!user) return null;
 
   return (
@@ -84,8 +87,12 @@ export default function RiderDashboard() {
         {/* Header */}
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex justify-between items-center mb-8">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold">
-              {user.fullName?.charAt(0) || "U"}
+            <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold overflow-hidden">
+              {user.imageUrl ? (
+                <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                user.fullName?.charAt(0) || "U"
+              )}
             </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-900">{user.fullName}</h1>
@@ -161,7 +168,7 @@ export default function RiderDashboard() {
             <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl text-center items-center">
               <h3 className="font-bold text-2xl mb-2">Report an Issue</h3>
               <textarea
-                className="w-full border p-3 rounded-lg mb-4 h-32"
+                className="w-full border p-3 rounded-lg mb-4 h-32 outline-none focus:border-blue-500"
                 placeholder="Describe what happened..."
                 value={complaintText}
                 onChange={(e) => setComplaintText(e.target.value)}

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser, useClerk } from '@clerk/nextjs'; // <-- NEW CLERK HOOKS
+import { useUser, useClerk } from '@clerk/nextjs'; 
 import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
@@ -22,16 +22,30 @@ export default function DriverDashboard() {
 
   // --- 1. LOAD DATA (CLERK + MONGODB SYNC) ---
   useEffect(() => {
-    // Wait for Clerk to load
+    // 1. Wait for Clerk to load
     if (!isLoaded) return;
     
-    // Boot out unauthenticated users
-    if (!isSignedIn) { router.push('/sign-in'); return; }
+    // 2. Boot out unauthenticated users
+    if (!isSignedIn) { 
+      router.push('/'); 
+      return; 
+    }
 
-    // Fetch the driver's specific details from MongoDB
+    // 3. Onboarding Check: Force setup if no role exists
+    if (!clerkUser?.publicMetadata?.role) {
+      router.push('/onboarding');
+      return;
+    }
+
+    // 4. Security Check: Kick Riders out of the Driver Dashboard
+    if (clerkUser.publicMetadata.role !== 'driver') {
+      router.push('/account');
+      return;
+    }
+
+    // 5. Fetch the driver's specific details from MongoDB
     const fetchDriverProfile = async () => {
       try {
-        // NOTE: Make sure your backend has a route that accepts a Clerk ID to return the driver document!
         const res = await fetch(`${API_BASE_URL}/driver/${clerkUser.id}`);
         const data = await res.json();
         
@@ -62,7 +76,7 @@ export default function DriverDashboard() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clerkId: clerkUser.id, // Send Clerk ID instead of MongoDB _id
+          clerkId: clerkUser.id,
           vehicle: formData.vehicle,
           phone: formData.phone,
           routes: formData.routes.split(',').map(s => s.trim()).filter(Boolean),
@@ -95,7 +109,7 @@ export default function DriverDashboard() {
 
     const uploadData = new FormData();
     uploadData.append('image', file);
-    uploadData.append('clerkId', clerkUser.id); // Send Clerk ID
+    uploadData.append('clerkId', clerkUser.id);
     uploadData.append('type', 'license'); 
     uploadData.append('driverName', clerkUser.fullName);
 
@@ -151,10 +165,14 @@ export default function DriverDashboard() {
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
           <div className="flex items-center gap-6">
             
-            {/* PROFILE PICTURE (Uses Clerk's built-in image by default, or DB fallback) */}
+            {/* PROFILE PICTURE */}
             <div className="relative group">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-slate-100 border-2 border-slate-200">
-                <img src={driverDbData.profilePic || clerkUser.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-slate-100 border-2 border-slate-200 flex items-center justify-center font-bold text-2xl text-slate-400">
+                {driverDbData.profilePic || clerkUser.imageUrl ? (
+                  <img src={driverDbData.profilePic || clerkUser.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  clerkUser.fullName?.charAt(0) || "D"
+                )}
               </div>
               
               <label className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 cursor-pointer transition">
@@ -325,7 +343,7 @@ async function handleImageUpload(file, type, clerkId, setDriverDbData) {
 
   const formData = new FormData();
   formData.append('image', file);
-  formData.append('clerkId', clerkId); // Changed to send clerkId
+  formData.append('clerkId', clerkId); 
   formData.append('type', type);
 
   try {
