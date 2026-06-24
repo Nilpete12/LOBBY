@@ -3,44 +3,44 @@ import { CheckCircle } from 'lucide-react';
 
 export default function DriverHero() {
   return (
-    <section className="mt-20 relative pt-32 pb-20 bg-[#0B3D2E] text-white overflow-hidden">
+    <section className="mt-20 relative pt-32 pb-20 bg-[#171717] text-white overflow-hidden">
       {/* Abstract Background Element */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-tl from-[#D9ED92]/80 to-[#FAFAF9] skew-x-14 translate-x-20"></div>
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-tl from-[#C59D5F]/30 to-[#F8F5EE] skew-x-14 translate-x-20"></div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-12">
         
         {/* Text Content */}
         <div className="flex-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1F6F50]/40 border border-[#2D6A4F] text-[#D9ED92] text-xs font-semibold uppercase tracking-[0.15em] mb-6">
-            <span className="w-2 h-2 rounded-full bg-[#E9C46A] animate-pulse"></span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#9F1D2C]/15 border border-[#9F1D2C]/40 text-[#C59D5F] text-xs font-semibold uppercase tracking-[0.15em] mb-6">
+            <span className="w-2 h-2 rounded-full bg-[#C59D5F] animate-pulse"></span>
             Accepting New Drivers
           </div>
           
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.05]">
             Your Car. <br/>
-            <span className="text-[#E9C46A]">Your Business.</span>
+            <span className="text-[#C59D5F]">Your Business.</span>
           </h1>
           
-          <p className="text-xl font-medium text-slate-300 mb-8 leading-relaxed w-1/2">
-            Stop paying huge commissions. Join THE LOBBY to connect directly with riders in in your city and keep 100% of the fare.
+          <p className="text-xl font-medium text-stone-300 mb-8 leading-relaxed w-1/2">
+            Stop paying huge commissions. Join THE LOBBY to connect directly with riders in your city and keep 100% of the fare.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Link 
               href="/auth" 
-              className="bg-[#E9C46A] text-[#0B3D2E] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#D9ED92] transition shadow-lg shadow-[#0B3D2E]/50 text-center"
+              className="bg-[#9F1D2C] text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#7F1823] transition shadow-lg shadow-black/30 text-center"
             >
               Become a Driver
             </Link>
           </div>
           
-          <div className="mt-8 flex gap-6 text-sm font-semibold text-slate-300">
+          <div className="mt-8 flex gap-6 text-sm font-semibold text-stone-300">
             <span className="flex items-center gap-2">
-              <CheckCircle size={16} className="text-[#D9ED92]" />
+              <CheckCircle size={16} className="text-[#C59D5F]" />
               No Joining Fees
             </span>
             <span className="flex items-center gap-2">
-              <CheckCircle size={16} className="text-[#D9ED92]" />
+              <CheckCircle size={16} className="text-[#C59D5F]" />
               Instant Payouts
             </span>
           </div>
