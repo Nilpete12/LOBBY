@@ -1,75 +1,169 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { Download, X } from 'lucide-react';
+
+import { useState, useEffect } from "react";
+import { Download, X } from "lucide-react";
 
 export default function InstallPopup() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
-    // This event fires automatically if the browser detects a valid PWA
     const handleBeforeInstallPrompt = (e) => {
-      // Prevent the default mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later
       setDeferredPrompt(e);
-      // Automatically show OUR custom Tailwind popup
       setShowPopup(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener(
+      "beforeinstallprompt",
+      handleBeforeInstallPrompt
+    );
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
     };
   }, []);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
-    
-    // Show the official native browser install prompt
+
     deferredPrompt.prompt();
-    
-    // Wait for the user to respond to the prompt
+
     const { outcome } = await deferredPrompt.userChoice;
-    
-    // If they installed it, hide our custom popup
-    if (outcome === 'accepted') {
+
+    if (outcome === "accepted") {
       setShowPopup(false);
     }
-    
-    // We can only use the prompt once, so clear it
+
     setDeferredPrompt(null);
   };
 
   if (!showPopup) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:w-96 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-700 z-100 animate-in slide-in-from-bottom-10 fade-in duration-500">
-      <button 
+    <div className="
+      fixed
+      bottom-4
+      left-4
+      right-4
+      md:left-auto
+      md:right-8
+      md:w-[380px]
+      z-50
+      rounded-3xl
+      border border-white/60
+      bg-white/80
+      backdrop-blur-xl
+      shadow-2xl shadow-slate-200
+      p-5
+      animate-in
+      slide-in-from-bottom-8
+      duration-500
+    ">
+
+      {/* Close Button */}
+      <button
         onClick={() => setShowPopup(false)}
-        className="absolute top-2 right-2 p-1 text-slate-400 hover:text-white rounded-full"
+        className="
+          absolute
+          top-3
+          right-3
+          p-2
+          rounded-full
+          text-slate-400
+          hover:bg-slate-100
+          hover:text-slate-700
+          transition
+        "
       >
-        <X size={18} />
+        <X size={16} />
       </button>
-      
-      <div className="flex items-center gap-4 mb-4 mt-1">
-        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
-          {/* Using your PWA icon */}
-          <img src="/favicon 512.png" alt="Lobby App" className="w-full h-full object-cover" />
+
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-5">
+
+        <div className="
+          w-14
+          h-14
+          rounded-2xl
+          overflow-hidden
+          bg-gradient-to-br
+          from-[#DCFCE7]
+          to-[#DBEAFE]
+          shadow-md
+          shrink-0
+        ">
+          <img
+            src="/favicon 512.png"
+            alt="THE LOBBY"
+            className="w-full h-full object-cover"
+          />
         </div>
+
         <div>
-          <h3 className="font-bold text-lg leading-tight">Install THE LOBBY</h3>
-          <p className="text-slate-400 text-sm mt-0.5">Faster booking, offline access.</p>
+
+          <h3 className="
+            text-lg
+            font-extrabold
+            tracking-tight
+            text-slate-900
+          ">
+            Install THE LOBBY
+          </h3>
+
+          <p className="
+            text-sm
+            text-slate-500
+            leading-relaxed
+          ">
+            Faster access, offline support and a smoother experience.
+          </p>
+
         </div>
       </div>
-      
-      <button 
+
+      {/* Button */}
+      <button
         onClick={handleInstallClick}
-        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition"
+        className="
+          w-full
+          rounded-2xl
+          bg-gradient-to-r
+          from-[#0F766E]
+          to-[#0891B2]
+          py-3.5
+          text-white
+          font-bold
+          shadow-lg
+          shadow-cyan-100
+          hover:scale-[1.02]
+          hover:from-[#115E59]
+          hover:to-[#0E7490]
+          transition-all
+          flex
+          items-center
+          justify-center
+          gap-3
+        "
       >
-        <Download size={20} /> Add to Home Screen
+        <Download size={18} />
+        Add to Home Screen
       </button>
+
+      {/* Footer */}
+      <p className="
+        mt-4
+        text-center
+        text-xs
+        font-medium
+        text-slate-400
+      ">
+        Install once • Use anytime
+      </p>
+
     </div>
   );
 }
