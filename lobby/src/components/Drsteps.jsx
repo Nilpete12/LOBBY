@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function JoinSteps() {
   return (
-    <section className="py-24 bg-[#0B3D2E] text-white border-t border-[#1F6F50]/30">
+    <section className="py-24 bg-[#111111] text-white border-t border-[#8B1E24]/30">
       <div className="max-w-7xl mx-auto px-6">
         
         <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -21,7 +21,7 @@ export default function JoinSteps() {
                 { num: "04", title: "Go Online", text: "Toggle your status to Green and start receiving calls." }
               ].map((step, i) => (
                 <div key={i} className="flex gap-6">
-                  <span className="text-3xl font-extrabold text-[#E9C46A] opacity-50">{step.num}</span>
+                  <span className="text-3xl font-extrabold text-[#8B1E24] opacity-60">{step.num}</span>
                   <div>
                     <h4 className="text-xl font-semibold mb-2">{step.title}</h4>
                     <p className="text-slate-300 text-sm leading-relaxed">{step.text}</p>
@@ -32,19 +32,19 @@ export default function JoinSteps() {
           </div>
 
           {/* Right Side: CTA Box */}
-          <div className="bg-gradient-to-b from-[#D9ED92]/40 to-[#FAFAF9] rounded-3xl p-10 md:p-14 text-center shadow-xl">
-             <h3 className="text-2xl font-extrabold tracking-tight mb-4 text-[#0B3D2E]">
+          <div className="bg-gradient-to-b from-[#8B1E24]/15 to-[#F8F5F0] rounded-3xl p-10 md:p-14 text-center shadow-xl">
+             <h3 className="text-2xl font-extrabold tracking-tight mb-4 text-[#111111]">
                Ready to hit the road?
              </h3>
-             <p className="text-[#1F6F50] font-medium mb-8">
+             <p className="text-slate-700 font-medium mb-8">
                Join over 500+ drivers in Shillong today.
              </p>
              <Link href="/auth" className="w-full block">
-               <button className="w-full bg-[#0B3D2E] text-white font-semibold py-4 rounded-xl hover:bg-[#1F6F50] transition shadow-lg">
+               <button className="w-full bg-[#8B1E24] text-white font-semibold py-4 rounded-xl hover:bg-[#6E171D] transition shadow-lg">
                  Sign Up Now
                </button>
              </Link>
-             <p className="text-xs text-[#0B3D2E] mt-4 font-medium">
+             <p className="text-xs text-slate-600 mt-4 font-medium">
                Takes less than 5 minutes
              </p>
           </div>
