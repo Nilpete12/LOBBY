@@ -3,38 +3,80 @@ import { ArrowRight } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <section className="relative w-full bg-linear-to-b from-blue-200/70 via-blue-60/30 to-white pt-34 pb-20">
-      
-      {/* 2. INNER CONTAINER: Centers the text and keeps it neat */}
-      <div className="px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
-        
+    <section className="relative w-full overflow-hidden bg-[#F8FAFC] pt-40 pb-28">
+
+      {/* Background gradients */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#DCFCE7]/40 via-[#F8FAFC] to-[#BFDBFE]/40"></div>
+
+      {/* Blur blobs */}
+      <div className="absolute top-20 -left-20 w-96 h-96 bg-[#BBF7D0]/30 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-[#BFDBFE]/30 rounded-full blur-3xl"></div>
+
+      {/* Content */}
+      <div className="relative px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
+
         {/* Badge */}
-        <div className="mb-6 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wide shadow-sm">
+        <div className="mb-8 inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-[#0F766E] text-xs font-semibold uppercase tracking-[0.15em] shadow-sm">
+
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22C55E]"></span>
           </span>
-          Live in the land of the Nagas
+
+          Live in the Land of the Nagas
         </div>
 
         {/* Headline */}
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
-          Get There. <br className="hidden md:block" />
-          <span className="text-slate-500">The Local Way.</span>
+        <h1 className="max-w-5xl text-5xl md:text-8xl font-extrabold tracking-tight text-slate-900 leading-[0.95] mb-8">
+          Get There.
+          <br className="hidden md:block" />
+          <span className="text-[#0F766E]">
+            The Local Way.
+          </span>
         </h1>
 
-        <p className="text-2xl text-slate-600 max-w-2xl mb-8 font-bold font-style: italic leading-relaxed">
-          Call. Confirm. Go!
+        {/* Tagline */}
+        <p className="text-2xl md:text-3xl text-slate-500 italic font-semibold mb-5">
+          Call. Confirm. Go.
+        </p>
+
+        <p className="max-w-2xl text-lg text-slate-500 font-medium leading-relaxed mb-12">
+          Connecting riders and drivers directly across Nagaland.
+          No middlemen, no surge pricing—just local rides, trusted drivers,
+          and fair fares.
         </p>
 
         {/* Buttons */}
-        <div className="flex gap-4">
-          <Link href="/search" className="bg-slate-900 text-white px-8 py-4 rounded-full font-bold hover:bg-black transition flex items-center gap-2 shadow-xl shadow-slate-200">
-            Find a Ride <ArrowRight size={18} />
+        <div className="flex flex-col sm:flex-row gap-5">
+
+          <Link
+            href="/search"
+            className="bg-[#0F766E] text-white px-9 py-4 rounded-2xl font-semibold text-lg hover:bg-[#115E59] transition duration-300 flex items-center justify-center gap-2 shadow-lg shadow-cyan-100"
+          >
+            Find a Ride
+            <ArrowRight size={18} />
           </Link>
-          <Link href="/auth" className="bg-white text-slate-900 border border-slate-200 px-8 py-4 rounded-full font-bold hover:bg-slate-50 transition shadow-xl">
+
+          <Link
+            href="/auth"
+            className="bg-white/80 backdrop-blur-sm text-slate-900 border border-slate-200 px-9 py-4 rounded-2xl font-semibold text-lg hover:bg-white transition shadow-lg"
+          >
             Driver Login
           </Link>
+
+        </div>
+
+        {/* Trust indicators */}
+        <div className="mt-16 flex flex-wrap justify-center gap-8 text-sm font-medium text-slate-400">
+
+          <span>✓ Local Drivers</span>
+
+          <span>✓ No Commission</span>
+
+          <span>✓ Fair Fares</span>
+
+          <span>✓ Trusted Community</span>
+
         </div>
 
       </div>
