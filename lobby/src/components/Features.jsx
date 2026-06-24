@@ -12,7 +12,7 @@ export default function Features() {
     {
       icon: <Smartphone size={24}/>,
       title: "Direct Connection",
-      desc: "One tap to call. Negotiate directly with the driver.",
+      desc: "One tap to call. Connect and Confirm, directly with the driver.",
       color: "bg-[#DCFCE7] text-[#0F766E]",
       grad: "bg-gradient-to-r from-[#DCFCE7]/30 to-[#DBEAFE]/20"
     },
