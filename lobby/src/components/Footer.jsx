@@ -4,7 +4,7 @@ import { MapPin } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-900 text-slate-300 py-16 border-t border-slate-800">
+    <footer className="bg-[#2C3639] text-slate-300 py-16 border-t border-[#3F4E4F]">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Top Section: Grid */}
@@ -12,12 +12,14 @@ export default function Footer() {
           
           {/* Column 1: Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="text-2xl font-black tracking-tighter text-white block mb-4">
-             THE LOBBY<span className="text-blue-500">.</span>
+            <Link href="/" className="text-2xl font-extrabold tracking-tight text-white block mb-4">
+             THE LOBBY<span className="text-[#7DD3FC]">.</span>
             </Link>
-            <p className="text-sm text-slate-400 leading-relaxed mb-6">
-              The trusted drive directory for Nagalang. Connecting locals directly.
+
+            <p className="text-sm font-medium text-slate-400 leading-relaxed mb-6">
+              The trusted drive directory for Nagaland. Connecting locals directly.
             </p>
+
             <div className="flex gap-4">
               {/* <a href="#" className="hover:text-white transition"><Instagram size={20} /></a>
               <a href="#" className="hover:text-white transition"><Twitter size={20} /></a>
@@ -27,32 +29,32 @@ export default function Footer() {
 
           {/* Column 2: Platform */}
           <div>
-            <h4 className="text-white font-bold mb-6">Platform</h4>
-            <ul className="space-y-4 text-sm">
-              <li><Link href="/search" className="hover:text-white transition">Find a Ride</Link></li>
-              <li><Link href="/drive" className="hover:text-white transition">Driver Sign Up</Link></li>
-              <li><Link href="/auth" className="hover:text-white transition">Log In</Link></li>
-              <li><Link href="/search" className="hover:text-white transition">Popular Routes</Link></li>
+            <h4 className="text-white font-semibold mb-6">Platform</h4>
+            <ul className="space-y-4 text-sm font-medium">
+              <li><Link href="/search" className="hover:text-[#BBF7D0] transition">Find a Ride</Link></li>
+              <li><Link href="/drive" className="hover:text-[#BBF7D0] transition">Driver Sign Up</Link></li>
+              <li><Link href="/auth" className="hover:text-[#BBF7D0] transition">Log In</Link></li>
+              <li><Link href="/search" className="hover:text-[#BBF7D0] transition">Popular Routes</Link></li>
             </ul>
           </div>
 
           {/* Column 3: Company */}
           <div>
-            <h4 className="text-white font-bold mb-6">Company</h4>
-            <ul className="space-y-4 text-sm">
-              <li><Link href="/about" className="hover:text-white transition">About Us</Link></li>
-              <li><Link href="/admin" className="hover:text-white transition">Admin Login</Link></li>
-              <li><Link href="/privacypolicy" className="hover:text-white transition">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
+            <h4 className="text-white font-semibold mb-6">Company</h4>
+            <ul className="space-y-4 text-sm font-medium">
+              <li><Link href="/about" className="hover:text-[#BBF7D0] transition">About Us</Link></li>
+              <li><Link href="/admin" className="hover:text-[#BBF7D0] transition">Admin Login</Link></li>
+              <li><Link href="/privacypolicy" className="hover:text-[#BBF7D0] transition">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-[#BBF7D0] transition">Terms of Service</Link></li>
             </ul>
           </div>
 
           {/* Column 4: Location */}
           <div>
-            <h4 className="text-white font-bold mb-6">Location</h4>
-            <ul className="space-y-4 text-sm">
+            <h4 className="text-white font-semibold mb-6">Location</h4>
+            <ul className="space-y-4 text-sm font-medium">
               <li className="flex items-start gap-3">
-                <MapPin size={18} className="text-blue-500 mt-0.5" />
+                <MapPin size={18} className="text-[#7DD3FC] mt-0.5" />
                 <span>
                   Laitumkhrah Main Road,<br />
                   Shillong, Meghalaya<br />
@@ -65,7 +67,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section: Copyright */}
-        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+        <div className="pt-8 border-t border-[#3F4E4F] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 font-medium">
           <p>&copy; {new Date().getFullYear()} THE LOBBY Platform. All rights reserved.</p>
           <p>Made with ❤️ in the hills.</p>
         </div>
