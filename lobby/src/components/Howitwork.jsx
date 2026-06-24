@@ -20,24 +20,39 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className="py-24 border-slate-200 border-y bg-linear-to-t from-blue-300/10 to-blue-0">
+    <section className="py-28 border-y border-slate-200 bg-gradient-to-b from-[#F8FAFC] via-white to-[#F0FDF4]">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">How THE LOBBY works</h2>
-          <p className="text-slate-500">We keep it simple. No hidden algorithms, just direct connections.</p>
+        
+        <div className="text-center max-w-2xl mx-auto mb-20">
+          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-5">
+            How THE LOBBY works
+          </h2>
+
+          <p className="text-slate-500 text-lg font-medium leading-relaxed">
+            We keep it simple. No hidden algorithms, just direct connections.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-12 relative">
+        <div className="grid md:grid-cols-3 gap-14 relative">
+
           {/* Connecting Line (Desktop Only) */}
-          <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-slate-200 -z-10"></div>
+          <div className="hidden md:block absolute top-14 left-[16%] right-[16%] h-[2px] bg-gradient-to-r from-[#BFDBFE] via-[#BBF7D0] to-[#BFDBFE] -z-10"></div>
 
           {steps.map((step, i) => (
-            <div key={i} className="text-center relative pt-4"> {/* bg-slate-50 to hide line behind icon */}
-              <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center shadow-[0px_0px_30px] shadow-blue-200 border border-slate-100 mb-6 text-slate-900">
+            <div key={i} className="text-center relative pt-4">
+
+              <div className="w-24 h-24 mx-auto bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl shadow-cyan-100 border border-slate-200 mb-8 text-[#0F766E]">
                 {step.icon}
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">{step.title}</h3>
-              <p className="text-slate-500 leading-relaxed px-4">{step.desc}</p>
+
+              <h3 className="text-2xl font-extrabold tracking-tight text-slate-900 mb-4">
+                {step.title}
+              </h3>
+
+              <p className="text-slate-500 font-medium leading-relaxed px-6">
+                {step.desc}
+              </p>
+
             </div>
           ))}
         </div>
