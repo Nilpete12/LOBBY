@@ -11,30 +11,30 @@ export default function DriverHero() {
         
         {/* Text Content */}
         <div className="flex-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1F6F50]/40 border border-[#2D6A4F] text-[#D9ED92] text-xs font-bold uppercase tracking-wide mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1F6F50]/40 border border-[#2D6A4F] text-[#D9ED92] text-xs font-semibold uppercase tracking-[0.15em] mb-6">
             <span className="w-2 h-2 rounded-full bg-[#E9C46A] animate-pulse"></span>
             Accepting New Drivers
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-black tracking-tighter mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.05]">
             Your Car. <br/>
             <span className="text-[#E9C46A]">Your Business.</span>
           </h1>
           
-          <p className="text-xl text-slate-300 mb-8 leading-relaxed w-1/2">
+          <p className="text-xl font-medium text-slate-300 mb-8 leading-relaxed w-1/2">
             Stop paying huge commissions. Join THE LOBBY to connect directly with riders in in your city and keep 100% of the fare.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Link 
               href="/auth" 
-              className="bg-[#E9C46A] text-[#0B3D2E] px-8 py-4 rounded-full font-bold text-lg hover:bg-[#D9ED92] transition shadow-lg shadow-[#0B3D2E]/50 text-center"
+              className="bg-[#E9C46A] text-[#0B3D2E] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#D9ED92] transition shadow-lg shadow-[#0B3D2E]/50 text-center"
             >
               Become a Driver
             </Link>
           </div>
           
-          <div className="mt-8 flex gap-6 text-sm font-bold text-slate-300">
+          <div className="mt-8 flex gap-6 text-sm font-semibold text-slate-300">
             <span className="flex items-center gap-2">
               <CheckCircle size={16} className="text-[#D9ED92]" />
               No Joining Fees
