@@ -23,7 +23,7 @@ export default function Hero() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22C55E]"></span>
           </span>
 
-          Live in the Land of the Nagas
+          Find your next ride
         </div>
 
         {/* Headline */}
@@ -37,13 +37,12 @@ export default function Hero() {
 
         {/* Tagline */}
         <p className="text-2xl md:text-3xl text-slate-500 italic font-semibold mb-5">
-          Call. Confirm. Go.
+          Local Drivers. Fair Fares. Direct Connections.
         </p>
 
         <p className="max-w-2xl text-lg text-slate-500 font-medium leading-relaxed mb-12">
           Connecting riders and drivers directly across Nagaland.
-          No middlemen, no surge pricing—just local rides, trusted drivers,
-          and fair fares.
+          No middlemen, no surge pricing—just local rides and trusted drivers.
         </p>
 
         {/* Buttons */}
