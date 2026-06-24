@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function JoinSteps() {
   return (
-    <section className="py-24 bg-[#111111] text-white border-t border-[#8B1E24]/30">
+    <section className="py-24 bg-[#171717] text-white border-t border-[#9F1D2C]/30">
       <div className="max-w-7xl mx-auto px-6">
         
         <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -10,9 +10,11 @@ export default function JoinSteps() {
             <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-[1.1] mb-6">
               Simple steps to get started.
             </h2>
-            <p className="text-slate-300 font-medium mb-8 text-lg leading-relaxed">
+
+            <p className="text-stone-300 font-medium mb-8 text-lg leading-relaxed">
               We verify every driver to ensure safety. Have your Driving License and Vehicle Registration (RC) ready.
             </p>
+
             <div className="space-y-8">
               {[
                 { num: "01", title: "Create Profile", text: "Sign up with your phone number and basic details." },
@@ -21,10 +23,16 @@ export default function JoinSteps() {
                 { num: "04", title: "Go Online", text: "Toggle your status to Green and start receiving calls." }
               ].map((step, i) => (
                 <div key={i} className="flex gap-6">
-                  <span className="text-3xl font-extrabold text-[#8B1E24] opacity-60">{step.num}</span>
+                  <span className="text-3xl font-extrabold text-[#B22222] opacity-70">
+                    {step.num}
+                  </span>
                   <div>
-                    <h4 className="text-xl font-semibold mb-2">{step.title}</h4>
-                    <p className="text-slate-300 text-sm leading-relaxed">{step.text}</p>
+                    <h4 className="text-xl font-semibold mb-2">
+                      {step.title}
+                    </h4>
+                    <p className="text-stone-300 text-sm leading-relaxed">
+                      {step.text}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -32,21 +40,24 @@ export default function JoinSteps() {
           </div>
 
           {/* Right Side: CTA Box */}
-          <div className="bg-gradient-to-b from-[#8B1E24]/15 to-[#F8F5F0] rounded-3xl p-10 md:p-14 text-center shadow-xl">
-             <h3 className="text-2xl font-extrabold tracking-tight mb-4 text-[#111111]">
-               Ready to hit the road?
-             </h3>
-             <p className="text-slate-700 font-medium mb-8">
-               Join over 500+ drivers in Shillong today.
-             </p>
-             <Link href="/auth" className="w-full block">
-               <button className="w-full bg-[#8B1E24] text-white font-semibold py-4 rounded-xl hover:bg-[#6E171D] transition shadow-lg">
-                 Sign Up Now
-               </button>
-             </Link>
-             <p className="text-xs text-slate-600 mt-4 font-medium">
-               Takes less than 5 minutes
-             </p>
+          <div className="bg-gradient-to-b from-[#C59D5F]/20 to-[#F8F5EE] rounded-3xl p-10 md:p-14 text-center shadow-xl">
+            <h3 className="text-2xl font-extrabold tracking-tight mb-4 text-[#171717]">
+              Ready to hit the road?
+            </h3>
+
+            <p className="text-stone-700 font-medium mb-8">
+              Join over 500+ drivers in Shillong today.
+            </p>
+
+            <Link href="/auth" className="w-full block">
+              <button className="w-full bg-[#9F1D2C] text-white font-semibold py-4 rounded-xl hover:bg-[#7F1823] transition shadow-lg">
+                Sign Up Now
+              </button>
+            </Link>
+
+            <p className="text-xs text-stone-600 mt-4 font-medium">
+              Takes less than 5 minutes
+            </p>
           </div>
         </div>
 
