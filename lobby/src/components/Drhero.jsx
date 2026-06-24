@@ -5,14 +5,14 @@ export default function DriverHero() {
   return (
     <section className="mt-20 relative pt-32 pb-20 bg-[#F8FAFC] text-[#0F172A] overflow-hidden">
       {/* Abstract Background Element */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-tl from-[#BFDBFE]/50 to-[#DCFCE7]/50 skew-x-14 translate-x-20"></div>
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-tl from-[#7DD3FC]/40 to-[#BBF7D0]/40 skew-x-14 translate-x-20"></div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-12">
         
         {/* Text Content */}
         <div className="flex-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-[#BFDBFE] text-[#0F766E] text-xs font-semibold uppercase tracking-[0.15em] mb-6 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-[#86EFAC] animate-pulse"></span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-[#0F766E] text-xs font-semibold uppercase tracking-[0.15em] mb-6 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"></span>
             Accepting New Drivers
           </div>
           
@@ -28,7 +28,7 @@ export default function DriverHero() {
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
               href="/auth"
-              className="bg-[#0F766E] text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#115E59] transition shadow-lg shadow-[#BFDBFE]/30 text-center"
+              className="bg-[#0F766E] text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-[#115E59] transition shadow-lg shadow-cyan-100 text-center"
             >
               Become a Driver
             </Link>
