@@ -25,23 +25,34 @@ export default function DriverBenefits() {
   ];
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-[#F8FAFC]">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">Why drive with THE LOBBY?</h2>
-          <p className="text-slate-500 max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 mb-4">
+            Why drive with THE LOBBY?
+          </h2>
+          <p className="text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
             We are building a directory, not a dispatch service. You are the boss of your own taxi business.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {benefits.map((item, i) => (
-            <div key={i} className="p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-lg transition group">
-              <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm mb-6 group-hover:scale-110 transition">
+            <div
+              key={i}
+              className="p-8 rounded-3xl bg-white/80 border border-slate-200 shadow-sm hover:shadow-xl transition duration-300 group backdrop-blur-sm"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-[#DCFCE7] to-[#BFDBFE] rounded-2xl flex items-center justify-center text-[#0F766E] shadow-sm mb-6 group-hover:scale-110 transition">
                 {item.icon}
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h3>
-              <p className="text-slate-500 leading-relaxed text-sm">{item.desc}</p>
+
+              <h3 className="text-xl font-bold tracking-tight text-slate-900 mb-3">
+                {item.title}
+              </h3>
+
+              <p className="text-slate-500 font-medium leading-relaxed text-sm">
+                {item.desc}
+              </p>
             </div>
           ))}
         </div>

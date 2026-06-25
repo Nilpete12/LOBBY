@@ -2,33 +2,44 @@ import { Star, Phone, ShieldCheck, MapPin } from 'lucide-react';
 
 export default function RideCard({ driver }) {
   return (
-    <div className="bg-linear-to-tr from-blue-200/30 to-blue-0 rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+    <div className="bg-white/80 backdrop-blur-sm rounded-[2rem] p-6 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group">
       <div className="flex flex-col md:flex-row justify-between gap-6">
         
         {/* Driver Info */}
         <div className="flex gap-4">
           {/* Avatar */}
-          <div className="w-16 h-16 rounded-full bg-slate-200  overflow-hidden shrink-0">
-             {/* Placeholder Image */}
-             <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400 font-bold text-xl">
-               {driver.name.charAt(0)}
-             </div>
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] overflow-hidden shrink-0 shadow-sm">
+            {/* Placeholder Image */}
+            <div className="w-full h-full flex items-center justify-center text-[#0F766E] font-bold text-xl">
+              {driver.name.charAt(0)}
+            </div>
           </div>
-          
+
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-lg font-bold text-slate-900">{driver.name}</h3>
-              <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                <Star size={12} fill="currentColor" /> {driver.rating}
+              <h3 className="text-xl font-bold tracking-tight text-slate-900">
+                {driver.name}
+              </h3>
+
+              <span className="bg-[#DCFCE7] text-[#0F766E] text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                <Star size={12} fill="currentColor" />
+                {driver.rating}
               </span>
             </div>
-            <p className="text-slate-500 text-sm mb-2">{driver.vehicle} • {driver.seats} Seats</p>
-            
+
+            <p className="text-slate-500 font-medium text-sm mb-3">
+              {driver.vehicle} • {driver.seats} Seats
+            </p>
+
             {/* Route Tags */}
             <div className="flex flex-wrap gap-2">
               {driver.routes.map((route, i) => (
-                <span key={i} className="text-xs font-medium text-slate-500 bg-slate-50 border border-slate-100 px-2 py-1 rounded-md flex items-center gap-1">
-                  <MapPin size={10} /> {route}
+                <span
+                  key={i}
+                  className="text-xs font-medium text-[#0F766E] bg-[#F8FAFC] border border-slate-200 px-3 py-1 rounded-xl flex items-center gap-1"
+                >
+                  <MapPin size={10} />
+                  {route}
                 </span>
               ))}
             </div>
@@ -36,25 +47,28 @@ export default function RideCard({ driver }) {
         </div>
 
         {/* Action Section */}
-        <div className="flex flex-col items-end justify-center gap-3 min-w-35">
+        <div className="flex flex-col items-end justify-center gap-4 min-w-35">
           <div className="text-right">
-             {driver.isAvailable ? (
-               <span className="inline-flex items-center gap-1.5 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Available
-               </span>
-             ) : (
-               <span className="text-xs font-bold text-slate-400">Busy</span>
-             )}
+            {driver.isAvailable ? (
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-[#0F766E] bg-[#DCFCE7] px-3 py-1 rounded-full">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Available
+              </span>
+            ) : (
+              <span className="text-xs font-semibold text-slate-400">
+                Busy
+              </span>
+            )}
           </div>
-          
-          <a 
+
+          <a
             href={`tel:${driver.phone}`}
-            className="w-full bg-slate-900 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-600 transition flex items-center justify-center gap-2 group-hover:scale-105 transform duration-200"
+            className="w-full bg-[#0F766E] text-white font-semibold py-3 px-7 rounded-2xl hover:bg-[#115E59] transition duration-300 flex items-center justify-center gap-2 group-hover:scale-105 shadow-lg shadow-cyan-100"
           >
-            <Phone size={18} /> Call Now
+            <Phone size={18} />
+            Call Now
           </a>
         </div>
-
       </div>
     </div>
   );
