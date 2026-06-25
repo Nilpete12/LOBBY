@@ -8,7 +8,7 @@ export const metadata = {
   title: 'LOBBY | Direct Rides',
   description: 'Connect directly with drivers. No middlemen, fair prices.',
   manifest: '/manifest.json', // Links your PWA manifest
-  themeColor: '#0f172a',
+  themeColor: '#0f172a', // Sets the theme color for your PWA
 };
 
 export default function RootLayout({ children }) {

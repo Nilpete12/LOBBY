@@ -33,7 +33,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           
           <Link href="/" className="text-2xl font-black tracking-tighter text-slate-900 z-50 relative">
-            THE LOBBY<span className="text-blue-600">.</span>
+            THE LOBBY<span className="text-[#0F5A53]">.</span>
           </Link>
 
           {/* --- DESKTOP NAVIGATION --- */}
