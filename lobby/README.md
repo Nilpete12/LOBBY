@@ -1,4 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+THE LOBBY is a Next.js app for connecting riders directly with local drivers.
+
+## Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in the values before running or deploying:
+
+```bash
+cp .env.example .env.local
+```
+
+Required for the core app:
+
+- `MONGO_URI`
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+- `WEBHOOK_SECRET`
+
+Required for the custom admin login:
+
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+- `ADMIN_SESSION_SECRET`
+
+Required for driver image uploads:
+
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+
+Optional for support form email delivery:
+
+- `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY`
 
 ## Getting Started
 

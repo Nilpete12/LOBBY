@@ -29,11 +29,11 @@ export default function TermsPage() {
               For the purposes of these Terms:
             </p>
             <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
-              <li><strong>"Service"</strong> means THE LOBBY website, mobile applications, APIs and related features that facilitate connections between Riders and Drivers.</li>
-              <li><strong>"Rider"</strong> means a user who requests transportation through the Service.</li>
-              <li><strong>"Driver"</strong> means a user who offers transportation through the Service.</li>
-              <li><strong>"Account"</strong> means a user account registered with THE LOBBY.</li>
-              <li><strong>"Personal Data"</strong> means information that identifies or can be used to identify an individual.</li>
+              <li><strong>&quot;Service&quot;</strong> means THE LOBBY website, mobile applications, APIs and related features that facilitate connections between Riders and Drivers.</li>
+              <li><strong>&quot;Rider&quot;</strong> means a user who requests transportation through the Service.</li>
+              <li><strong>&quot;Driver&quot;</strong> means a user who offers transportation through the Service.</li>
+              <li><strong>&quot;Account&quot;</strong> means a user account registered with THE LOBBY.</li>
+              <li><strong>&quot;Personal Data&quot;</strong> means information that identifies or can be used to identify an individual.</li>
             </ul>
           </section>
 

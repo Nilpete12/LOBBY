@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
-import { SP } from 'next/dist/shared/lib/utils';
 
 const UserSchema = new mongoose.Schema({
   // Basic Info
   fullName: { type: String, required: true },
   email:    { type: String, required: true, unique: true },
-  clerkId: { type: String, unique: true, Spare: true }, // Clerk ID for authentication
+  clerkId: { type: String, unique: true, sparse: true }, // Clerk ID for authentication
   role:     { type: String, enum: ['rider', 'driver', 'admin'], default: 'rider' },
   
   // Driver Specific Fields (Optional for Riders)

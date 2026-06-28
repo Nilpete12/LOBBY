@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const ComplaintSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Optional (if logged in)
+  userId: { type: String }, // Clerk user id when available
   name: { type: String, required: true },
   email: { type: String }, 
   role: { type: String, enum: ['rider', 'driver', 'guest'], default: 'guest' },
@@ -11,4 +11,4 @@ const ComplaintSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-export default mongoose.model('Complaint', ComplaintSchema);
+export default mongoose.models.Complaint || mongoose.model('Complaint', ComplaintSchema);

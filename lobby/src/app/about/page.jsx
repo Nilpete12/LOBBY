@@ -89,7 +89,7 @@ export default function AboutPage() {
         </h2>
 
         <p className="text-slate-500 font-medium mb-10">
-          We'd love to hear from you. Reach out to our support team.
+          We&apos;d love to hear from you. Reach out to our support team.
         </p>
 
         <Link
@@ -146,7 +146,7 @@ function CreatorCard({ name, role, image, bio, links }) {
       </p>
 
       <p className="text-slate-500 font-medium text-sm leading-relaxed mb-6 px-4">
-        "{bio}"
+        &ldquo;{bio}&rdquo;
       </p>
 
       <div className="flex gap-4 mt-auto">

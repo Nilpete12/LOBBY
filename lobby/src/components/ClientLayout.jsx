@@ -16,7 +16,7 @@ export default function ClientLayout({ children }) {
       {/* Conditionally render Navbar */}
       {!isAdmin && <Navbar />}
       
-      <InstallPopup />
+      {!isAdmin && <InstallPopup />}
       
       {/* The 'children' prop represents whatever page the user is currently on */}
       <main className="grow">

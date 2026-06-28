@@ -1,37 +1,37 @@
 "use client";
-import { Search, MapPin, Star, Phone, Shield, Filter } from 'lucide-react';
-import { Loader2 } from 'lucide-react';
+import { Search, MapPin, Star, Phone } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
 import API_BASE_URL from '@/config';
 
+async function requestDrivers(query = '') {
+  const params = new URLSearchParams();
+  if (query.trim()) params.set('destination', query.trim());
+
+  const url = `${API_BASE_URL}/driver/search${params.toString() ? `?${params.toString()}` : ''}`;
+  const res = await fetch(url);
+  const data = await res.json();
+
+  if (data.success && Array.isArray(data.drivers)) {
+    return data.drivers;
+  }
+
+  return [];
+}
+
 export default function SearchPage() {
+  const { user } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // 1. Fetch Drivers on Load
-  useEffect(() => {
-    fetchDrivers();
-  }, []);
-
   const fetchDrivers = async (query = '') => {
     setLoading(true);
     setError('');
     try {
-      // Build URL: if query exists, add it ?destination=Guwahati
-      const url = `${API_BASE_URL}/drivers/search${query ? `?destination=${query}` : ''}`;
-      
-      const res = await fetch(url);
-      const data = await res.json();
-      
-      if (Array.isArray(data)) {
-        setDrivers(data);
-      } else {
-        // Safety: If server returns {message: "error"}, don't crash
-        setDrivers([]); 
-      }
+      setDrivers(await requestDrivers(query));
     } catch (err) {
       console.error("Fetch error:", err);
       setError("Could not connect to server. Is it running?");
@@ -39,6 +39,27 @@ export default function SearchPage() {
       setLoading(false);
     }
   };
+
+  // 1. Fetch Drivers on Load
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadInitialDrivers() {
+      try {
+        const initialDrivers = await requestDrivers();
+        if (isMounted) setDrivers(initialDrivers);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        if (isMounted) setError("Could not connect to server. Is it running?");
+      }
+    }
+
+    loadInitialDrivers();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -121,7 +142,7 @@ function RideCard({ driver, currentUser }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'call_click', driverId: driver._id, 
-        riderId: currentUser ? currentUser.id || currentUser._id : null })
+        riderId: currentUser?.id || null })
       });
     } catch (err) {
       console.error("Tracking failed", err);
@@ -138,7 +159,7 @@ function RideCard({ driver, currentUser }) {
             <img src={driver.profilePic} alt={driver.fullName} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full bg-slate-900 flex items-center justify-center text-white font-bold text-xl">
-              {driver.fullName.charAt(0)}
+              {driver.fullName?.charAt(0) || 'D'}
             </div>
           )}
         </div>

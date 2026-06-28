@@ -140,7 +140,7 @@ export default function RiderDashboard() {
           ) : history.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-slate-400 mb-4">
-                You haven't contacted any drivers yet.
+                You haven&apos;t contacted any drivers yet.
               </p>
 
               <button

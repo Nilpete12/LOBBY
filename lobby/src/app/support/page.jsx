@@ -3,6 +3,8 @@ import { Mail, MapPin, Phone, MessageSquare, ChevronDown, ChevronUp, CheckCircle
 import { useState } from 'react';
 import API_BASE_URL from '@/config';
 
+const WEB3FORMS_ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+
 export default function ContactPage() {
   // 1. Form State
   const [formData, setFormData] = useState({
@@ -95,26 +97,30 @@ export default function ContactPage() {
         throw new Error('Failed to save message to database');
       }
 
-      // Create the data object for Web3Forms
-      const payload = {
-        access_key: "e68d204c-a95f-4b2a-b1aa-5a06f72082e7",
-        subject: `New Support Message from ${formData.firstName}`,
-        from_name: "Lobby App Support",
-        ...formData
-      };
+      if (WEB3FORMS_ACCESS_KEY) {
+        const payload = {
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: `New Support Message from ${formData.firstName}`,
+          from_name: "Lobby App Support",
+          ...formData
+        };
 
-      const res = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+        const res = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
 
-      const result = await res.json();
+        const result = await res.json();
+        if (!result.success) {
+          setFormError("Something went wrong. Please try again.");
+          return;
+        }
+      }
 
-      if (result.success) {
         // Show the green success message
         setIsSubmitted(true);
         
@@ -129,9 +135,6 @@ export default function ContactPage() {
 
         // Hide success message after 5 seconds
         setTimeout(() => setIsSubmitted(false), 5000);
-      } else {
-        setFormError("Something went wrong. Please try again.");
-      }
     } catch (error) {
       console.error("Error submitting form", error);
       setFormError("Network error. Please check your connection and try again.");

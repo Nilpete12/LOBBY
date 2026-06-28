@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from 'react';
-import { CheckCircle, XCircle, Clock, Trash2, Search } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { CheckCircle, Clock, Trash2, Search } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 export default function UserTable({ role, limit }) {
@@ -8,50 +8,56 @@ export default function UserTable({ role, limit }) {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchUsers = async () => {
-    try {
-      // FIX: Direct Localhost URL
-      const res = await fetch(`${API_BASE_URL}/admin/users`);
-      const data = await res.json();
-      if (data.success) {
-        console.log("🔥 RAW DATA FROM SERVER:", data.users); // <--- Add this spy
-        let filtered = data.users;
-        if (role) {
-        console.log(`🧐 Filtering for role: "${role}"`);
-        filtered = filtered.filter(u => {
-          console.log(`   Checking ${u.fullName}: role is "${u.role}"`); // <--- Add this spy
-          return u.role === role;
-        });
-      }
-        setUsers(filtered);
-      }
-    } catch (err) { 
-      console.error("Failed to load users", err); 
-    } finally { 
-      setLoading(false); 
-    }
-  };
+  const fetchUsers = useCallback(async () => {
+    const res = await fetch(`${API_BASE_URL}/admin/users`);
+    const data = await res.json();
 
-  useEffect(() => { fetchUsers(); }, [role]);
+    if (!data.success) return [];
+
+    if (role) {
+      return data.users.filter(u => u.role === role);
+    }
+
+    return data.users;
+  }, [role]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadUsers() {
+      try {
+        const nextUsers = await fetchUsers();
+        if (isMounted) setUsers(nextUsers);
+      } catch (err) {
+        console.error("Failed to load users", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    loadUsers();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchUsers]);
 
   const handleApprove = async (id) => {
     if(!window.confirm("Verify this driver?")) return;
-    // FIX: Direct Localhost URL
-    await fetch(`${API_BASE_URL}/admin/approve`, {
+    const res = await fetch(`${API_BASE_URL}/admin/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
     });
-    fetchUsers();
+    if (res.ok) setUsers(await fetchUsers());
   };
 
   const handleDelete = async (id) => {
     if(!window.confirm("Are you sure? This will permanently delete this user.")) return;
-    // FIX: Direct Localhost URL
-    await fetch(`${API_BASE_URL}/admin/user/${id}`, {
+    const res = await fetch(`${API_BASE_URL}/admin/user/${id}`, {
       method: 'DELETE'
     });
-    fetchUsers();
+    if (res.ok) setUsers(await fetchUsers());
   };
 
   const displayUsers = users
@@ -91,7 +97,7 @@ export default function UserTable({ role, limit }) {
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold overflow-hidden">
-                      {user.profilePic ? <img src={user.profilePic} className="w-full h-full object-cover"/> : user.fullName[0]}
+                      {user.profilePic ? <img src={user.profilePic} alt={user.fullName} className="w-full h-full object-cover"/> : user.fullName[0]}
                     </div>
                     <div>
                       <div className="font-bold text-slate-900">{user.fullName}</div>

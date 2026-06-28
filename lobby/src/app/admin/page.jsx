@@ -12,6 +12,7 @@ import API_BASE_URL from '@/config';
 export default function AdminPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [complaints, setComplaints] = useState([]);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -23,14 +24,30 @@ export default function AdminPage() {
   const [stats, setStats] = useState({ totalUsers: 0, totalDrivers: 0, activeDrivers: 0, totalCalls: 0 });
 
   useEffect(() => {
-  if (activeTab === 'complaints') {
-    fetch(`${API_BASE_URL}/admin/complaints`) // <--- Direct URL
+    const checkAdminSession = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/admin/session`);
+        const data = await res.json();
+        setIsAuthenticated(Boolean(data.authenticated));
+      } catch {
+        setIsAuthenticated(false);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAdminSession();
+  }, []);
+
+  useEffect(() => {
+  if (isAuthenticated && activeTab === 'complaints') {
+    fetch(`${API_BASE_URL}/admin/complaints`)
       .then(res => res.json())
       .then(data => {
         if (data.success) setComplaints(data.complaints);
       });
   }
-}, [activeTab]);
+}, [activeTab, isAuthenticated]);
 
 const resolveComplaint = async (id) => {
   const res = await fetch(`${API_BASE_URL}/admin/complaints/${id}`, { method: 'PUT' });
@@ -43,7 +60,6 @@ const resolveComplaint = async (id) => {
     if (isAuthenticated) {
       const fetchStats = async () => {
         try {
-          // FIX: Direct Localhost URL
           const res = await fetch(`${API_BASE_URL}/admin/stats`);
           const data = await res.json();
           if (data.success) setStats(data.stats);
@@ -52,6 +68,16 @@ const resolveComplaint = async (id) => {
       fetchStats();
     }
   }, [isAuthenticated, activeTab]);
+
+  const handleLogout = async () => {
+    await fetch(`${API_BASE_URL}/admin/logout`, { method: 'POST' });
+    setIsAuthenticated(false);
+    router.push('/');
+  };
+
+  if (isCheckingAuth) {
+    return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400 font-bold">Checking access...</div>;
+  }
 
   if (!isAuthenticated) return <AdminLog onLogin={() => setIsAuthenticated(true)} />;
 
@@ -196,7 +222,7 @@ const resolveComplaint = async (id) => {
         onClose={() => setSidebarOpen(false)} 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}
-        onLogout={() => { setIsAuthenticated(false); router.push('/'); }} 
+        onLogout={handleLogout}
       />
 
       <main className="flex-1 md:ml-0 p-4 md:p-8 w-full h-screen overflow-y-auto">

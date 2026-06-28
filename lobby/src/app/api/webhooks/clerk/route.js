@@ -9,17 +9,20 @@ export async function POST(req) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    throw new Error('Please add WEBHOOK_SECRET from Clerk Dashboard to .env');
+    return NextResponse.json(
+      { success: false, message: 'Webhook secret is not configured' },
+      { status: 500 }
+    );
   }
 
   // Get the headers
-  const headerPayload = headers();
+  const headerPayload = await headers();
   const svix_id = headerPayload.get("svix-id");
   const svix_timestamp = headerPayload.get("svix-timestamp");
   const svix_signature = headerPayload.get("svix-signature");
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response('Error occured -- no svix headers', { status: 400 });
+    return new Response('Error occurred -- no svix headers', { status: 400 });
   }
 
   const payload = await req.json();
@@ -35,7 +38,7 @@ export async function POST(req) {
     });
   } catch (err) {
     console.error('Error verifying webhook:', err);
-    return new Response('Error occured', { status: 400 });
+    return new Response('Error occurred', { status: 400 });
   }
 
   // --- HANDLE THE EVENT ---
@@ -46,13 +49,18 @@ export async function POST(req) {
     
     await connectDB();
     
-    // Save the Clerk user to your MongoDB
-    await User.create({
-      clerkId: id, // Add this new field to your User.js schema!
-      email: email_addresses[0].email_address,
-      fullName: `${first_name || ''} ${last_name || ''}`.trim(),
-      role: 'rider', // Default role
-    });
+    await User.findOneAndUpdate(
+      { clerkId: id },
+      {
+        $setOnInsert: {
+          clerkId: id,
+          email: email_addresses[0]?.email_address || '',
+          fullName: `${first_name || ''} ${last_name || ''}`.trim() || 'New User',
+          role: 'rider',
+        },
+      },
+      { upsert: true }
+    );
   }
 
   return NextResponse.json({ message: 'Webhook processed' }, { status: 200 });

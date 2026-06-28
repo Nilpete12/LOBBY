@@ -31,7 +31,7 @@ export default function PrivacyPolicy() {
             <ul className="list-disc pl-6 space-y-2 mb-4">
               <li><strong>Account Data:</strong> Name, phone number, email address, and profile information provided during registration.</li>
               <li><strong>Driver Verification Data:</strong> Vehicle details, driving license copies, government ID, insurance information, and vehicle registration documents (for verification purposes only).</li>
-              <li><strong>Usage Data:</strong> Search history (e.g., "Shillong to Dawki"), trip routes, pickup and drop-off locations, and app interaction patterns to improve our services.</li>
+              <li><strong>Usage Data:</strong> Search history (e.g., &quot;Shillong to Dawki&quot;), trip routes, pickup and drop-off locations, and app interaction patterns to improve our services.</li>
               <li><strong>Communication Data:</strong> Messages, call logs, and support tickets exchanged through our platform.</li>
               <li><strong>Device Information:</strong> Device type, operating system, IP address, and unique device identifiers for security and service optimization.</li>
               <li><strong>Payment Information:</strong> Transaction history and payment method details (processed by third-party payment providers).</li>
@@ -159,7 +159,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">10. Children's Privacy</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">10. Children&apos;s Privacy</h3>
             <p className="text-sm">
               THE LOBBY is not intended for users under 18 years of age. We do not knowingly collect personal data from children. If we discover we have collected data from a child, we will delete it promptly. Parents or guardians who believe their child has provided personal data should contact us immediately.
             </p>
@@ -195,7 +195,7 @@ export default function PrivacyPolicy() {
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">13. Changes to This Privacy Policy</h3>
             <p className="text-sm">
-              We may update this Privacy Policy from time to time to reflect changes in our practices, technology, or legal requirements. Material changes will be posted with an updated "Last updated" date. Where required by law, we will provide advance notice. Your continued use of THE LOBBY after any changes constitutes your acceptance of the updated policy.
+              We may update this Privacy Policy from time to time to reflect changes in our practices, technology, or legal requirements. Material changes will be posted with an updated &quot;Last updated&quot; date. Where required by law, we will provide advance notice. Your continued use of THE LOBBY after any changes constitutes your acceptance of the updated policy.
             </p>
           </section>
 
