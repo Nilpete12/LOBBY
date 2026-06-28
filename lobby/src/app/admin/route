@@ -1,0 +1,35 @@
+import { NextResponse } from "next/server";
+
+export async function POST(request) {
+  try {
+    const { email, password } = await request.json();
+
+    const isValid =
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD;
+
+    if (!isValid) {
+      return NextResponse.json(
+        { message: "Invalid credentials." },
+        { status: 401 }
+      );
+    }
+
+    const response = NextResponse.json({ success: true });
+
+    response.cookies.set("admin_auth", "true", {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24,
+    });
+
+    return response;
+  } catch {
+    return NextResponse.json(
+      { message: "Invalid request." },
+      { status: 400 }
+    );
+  }
+}
