@@ -56,7 +56,7 @@ export default function TermsPage() {
             <ul className="list-disc pl-6 space-y-2 mb-4">
               <li>You must be at least 18 years old to create a driver account.</li>
               <li>You agree to provide accurate, current, and complete information during registration and to update that information promptly if it changes.</li>
-              <li>Riders agree to pay the fare negotiated directly with the driver unless otherwise processed through our payment system.</li>
+              <li>Riders agree to pay the fare as set by the associatios that regulate the prices.</li>
               <li>Drivers agree to maintain valid vehicle insurance, registration, and licenses required by their applicable jurisdiction (for example, the State of Nagaland).</li>
               <li>Users must follow all local laws and regulations when using the Service.</li>
             </ul>
