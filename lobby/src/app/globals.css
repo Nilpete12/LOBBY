@@ -24,3 +24,18 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+:where(input, textarea, select) {
+  color: #0f172a;
+  caret-color: #0f766e;
+}
+
+:where(input, textarea)::placeholder {
+  color: #64748b;
+  opacity: 1;
+}
+
+:where(select option) {
+  color: #0f172a;
+  background: #ffffff;
+}
