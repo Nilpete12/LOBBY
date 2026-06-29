@@ -31,7 +31,7 @@ export default function Features() {
         {items.map((item, i) => (
           <div
             key={i}
-            className={`bg-white/80 backdrop-blur-sm p-10 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl transition duration-300 ${item.grad}`}
+            className={`bg-white/80 backdrop-blur-sm p-10 rounded-4xl border border-slate-200 shadow-sm hover:shadow-xl transition duration-300 ${item.grad}`}
           >
             <div
               className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-7 shadow-sm ${item.color}`}
