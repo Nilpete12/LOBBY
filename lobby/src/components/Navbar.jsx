@@ -1,20 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Menu,
-  X,
-  ChevronRight,
-  LogOut,
-} from "lucide-react";
+import { Menu, X, ChevronRight, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
-import {
-  Show,
-  SignInButton,
-  SignOutButton,
-  UserButton,
-  useUser,
-} from "@clerk/nextjs";
+import { Show, SignInButton, SignOutButton, UserButton, useUser } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function Navbar() {
@@ -49,8 +38,9 @@ export default function Navbar() {
     <>
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 bg-[#F8FAFC]/80 backdrop-blur-xl border-b border-[#DBEAFE]/40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-5 md:px-6 h-20 flex items-center justify-between">c
-
+        {/* CHANGED: max-w-full to max-w-7xl and removed the stray 'c' */}
+        <div className="max-w-7xl mx-auto px-5 md:px-6 h-20 flex items-center justify-between">
+          
           {/* Logo */}
           <Link
             href="/"

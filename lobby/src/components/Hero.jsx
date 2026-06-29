@@ -19,8 +19,8 @@ export default function Hero() {
         <div className="mb-8 inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-[#0F766E] text-xs font-semibold uppercase tracking-[0.15em] shadow-sm">
 
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22C55E]"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#20a350] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#20a350]"></span>
           </span>
 
           Live in the Land of the Nagas
