@@ -2,6 +2,7 @@ import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import ClientLayout from '@/components/ClientLayout';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
+import localFont from 'next/font/local';
 
 export const metadata = {
   title: 'THE LOBBY | Direct Rides',

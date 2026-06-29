@@ -6,11 +6,11 @@ export default function Hero() {
     <section className="relative w-full overflow-hidden bg-[#F8FAFC] pt-40 pb-28">
 
       {/* Background gradients */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#DCFCE7]/40 via-[#F8FAFC] to-[#BFDBFE]/40"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-[#DCFCE7]/40 via-[#F8FAFC] to-[#BFDBFE]/40"></div>
 
       {/* Blur blobs */}
       <div className="absolute top-20 -left-20 w-96 h-96 bg-[#BBF7D0]/30 rounded-full blur-3xl"></div>
-      <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-[#BFDBFE]/30 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 right-0 w-120 h-120 bg-[#BFDBFE]/30 rounded-full blur-3xl"></div>
 
       {/* Content */}
       <div className="relative px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
@@ -27,7 +27,7 @@ export default function Hero() {
         </div>
 
         {/* Headline */}
-        <h1 className="max-w-5xl text-5xl md:text-8xl font-extrabold tracking-tight text-slate-900 leading-[0.95] mb-8">
+        <h1 className="max-w-5xl text-5xl md:text-8xl font-serif tracking-tight text-slate-900 leading-[0.95] mb-8">
           Get There.
           <br className="hidden md:block" />
           <span className="text-[#0F766E]">
