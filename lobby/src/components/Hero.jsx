@@ -69,7 +69,7 @@ export default function Hero() {
             </div>
 
             {/* Search Button */}
-            <button className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#0F5A53] hover:bg-[#0a423d] text-white rounded-xl md:rounded-2xl font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 shrink-0 text-sm md:text-base">
+            <button className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#0F766E] hover:bg-[#0a423d] text-white rounded-xl md:rounded-2xl font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 shrink-0 text-sm md:text-base">
               Search <ArrowRight size={18} className="md:w-5 md:h-5" />
             </button>
           </div>
