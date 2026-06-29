@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, MapPin, CheckCircle2 } from 'lucide-react';
 
 export default function Hero() {
   return (
@@ -40,46 +40,61 @@ export default function Hero() {
           Call. Confirm. Go.
         </p>
 
-        <p className="max-w-2xl text-lg text-slate-500 font-medium leading-relaxed mb-12">
+        {/* <p className="max-w-2xl text-lg text-slate-500 font-medium leading-relaxed mb-12">
           Connecting riders and drivers directly across Nagaland.
           No middlemen, no surge pricing—just local rides, trusted drivers,
           and fair fares.
-        </p>
+        </p> */}
 
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row gap-5">
+        {/* Floating Search Container - Tighter padding on mobile */}
+        <div className="bg-white/90 backdrop-blur-xl p-3 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(15,90,83,0.15)] w-full max-w-3xl border border-white">
+          
+          {/* Input Row */}
+          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
+            
+            {/* INLINE WRAPPER: Keeps the Pin and Input on the SAME row on mobile to save vertical space */}
+            <div className="flex w-full items-center gap-2 bg-[#eef5f2] md:bg-transparent rounded-xl md:rounded-none p-1 md:p-0">
+              
+              {/* Map Pin Icon - Smaller on mobile */}
+              <div className="w-10 h-10 md:w-14 md:h-14 bg-white md:bg-[#eef5f2] rounded-lg md:rounded-2xl flex items-center justify-center shrink-0 shadow-sm md:shadow-none">
+                <MapPin className="text-[#0F5A53] w-5 h-5 md:w-6 md:h-6" />
+              </div>
 
-          <Link
-            href="/search"
-            className="bg-[#0F766E] text-white px-9 py-4 rounded-2xl font-semibold text-lg hover:bg-[#115E59] transition duration-300 flex items-center justify-center gap-2 shadow-lg shadow-cyan-100"
-          >
-            Find a Ride
-            <ArrowRight size={18} />
-          </Link>
+              {/* Text Input - Slightly shorter on mobile */}
+              <input 
+                type="text" 
+                placeholder="Where to? (e.g. Dawki)" 
+                className="w-full h-12 md:h-14 bg-transparent outline-none text-base md:text-lg text-slate-800 placeholder-slate-400 px-2"
+              />
+            </div>
 
-          <Link
-            href="/auth"
-            className="bg-white/80 backdrop-blur-sm text-slate-900 border border-slate-200 px-9 py-4 rounded-2xl font-semibold text-lg hover:bg-white transition shadow-lg"
-          >
-            Driver Login
-          </Link>
-
-        </div>
+            {/* Search Button */}
+            <button className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#0F5A53] hover:bg-[#0a423d] text-white rounded-xl md:rounded-2xl font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 shrink-0 text-sm md:text-base">
+              Search <ArrowRight size={18} className="md:w-5 md:h-5" />
+            </button>
+          </div>
 
         {/* Trust indicators */}
-        <div className="mt-16 flex flex-wrap justify-center gap-8 text-sm font-medium text-slate-400">
-
-          <span>✓ Local Drivers</span>
-
-          <span>✓ No Commission</span>
-
-          <span>✓ Fair Fares</span>
-
-          <span>✓ Trusted Community</span>
-
+        {/* Features Bottom Row - Left aligned and stacked on mobile, center inline on PC */}
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-center gap-2 md:gap-6 mt-4 md:mt-5 pt-3 md:pt-4 border-t border-slate-100 px-2">
+            <FeatureItem text="No Commission" />
+            <span className="hidden md:block text-slate-200">|</span>
+            <FeatureItem text="Local & Verified Drivers" />
+            <span className="hidden md:block text-slate-200">|</span>
+            <FeatureItem text="100% Direct Contact" />
+          </div>
         </div>
 
       </div>
     </section>
+  );
+}
+
+function FeatureItem({ text }) {
+  return (
+    <span className="flex items-center gap-2 text-[13px] md:text-sm font-semibold text-slate-500">
+      <CheckCircle2 className="text-[#7cc29e] w-4 h-4 md:w-[18px] md:h-[18px]" strokeWidth={2.5} /> 
+      {text}
+    </span>
   );
 }
