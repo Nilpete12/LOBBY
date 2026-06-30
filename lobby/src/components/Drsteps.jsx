@@ -51,10 +51,11 @@ export default function JoinSteps() {
               Join THE LOBBY today!
             </p>
 
-            <Link href="/auth" className="w-full block">
-              <button className="w-full bg-[#0F766E] text-white font-semibold py-4 rounded-2xl hover:bg-[#115E59] transition shadow-lg shadow-cyan-100">
-                Sign Up Now
-              </button>
+            <Link
+              href="/sign-up"
+              className="block w-full rounded-2xl bg-[#0F766E] py-4 text-center font-semibold text-white shadow-lg shadow-cyan-100 transition hover:bg-[#115E59]"
+            >
+              Sign Up Now
             </Link>
 
             <p className="text-xs text-slate-400 mt-4 font-medium">

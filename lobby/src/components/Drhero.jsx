@@ -27,7 +27,7 @@ export default function DriverHero() {
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
-              href="/auth"
+              href="/sign-up"
               className="bg-[#0F766E] text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-[#115E59] transition shadow-lg shadow-cyan-100 text-center"
             >
               Become a Driver
