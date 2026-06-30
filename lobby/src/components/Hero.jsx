@@ -23,7 +23,7 @@ export default function Hero() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#20a350]"></span>
           </span>
 
-          Live in the Land of the Nagas
+          Live in the capital
         </div>
 
         {/* Headline */}
@@ -62,7 +62,7 @@ export default function Hero() {
               {/* Text Input - Slightly shorter on mobile */}
               <input 
                 type="text" 
-                placeholder="Where to? (e.g. Dawki)" 
+                placeholder="Where to?" 
                 className="w-full h-12 md:h-14 bg-transparent outline-none text-base md:text-lg text-slate-800 placeholder-slate-400 px-2"
               />
             </div>
