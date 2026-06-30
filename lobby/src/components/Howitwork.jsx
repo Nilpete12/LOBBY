@@ -36,12 +36,12 @@ export default function HowItWorks() {
         <div className="grid md:grid-cols-3 gap-14 relative">
 
           {/* Connecting Line (Desktop Only) */}
-          <div className="hidden md:block absolute top-14 left-[16%] right-[16%] h-[2px] bg-gradient-to-r from-[#BFDBFE] via-[#BBF7D0] to-[#BFDBFE] -z-10"></div>
+          <div className="hidden md:block absolute top-14 left-[16%] right-[16%] h-0.5 bg-linear-to-r from-[#BFDBFE] via-[#BBF7D0] to-[#BFDBFE] -z-10"></div>
 
           {steps.map((step, i) => (
             <div key={i} className="text-center relative pt-4">
 
-              <div className="w-24 h-24 mx-auto bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl shadow-cyan-100 border border-slate-200 mb-8 text-[#0F766E]">
+              <div className="w-24 h-24 mx-auto bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl shadow-[#0F766E] border border-slate-200 mb-8 text-[#0F766E]">
                 {step.icon}
               </div>
 

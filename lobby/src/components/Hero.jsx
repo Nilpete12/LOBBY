@@ -93,7 +93,7 @@ export default function Hero() {
 function FeatureItem({ text }) {
   return (
     <span className="flex items-center gap-2 text-[13px] md:text-sm font-semibold text-slate-500">
-      <CheckCircle2 className="text-[#7cc29e] w-4 h-4 md:w-[18px] md:h-[18px]" strokeWidth={2.5} /> 
+      <CheckCircle2 className="text-[#0F766E] w-4 h-4 md:w-[18px] md:h-[18px]" strokeWidth={2.5} /> 
       {text}
     </span>
   );
