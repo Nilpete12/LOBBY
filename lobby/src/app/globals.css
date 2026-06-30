@@ -40,3 +40,28 @@ body {
   background: #ffffff;
 }
 
+@font-face {
+  font-family: 'Proxima Nova Extrabold';
+  src: url('/fonts/Proxima Nova Extrabold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Proxima Nova Light';
+  src: url('/fonts/Proxima Nova Light.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Proxima Nova Regular';
+  src: url('/fonts/Proxima Nova Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Proxima Nova Semibold';
+  src: url('/fonts/Proxima Nova SemiBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Sailors Slant Italic';
+  src: url('/fonts/Sailors Slant.otf') format('truetype');
+}
+@font-face {
+  font-family: 'Sailors Slant Normal';
+  src: url('/fonts/Sailors Slant.ttf') format('truetype');
+}
+

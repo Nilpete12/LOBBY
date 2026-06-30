@@ -27,16 +27,16 @@ export default function Hero() {
         </div>
 
         {/* Headline */}
-        <h1 className="max-w-5xl text-5xl md:text-8xl font-serif tracking-tight text-slate-900 leading-[0.95] mb-8">
+        <h1 className="max-w-5xl text-5xl md:text-8xl font-[Proxima_Nova_Semibold] tracking-tight text-slate-900 leading-[0.95] mb-8">
           Get There.
           <br className="hidden md:block" />
-          <span className="text-[#0F766E]">
+          <span className="text-[#0F766E] font-[Sailors_Slant_Normal]">
             The Local Way.
           </span>
         </h1>
 
         {/* Tagline */}
-        <p className="text-2xl md:text-3xl text-slate-500 italic font-semibold mb-5">
+        <p className="text-2xl md:text-3xl font-[Sailors_Slant_Italic] text-slate-500 italic font-semibold mb-5">
           Call. Confirm. Go.
         </p>
 

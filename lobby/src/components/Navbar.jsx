@@ -36,7 +36,7 @@ export default function Navbar() {
           {/* Logo (Top Left) */}
           <Link
             href="/"
-            className="text-xl md:text-2xl font-black tracking-tight text-slate-900 relative z-50"
+            className="text-xl md:text-2xl font-[Sailors_Slant_Normal] tracking-tight text-slate-900 relative z-50"
           >
             THE LOBBY
             <span className="text-[#0F766E]">.</span>
@@ -87,7 +87,7 @@ export default function Navbar() {
                 className="
                   hidden
                   md:block
-                  bg-gradient-to-r from-[#0F766E] to-[#0891B2]
+                  bg-linear-to-r from-[#0F766E] to-[#0891B2]
                   text-white px-5 py-2.5 rounded-full text-sm font-bold
                   shadow-lg shadow-cyan-100 hover:scale-105 transition
                 "
