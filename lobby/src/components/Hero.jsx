@@ -29,8 +29,7 @@ export default function Hero() {
         {/* Headline */}
         <h1 className="max-w-5xl text-5xl md:text-8xl font-[Proxima_Nova_Semibold] tracking-tight text-slate-900 leading-[0.95] mb-8">
           Get There.
-          <br className="hidden md:block" />
-          <span className="text-[#0F766E] font-[Sailors_Slant_Normal]">
+          <span className="block text-[#0F766E] font-[Sailors_Slant_Normal]">
             The Local Way.
           </span>
         </h1>
