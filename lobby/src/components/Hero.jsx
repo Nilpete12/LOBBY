@@ -6,7 +6,7 @@ export default function Hero() {
 
       {/* Background gradients */}
       <div className="absolute inset-0 bg-linear-to-br from-[#DCFCE7]/40 via-[#F8FAFC] to-[#BFDBFE]/40"></div>
-      <div className="pointer-events-none absolute inset-0 bg-[url('/dzukou-valley.webp')] bg-cover bg-center opacity-[0.08] mix-blend-multiply saturate-125"></div>
+      <div className="pointer-events-none absolute inset-0 bg-[url('/dzukou-valley.webp')] bg-cover bg-center opacity-[0.15] mix-blend-multiply saturate-125"></div>
 
       {/* Blur blobs */}
       <div className="absolute top-20 -left-20 w-96 h-96 bg-[#BBF7D0]/30 rounded-full blur-3xl"></div>
@@ -16,7 +16,7 @@ export default function Hero() {
       <div className="relative px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
 
         {/* Badge */}
-        <div className="mb-8 inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-[#0F766E] text-xs font-semibold uppercase tracking-[0.15em] shadow-sm">
+        <div className="mb-8 inline-flex items-center gap-2 md:gap-3 px-3 md:px-5 py-1.5 md:py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-[#0F766E] text-[9px] md:text-xs font-semibold uppercase tracking-[0.12em] md:tracking-[0.15em] shadow-sm">
 
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#20a350] opacity-75"></span>
