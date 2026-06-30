@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-// 1. Updated Icons for the bottom tab bar
 import { Search, Car, LayoutDashboard, LifeBuoy } from "lucide-react"; 
 import { useEffect } from "react";
 import { Show, SignInButton, UserButton, useUser } from "@clerk/nextjs";
@@ -30,13 +29,13 @@ export default function Navbar() {
   return (
     <>
       {/* --- TOP NAVBAR (Stays at top for both Mobile & PC) --- */}
-      <nav className="fixed top-0 w-full z-40 bg-[#F8FAFC]/80 backdrop-blur-xl border-b border-[#DBEAFE]/40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-5 md:px-6 h-16 md:h-20 flex items-center justify-between">
+      <nav className="fixed top-0 w-full z-40 bg-[#F8FAFC]/90 backdrop-blur-xl border-b border-[#DBEAFE]/40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-14 md:h-20 flex items-center justify-between">
           
           {/* Logo (Top Left) */}
           <Link
             href="/"
-            className="text-xl md:text-2xl font-black tracking-tight text-slate-900 relative z-50"
+            className="text-lg md:text-2xl font-black tracking-tight text-slate-900 relative z-50"
           >
             THE LOBBY
             <span className="text-[#0F766E]">.</span>
@@ -60,7 +59,7 @@ export default function Navbar() {
           </div>
 
           {/* Auth Section (Top Right - Appears on Mobile & PC) */}
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3 md:gap-5">
             <Show when="signed-in">
               <div className="flex items-center gap-4">
                 {/* Hide the word Dashboard on mobile, keep it on PC */}
@@ -100,8 +99,8 @@ export default function Navbar() {
       </nav>
 
       {/* --- MOBILE BOTTOM PILL TRAY (Hidden on PC) --- */}
-      <div className="md:hidden fixed bottom-6 inset-x-6 z-50 mx-auto max-w-sm">
-      <div className="bg-white/50 backdrop-blur-sm backdrop-saturate-200 border border-[#0F5A53]/60 shadow-[0_8px_32px_rgba(15,118,110,0.15)] rounded-full px-4 py-2.5 flex items-center justify-around">          
+      <div className="md:hidden fixed bottom-3 inset-x-3 z-50 mx-auto max-w-sm pb-[env(safe-area-inset-bottom)]">
+      <div className="bg-white/90 backdrop-blur-xl backdrop-saturate-200 border border-[#0F5A53]/20 shadow-[0_12px_36px_rgba(15,118,110,0.22)] rounded-full px-3 py-2 flex items-center justify-around">
           {/* Always Show: Search */}
           <BottomNavLink 
             href="/search" 
@@ -153,6 +152,7 @@ function BottomNavLink({ href, icon, label, isActive }) {
         flex flex-col items-center justify-center w-14 gap-1 transition-all duration-200
         ${isActive ? "text-[#0F766E]" : "text-slate-400 hover:text-slate-600"}
       `}
+      aria-current={isActive ? "page" : undefined}
     >
       <div className={`
         p-1.5 rounded-full transition-all duration-200
