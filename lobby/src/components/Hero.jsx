@@ -5,7 +5,7 @@ export default function Hero() {
     <section className="relative w-full overflow-hidden bg-[#F8FAFC] pt-40 pb-28">
 
       {/* Background gradients */}
-      <div className="absolute inset-0 bg-linear-to-br from-[#DCFCE7]/40 via-[#F8FAFC] to-[#BFDBFE]/40"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-[#DCFCE7]/20 via-[#F8FAFC]/80 to-[#BFDBFE]/20 md:from-[#DCFCE7]/40 md:via-[#F8FAFC] md:to-[#BFDBFE]/40"></div>
       <div className="pointer-events-none absolute inset-0 bg-[url('/homepage-city.jpg')] bg-cover bg-center opacity-[0.15] mix-blend-multiply saturate-125"></div>
 
       {/* Blur blobs */}
