@@ -23,39 +23,39 @@ export default function Destinations() {
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex justify-between items-end mb-8 md:mb-12">
+    <section className="py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex justify-between items-end mb-12">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Popular Routes</h2>
-            <p className="text-sm md:text-base text-slate-500">Fixed price estimates from verified local drivers.</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">Popular Routes</h2>
+            <p className="text-slate-500">Fixed price estimates from verified local drivers.</p>
           </div>
           <button className="hidden md:flex items-center gap-2 text-slate-900 font-bold hover:gap-3 transition-all">
             View all routes <ArrowRight size={18}/>
           </button>
         </div>
 
-        <div className="flex gap-4 overflow-x-auto pb-3 -mx-4 px-4 sm:mx-0 sm:px-0 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:pb-0">
+        <div className="grid md:grid-cols-3 gap-8">
           {routes.map((route, index) => (
-            <div key={index} className="group cursor-pointer min-w-[82%] sm:min-w-[46%] md:min-w-0">
-              <div className="relative overflow-hidden rounded-2xl aspect-[4/3] mb-4 bg-slate-100">
+            <div key={index} className="group cursor-pointer">
+              <div className="relative overflow-hidden rounded-2xl aspect-4/3 mb-4">
                 <img 
                   src={route.image} 
                   alt={route.name} 
                   className="object-cover w-full h-full group-hover:scale-105 transition duration-500"
                 />
-                <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider text-slate-900">
+                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-slate-900">
                   {route.tag}
                 </div>
               </div>
-              <h3 className="text-lg md:text-xl font-bold text-slate-900">{route.name}</h3>
+              <h3 className="text-xl font-bold text-slate-900">{route.name}</h3>
               <p className="text-slate-500 text-sm mt-1">Starts at {route.price}</p>
             </div>
           ))}
         </div>
         
         {/* Mobile View All Button */}
-        <button className="md:hidden mt-5 w-full py-4 border border-slate-200 rounded-xl font-bold text-slate-900 bg-white">
+        <button className="md:hidden mt-8 w-full py-4 border border-slate-200 rounded-xl font-bold text-slate-900">
           View all routes
         </button>
       </div>

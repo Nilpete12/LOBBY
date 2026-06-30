@@ -1,36 +1,22 @@
-"use client";
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ArrowRight, MapPin, CheckCircle2 } from 'lucide-react';
 
 export default function Hero() {
-  const router = useRouter();
-  const [destination, setDestination] = useState('');
-
-  const handleSearch = (event) => {
-    event.preventDefault();
-
-    const trimmedDestination = destination.trim();
-    router.push(trimmedDestination ? `/search?destination=${encodeURIComponent(trimmedDestination)}` : '/search');
-  };
-
   return (
-    <section className="relative w-full overflow-hidden bg-[#F8FAFC] pt-28 pb-16 md:pt-40 md:pb-28">
+    <section className="relative w-full overflow-hidden bg-[#F8FAFC] pt-40 pb-28">
 
       {/* Background gradients */}
       <div className="absolute inset-0 bg-linear-to-br from-[#DCFCE7]/40 via-[#F8FAFC] to-[#BFDBFE]/40"></div>
       <div className="pointer-events-none absolute inset-0 bg-[url('/dzukou-valley.webp')] bg-cover bg-center opacity-[0.08] mix-blend-multiply saturate-125"></div>
 
       {/* Blur blobs */}
-      <div className="absolute top-20 -left-24 h-72 w-72 md:h-96 md:w-96 bg-[#BBF7D0]/30 rounded-full blur-3xl"></div>
-      <div className="absolute top-0 -right-20 h-80 w-80 md:h-120 md:w-120 bg-[#BFDBFE]/30 rounded-full blur-3xl"></div>
+      <div className="absolute top-20 -left-20 w-96 h-96 bg-[#BBF7D0]/30 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 right-0 w-120 h-120 bg-[#BFDBFE]/30 rounded-full blur-3xl"></div>
 
       {/* Content */}
-      <div className="relative px-4 sm:px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
+      <div className="relative px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
 
         {/* Badge */}
-        <div className="mb-6 md:mb-8 inline-flex items-center gap-2.5 px-4 md:px-5 py-2 rounded-full bg-white/85 backdrop-blur-sm border border-slate-200 text-[#0F766E] text-[10px] md:text-xs font-semibold uppercase tracking-[0.12em] md:tracking-[0.15em] shadow-sm">
+        <div className="mb-8 inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-[#0F766E] text-xs font-semibold uppercase tracking-[0.15em] shadow-sm">
 
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#20a350] opacity-75"></span>
@@ -41,7 +27,7 @@ export default function Hero() {
         </div>
 
         {/* Headline */}
-        <h1 className="max-w-5xl text-4xl sm:text-5xl md:text-8xl font-serif tracking-tight text-slate-900 leading-[1.02] md:leading-[0.95] mb-5 md:mb-8">
+        <h1 className="max-w-5xl text-5xl md:text-8xl font-serif tracking-tight text-slate-900 leading-[0.95] mb-8">
           Get There.
           <br className="hidden md:block" />
           <span className="text-[#0F766E]">
@@ -50,7 +36,7 @@ export default function Hero() {
         </h1>
 
         {/* Tagline */}
-        <p className="text-xl md:text-3xl text-slate-500 italic font-semibold mb-6 md:mb-5">
+        <p className="text-2xl md:text-3xl text-slate-500 italic font-semibold mb-5">
           Call. Confirm. Go.
         </p>
 
@@ -60,10 +46,8 @@ export default function Hero() {
           and fair fares.
         </p> */}
 
-        <form
-          onSubmit={handleSearch}
-          className="bg-white/90 backdrop-blur-xl p-2.5 md:p-6 rounded-2xl md:rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(15,90,83,0.15)] w-full max-w-3xl border border-white"
-        >
+        {/* Floating Search Container - Tighter padding on mobile */}
+        <div className="bg-white/90 backdrop-blur-xl p-3 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(15,90,83,0.15)] w-full max-w-3xl border border-white">
           
           {/* Input Row */}
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
@@ -80,17 +64,12 @@ export default function Hero() {
               <input 
                 type="text" 
                 placeholder="Where to? (e.g. Dawki)" 
-                className="w-full h-12 md:h-14 bg-transparent outline-none text-base md:text-lg text-slate-800 placeholder-slate-500 px-2"
-                value={destination}
-                onChange={(event) => setDestination(event.target.value)}
+                className="w-full h-12 md:h-14 bg-transparent outline-none text-base md:text-lg text-slate-800 placeholder-slate-400 px-2"
               />
             </div>
 
             {/* Search Button */}
-            <button
-              type="submit"
-              className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#0F766E] hover:bg-[#0a423d] text-white rounded-xl md:rounded-2xl font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 shrink-0 text-sm md:text-base"
-            >
+            <button className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#0F766E] hover:bg-[#0a423d] text-white rounded-xl md:rounded-2xl font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 shrink-0 text-sm md:text-base">
               Search <ArrowRight size={18} className="md:w-5 md:h-5" />
             </button>
           </div>
@@ -104,7 +83,7 @@ export default function Hero() {
             <span className="hidden md:block text-slate-200">|</span>
             <FeatureItem text="100% Direct Contact" />
           </div>
-        </form>
+        </div>
 
       </div>
     </section>

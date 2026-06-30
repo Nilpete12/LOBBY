@@ -19,7 +19,7 @@ export default function ClientLayout({ children }) {
       {!isAdmin && <InstallPopup />}
       
       {/* The 'children' prop represents whatever page the user is currently on */}
-      <main className="grow pb-24 md:pb-0">
+      <main className="grow">
         {children}
       </main>
 
