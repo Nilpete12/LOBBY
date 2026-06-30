@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { ArrowRight, MapPin, CheckCircle2 } from 'lucide-react';
 
 export default function Hero() {
@@ -7,6 +6,7 @@ export default function Hero() {
 
       {/* Background gradients */}
       <div className="absolute inset-0 bg-linear-to-br from-[#DCFCE7]/40 via-[#F8FAFC] to-[#BFDBFE]/40"></div>
+      <div className="pointer-events-none absolute inset-0 bg-[url('/dzukou-valley.webp')] bg-cover bg-center opacity-[0.08] mix-blend-multiply saturate-125"></div>
 
       {/* Blur blobs */}
       <div className="absolute top-20 -left-20 w-96 h-96 bg-[#BBF7D0]/30 rounded-full blur-3xl"></div>
