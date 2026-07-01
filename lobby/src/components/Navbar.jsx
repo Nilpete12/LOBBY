@@ -122,7 +122,7 @@ export default function Navbar() {
                 href="/search"
                 className="
                   hidden md:block
-                  bg-linera-to-r from-[#0F766E] to-[#0891B2]
+                  bg-linear-to-r from-[#0F766E] to-[#0891B2]
                   text-white px-5 py-2.5 rounded-full text-sm font-bold
                   shadow-lg shadow-cyan-100 hover:scale-105 transition
                 "
