@@ -5,8 +5,8 @@ export default function Hero() {
     <section className="relative w-full overflow-hidden bg-[#F8FAFC] pt-40 pb-28">
 
       {/* Background gradients */}
-      <div className="absolute inset-0 bg-linear-to-br from-[#DCFCE7]/40 via-[#F8FAFC] to-[#BFDBFE]/40"></div>
-      <div className="pointer-events-none absolute inset-0 bg-[url('/dzukou-valley.webp')] bg-cover bg-center opacity-[0.08] mix-blend-multiply saturate-125"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-[#DCFCE7]/20 via-[#F8FAFC]/80 to-[#BFDBFE]/20 md:from-[#DCFCE7]/40 md:via-[#F8FAFC] md:to-[#BFDBFE]/40"></div>
+      <div className="pointer-events-none absolute inset-0 bg-[url('/homepage-city.jpg')] bg-cover bg-center opacity-[0.15] mix-blend-multiply saturate-125"></div>
 
       {/* Blur blobs */}
       <div className="absolute top-20 -left-20 w-96 h-96 bg-[#BBF7D0]/30 rounded-full blur-3xl"></div>
@@ -16,21 +16,20 @@ export default function Hero() {
       <div className="relative px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
 
         {/* Badge */}
-        <div className="mb-8 inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-[#0F766E] text-xs font-semibold uppercase tracking-[0.15em] shadow-sm">
+        <div className="mb-8 inline-flex items-center gap-2 md:gap-3 px-3 md:px-5 py-1.5 md:py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-[#0F766E] text-[9px] md:text-xs font-semibold uppercase tracking-[0.12em] md:tracking-[0.15em] shadow-sm">
 
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#20a350] opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#20a350]"></span>
           </span>
 
-          Live in the Land of the Nagas
+          Live in the capital
         </div>
 
         {/* Headline */}
         <h1 className="max-w-5xl text-5xl md:text-8xl font-[Proxima_Nova_Semibold] tracking-tight text-slate-900 leading-[0.95] mb-8">
           Get There.
-          <br className="hidden md:block" />
-          <span className="text-[#0F766E] font-[Sailors_Slant_Normal]">
+          <span className="block text-[#0F766E] font-[Sailors_Slant_Normal]">
             The Local Way.
           </span>
         </h1>
@@ -63,7 +62,7 @@ export default function Hero() {
               {/* Text Input - Slightly shorter on mobile */}
               <input 
                 type="text" 
-                placeholder="Where to? (e.g. Dawki)" 
+                placeholder="Where to?" 
                 className="w-full h-12 md:h-14 bg-transparent outline-none text-base md:text-lg text-slate-800 placeholder-slate-400 px-2"
               />
             </div>

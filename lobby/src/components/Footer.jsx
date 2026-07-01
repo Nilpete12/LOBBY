@@ -33,7 +33,7 @@ export default function Footer() {
             <ul className="space-y-4 text-sm font-medium">
               <li><Link href="/search" className="hover:text-[#BBF7D0] transition">Find a Ride</Link></li>
               <li><Link href="/drive" className="hover:text-[#BBF7D0] transition">Driver Sign Up</Link></li>
-              <li><Link href="/auth" className="hover:text-[#BBF7D0] transition">Log In</Link></li>
+              <li><Link href="/sign-in" className="hover:text-[#BBF7D0] transition">Log In</Link></li>
               <li><Link href="/search" className="hover:text-[#BBF7D0] transition">Popular Routes</Link></li>
             </ul>
           </div>
