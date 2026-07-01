@@ -1,15 +1,17 @@
 import Link from 'next/link';
+import Image from 'next/image'; // 1. Import Next.js Image
 import { CheckCircle } from 'lucide-react';
 
 export default function DriverHero() {
   return (
-    <section className="mt-20 relative pt-32 pb-20 bg-[#F8FAFC] text-[#0F172A] overflow-hidden">
+    <section className="relative pt-32 pb-20 h-screen bg-[#F8FAFC] text-[#0F172A] overflow-hidden">
+      
       {/* Abstract Background Element */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-tl from-[#7DD3FC]/40 to-[#BBF7D0]/40 skew-x-14 translate-x-20"></div>
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-tl from-[#0F766E]/40 to-[#0F766E]/20 skew-x-[14deg] translate-x-20"></div>
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-12">
+      <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-12 h-full">
         
-        {/* Text Content */}
+        {/* TEXT CONTENT */}
         <div className="flex-1">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-[#0F766E] text-xs font-semibold uppercase tracking-[0.15em] mb-6 shadow-sm">
             <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"></span>
@@ -21,7 +23,7 @@ export default function DriverHero() {
             <span className="text-[#0F766E]">Your Business.</span>
           </h1>
           
-          <p className="text-xl font-medium text-slate-500 mb-8 leading-relaxed w-1/2">
+          <p className="text-xl font-medium text-slate-500 mb-8 leading-relaxed md:w-4/5">
             Stop paying huge commissions. Join THE LOBBY to connect directly with riders in your city and keep 100% of the fare.
           </p>
 
@@ -46,7 +48,26 @@ export default function DriverHero() {
           </div>
         </div>
 
-        {/* Visual Element (Mockup Card) */}
+        {/* VISUAL ELEMENT (3D Taxi) */}
+        {/* 'hidden md:flex' ensures it disappears completely on mobile phones to save space! */}
+        <div className="hidden md:flex flex-1 justify-center items-center relative">
+          
+          {/* Decorative Glow behind the car to make it pop against the abstract background */}
+          <div className="absolute w-80 h-80 bg-white/40 rounded-full blur-3xl z-0"></div>
+          
+          {/* The Image Wrapper - Adds a smooth hover float effect */}
+          <div className="relative w-full max-w-[500px] h-[400px] hover:-translate-y-4 transition-transform duration-700 ease-out z-10">
+            <Image 
+              src="/3d-taxi.png" 
+              alt="3D Taxi Illustration"
+              fill
+              // drop-shadow makes the PNG shadow mold to the shape of the car, unlike a box-shadow!
+              className="object-contain drop-shadow-[0_25px_35px_rgba(15,118,110,0.3)]"
+              priority 
+            />
+          </div>
+          
+        </div>
 
       </div>
     </section>

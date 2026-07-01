@@ -15,7 +15,7 @@ export default function SearchSection() {
 
   return (
     <section className="px-6 pb-20">
-      <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm p-3 rounded-[2rem] shadow-xl border border-slate-200 flex flex-col md:flex-row gap-3">
+      <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm p-3 rounded-4xl shadow-xl border border-slate-200 flex flex-col md:flex-row gap-3">
 
         <div className="flex-1 flex items-center px-5 bg-[#F8FAFC] rounded-2xl focus-within:ring-2 focus-within:ring-[#0F766E]/20 transition">
           <MapPin className="text-[#0F766E] mr-3" size={22} />
