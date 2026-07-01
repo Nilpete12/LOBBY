@@ -70,7 +70,7 @@ export default function TaxiStands() {
   return (
     <section className="py-20 bg-white relative overflow-hidden">
       {/* Background ambient gradient to blend with the theme */}
-      <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-slate-50 to-white z-0"></div>
+      <div className="absolute top-0 inset-x-0 h-40 bg-linear-to-b from-slate-50 to-white z-0"></div>
 
       <div className="max-w-7xl mx-auto px-5 md:px-6 relative z-10">
         

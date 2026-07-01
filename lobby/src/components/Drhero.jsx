@@ -7,7 +7,7 @@ export default function DriverHero() {
     <section className="relative pt-32 pb-20 h-screen bg-[#F8FAFC] text-[#0F172A] overflow-hidden">
       
       {/* Abstract Background Element */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-tl from-[#0F766E]/40 to-[#0F766E]/20 skew-x-[14deg] translate-x-20"></div>
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-tl from-[#0F766E]/40 to-[#0F766E]/20 skew-x-14 translate-x-20"></div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-12 h-full">
         
@@ -50,13 +50,13 @@ export default function DriverHero() {
 
         {/* VISUAL ELEMENT (3D Taxi) */}
         {/* 'hidden md:flex' ensures it disappears completely on mobile phones to save space! */}
-        <div className="hidden md:flex flex-1 justify-center items-center relative">
+        <div className="hidden md:flex flex-1 justify-end relative">
           
           {/* Decorative Glow behind the car to make it pop against the abstract background */}
           <div className="absolute w-80 h-80 bg-white/40 rounded-full blur-3xl z-0"></div>
           
           {/* The Image Wrapper - Adds a smooth hover float effect */}
-          <div className="relative w-full max-w-[500px] h-[400px] hover:-translate-y-4 transition-transform duration-700 ease-out z-10">
+          <div className="relative w-full max-w-125 h-100 hover:-translate-y-4 transition-transform duration-700 ease-out z-10">
             <Image 
               src="/3d-taxi.png" 
               alt="3D Taxi Illustration"
