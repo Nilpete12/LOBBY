@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { Phone, Clock, LogOut, History } from 'lucide-react';
@@ -16,7 +17,8 @@ export default function RiderDashboard() {
   const [complaintText, setComplaintText] = useState("");
 
   const handleReport = async () => {
-    if (!complaintText) return;
+    const message = complaintText.trim();
+    if (!message) return;
 
     await fetch(`${API_BASE_URL}/complaints`, {
       method: "POST",
@@ -27,7 +29,7 @@ export default function RiderDashboard() {
         email: user.primaryEmailAddress?.emailAddress,
         role: user.publicMetadata?.role || 'rider',
         topic: 'Rider Issue',
-        message: complaintText
+        message
       })
     });
 
@@ -84,29 +86,32 @@ export default function RiderDashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pt-24 pb-12 px-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#F8FAFC] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
+      <div className="mx-auto max-w-4xl">
 
         {/* Header */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-[2rem] p-8 shadow-sm border border-slate-200 flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] text-[#0F766E] rounded-full flex items-center justify-center text-2xl font-bold overflow-hidden shadow-sm">
+        <div className="mb-6 flex flex-col gap-5 rounded-[1.5rem] border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:rounded-[2rem] sm:p-8">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] text-xl font-bold text-[#0F766E] shadow-sm sm:h-16 sm:w-16 sm:text-2xl">
               {user.imageUrl ? (
-                <img
+                <Image
                   src={user.imageUrl}
                   alt="Profile"
-                  className="w-full h-full object-cover"
+                  width={64}
+                  height={64}
+                  className="h-full w-full object-cover"
+                  sizes="64px"
                 />
               ) : (
                 user.fullName?.charAt(0) || "U"
               )}
             </div>
 
-            <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-                {user.fullName}
+            <div className="min-w-0">
+              <h1 className="truncate text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                {user.fullName || "Rider"}
               </h1>
-              <p className="text-slate-500 font-medium text-sm">
+              <p className="mt-1 break-all text-xs font-medium text-slate-500 sm:text-sm">
                 Rider Account • {user.primaryEmailAddress?.emailAddress}
               </p>
             </div>
@@ -114,7 +119,7 @@ export default function RiderDashboard() {
 
           <button
             onClick={handleLogout}
-            className="p-3 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-2xl transition flex items-center gap-2 text-sm font-semibold"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-red-50 hover:text-red-500 sm:w-auto sm:border-transparent sm:bg-transparent sm:p-3"
           >
             <LogOut size={20} />
             Logout
@@ -122,13 +127,13 @@ export default function RiderDashboard() {
         </div>
 
         {/* Recent Contacts */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-[2rem] p-8 shadow-sm border border-slate-200 min-h-100">
-          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
-            <div className="bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] p-3 rounded-2xl text-[#0F766E] shadow-sm">
+        <div className="min-h-[26rem] rounded-[1.5rem] border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-[2rem] sm:p-8">
+          <div className="mb-5 flex items-center gap-3 border-b border-slate-100 pb-5 sm:mb-6 sm:pb-6">
+            <div className="rounded-2xl bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] p-2.5 text-[#0F766E] shadow-sm sm:p-3">
               <History size={24} />
             </div>
 
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
+            <h2 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
               Recently Contacted Drivers
             </h2>
           </div>
@@ -138,33 +143,36 @@ export default function RiderDashboard() {
               Loading history...
             </div>
           ) : history.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-slate-400 mb-4">
+            <div className="py-10 text-center sm:py-12">
+              <p className="mx-auto mb-4 max-w-xs text-slate-400">
                 You haven&apos;t contacted any drivers yet.
               </p>
 
               <button
                 onClick={() => router.push('/search')}
-                className="bg-[#0F766E] text-white px-7 py-3 rounded-2xl font-semibold hover:bg-[#115E59] transition shadow-lg shadow-cyan-100"
+                className="w-full rounded-2xl bg-[#0F766E] px-7 py-3 font-semibold text-white shadow-lg shadow-cyan-100 transition hover:bg-[#115E59] sm:w-auto"
               >
                 Find a Ride
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
               {history.map((driver) => (
                 <div
                   key={driver._id}
-                  className="p-5 rounded-[1.75rem] border border-slate-200 bg-white hover:shadow-xl transition duration-300 group"
+                  className="rounded-3xl border border-slate-200 bg-white p-4 transition duration-300 hover:shadow-xl sm:rounded-[1.75rem] sm:p-5"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     {/* Driver Pic */}
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] overflow-hidden shrink-0 shadow-sm">
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] shadow-sm">
                       {driver.profilePic ? (
-                        <img
+                        <Image
                           src={driver.profilePic}
                           alt=""
-                          className="w-full h-full object-cover"
+                          width={48}
+                          height={48}
+                          className="h-full w-full object-cover"
+                          sizes="48px"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center font-bold text-[#0F766E]">
@@ -173,13 +181,13 @@ export default function RiderDashboard() {
                       )}
                     </div>
 
-                    <div className="flex-1">
-                      <h3 className="font-bold tracking-tight text-slate-900">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate font-bold tracking-tight text-slate-900">
                         {driver.fullName}
                       </h3>
 
-                      <div className="flex items-center gap-2 text-xs text-slate-500">
-                        <span>{driver.vehicle}</span>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+                        <span className="max-w-full truncate">{driver.vehicle}</span>
                         <span>•</span>
 
                         <span className="flex items-center gap-1">
@@ -191,7 +199,8 @@ export default function RiderDashboard() {
 
                     <a
                       href={`tel:${driver.phone}`}
-                      className="p-3 bg-[#0F766E] text-white rounded-full shadow-lg shadow-cyan-100 hover:scale-105 transition"
+                      aria-label={`Call ${driver.fullName}`}
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0F766E] text-white shadow-lg shadow-cyan-100 transition hover:scale-105"
                     >
                       <Phone size={18} />
                     </a>
@@ -205,37 +214,38 @@ export default function RiderDashboard() {
         {/* Report Issue Button */}
         <button
           onClick={() => setShowComplaint(true)}
-          className="mt-6 text-sm font-semibold text-slate-500 hover:text-[#0F766E] transition underline"
+          className="mx-auto mt-6 block rounded-full px-4 py-2 text-sm font-semibold text-slate-500 underline transition hover:text-[#0F766E]"
         >
           Report an Issue
         </button>
 
         {/* Modal */}
         {showComplaint && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white/90 backdrop-blur-sm p-8 rounded-[2rem] w-full max-w-md shadow-2xl text-center border border-slate-200">
-              <h3 className="font-extrabold tracking-tight text-3xl text-slate-900 mb-4">
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-3 sm:items-center sm:p-4">
+            <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-[2rem] border border-slate-200 bg-white/95 p-5 text-left shadow-2xl backdrop-blur-sm sm:rounded-[2rem] sm:p-8 sm:text-center">
+              <h3 className="mb-4 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
                 Report an Issue
               </h3>
 
               <textarea
-                className="w-full border border-slate-200 bg-[#F8FAFC] p-4 rounded-2xl mb-4 h-32 outline-none focus:ring-2 focus:ring-[#0F766E]/20 focus:border-[#0F766E]"
+                className="mb-4 h-32 w-full rounded-2xl border border-slate-200 bg-[#F8FAFC] p-4 text-sm outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
                 placeholder="Describe what happened..."
                 value={complaintText}
                 onChange={(e) => setComplaintText(e.target.value)}
               />
 
-              <div className="flex justify-end gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
                 <button
                   onClick={() => setShowComplaint(false)}
-                  className="text-slate-500 font-semibold text-sm"
+                  className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-50 sm:border-transparent sm:py-2"
                 >
                   Cancel
                 </button>
 
                 <button
                   onClick={handleReport}
-                  className="bg-[#0F766E] text-white px-5 py-2 rounded-2xl font-semibold text-sm hover:bg-[#115E59] transition"
+                  disabled={!complaintText.trim()}
+                  className="rounded-2xl bg-[#0F766E] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50 sm:py-2"
                 >
                   Submit
                 </button>
