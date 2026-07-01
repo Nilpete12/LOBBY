@@ -2,7 +2,7 @@ import { ArrowRight, MapPin, CheckCircle2 } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#F8FAFC] pt-32 pb-28 md:pt-36">
+    <section className="relative w-full overflow-hidden bg-[#F8FAFC] pt-30 pb-28 md:pt-34">
 
       {/* Background gradients */}
       <div className="absolute inset-0 bg-linear-to-br from-[#DCFCE7]/20 via-[#F8FAFC]/80 to-[#BFDBFE]/20 md:from-[#DCFCE7]/40 md:via-[#F8FAFC] md:to-[#BFDBFE]/40"></div>
