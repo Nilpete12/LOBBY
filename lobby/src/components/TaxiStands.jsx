@@ -131,7 +131,7 @@ export default function TaxiStands() {
           {visibleCount < standsData.length ? (
             <button
               onClick={showMore}
-              className="bg-slate-900 text-white px-8 py-3.5 rounded-full font-bold text-sm hover:bg-slate-800 transition shadow-lg shadow-slate-200 flex items-center gap-2"
+              className="bg-slate-900 dark-section text-white px-8 py-3.5 rounded-full font-bold text-sm hover:bg-slate-800 transition shadow-lg shadow-slate-200 flex items-center gap-2"
             >
               View All Stands
             </button>

@@ -4,7 +4,7 @@ import { MapPin } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#033b37] text-slate-300 py-16 border-t border-[#3F4E4F]">
+    <footer className="bg-[#033b37] text-slate-300 py-16 border-t border-[#3F4E4F] dark-section">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Top Section: Grid */}

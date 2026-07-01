@@ -1,9 +1,19 @@
 "use client";
 
 import Link from "next/link";
-// 1. Updated Icons for the bottom tab bar
-import { Search, Car, LayoutDashboard, LifeBuoy } from "lucide-react"; 
-import { useEffect } from "react";
+// 1. Imported all the new dynamic icons needed for Rider & Driver states
+import { 
+  Search, 
+  Car, 
+  LayoutDashboard, 
+  LifeBuoy, 
+  LayoutGrid, 
+  Heart, 
+  User, 
+  Wallet, 
+  UserCircle 
+} from "lucide-react"; 
+import { useEffect, useState } from "react";
 import { Show, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -11,21 +21,38 @@ export default function Navbar() {
   const { user, isLoaded, isSignedIn } = useUser();
   const router = useRouter();
   const pathname = usePathname();
-
+  const [isDarkBg, setIsDarkBg] = useState(false);
   const userRole = user?.publicMetadata?.role;
 
-  const dashboardLink =
-    userRole === "driver"
-      ? "/drive/dashboard"
-      : userRole === "rider"
-      ? "/account"
-      : "/onboarding";
-
+  // Handles the redirect logic if they haven't finished onboarding
   useEffect(() => {
     if (isLoaded && isSignedIn && !userRole && pathname !== "/onboarding") {
       router.push("/onboarding");
     }
   }, [isLoaded, isSignedIn, userRole, pathname, router]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Find every section on your page that has the class "dark-section"
+      const darkSections = document.querySelectorAll('.dark-section');
+      let overDark = false;
+
+      darkSections.forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        // The navbar is at the bottom of the screen. 
+        // We check if the bottom 100px of the viewport is currently inside a dark section.
+        if (rect.top < window.innerHeight - 24 && rect.bottom > window.innerHeight - 80) {
+          overDark = true;
+        }
+      });
+
+      setIsDarkBg(overDark);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <>
@@ -36,40 +63,50 @@ export default function Navbar() {
           {/* Logo (Top Left) */}
           <Link
             href="/"
-            className="text-xl md:text-2xl font-[Sailors_Slant_Normal] tracking-tight text-slate-900 relative z-50"
+            className="text-xl md:text-2xl font-['Sailors_Slant_Normal'] tracking-tight text-slate-900 relative z-50"
           >
             THE LOBBY
             <span className="text-[#0F766E]">.</span>
           </Link>
 
-          {/* Desktop Navigation (Hidden on Mobile) */}
+          {/* --- DESKTOP NAVIGATION (Hidden on Mobile) --- */}
           <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-            <Link href="/search" className="hover:text-[#0F766E] transition">
-              Find a Ride
-            </Link>
+            
+            {/* 1. VIEW: SIGNED OUT */}
+            <Show when="signed-out">
+              <Link href="/search" className="hover:text-[#0F766E] transition">Find a Ride</Link>
+              <Link href="/drive" className="hover:text-[#0F766E] transition">For Drivers</Link>
+              <Link href="/support" className="hover:text-[#0F766E] transition">Support</Link>
+            </Show>
 
-            {userRole !== "driver" && (
-              <Link href="/drive" className="hover:text-[#0F766E] transition">
-                For Drivers
-              </Link>
-            )}
+            <Show when="signed-in">
+              {/* 2. VIEW: LOGGED IN AS RIDER (or no role yet) */}
+              {userRole !== "driver" && (
+                <>
+                  <Link href="/search" className="hover:text-[#0F766E] transition">All Services</Link>
+                  <Link href="/favourites" className="hover:text-[#0F766E] transition">Favourites</Link>
+                  <Link href="/account" className="hover:text-[#0F766E] transition">Profile</Link>
+                  <Link href="/support" className="hover:text-[#0F766E] transition">Support</Link>
+                </>
+              )}
 
-            <Link href="/support" className="hover:text-[#0F766E] transition">
-              Support
-            </Link>
+              {/* 3. VIEW: LOGGED IN AS DRIVER */}
+              {userRole === "driver" && (
+                <>
+                  <Link href="/drive/dashboard" className="hover:text-[#0F766E] transition">Dashboard</Link>
+                  <Link href="/drive/earnings" className="hover:text-[#0F766E] transition">Earnings</Link>
+                  <Link href="/drive/profile" className="hover:text-[#0F766E] transition">Driver Profile</Link>
+                  <Link href="/support" className="hover:text-[#0F766E] transition">Support</Link>
+                </>
+              )}
+            </Show>
           </div>
 
-          {/* Auth Section (Top Right - Appears on Mobile & PC) */}
+          {/* --- AUTH SECTION (Top Right) --- */}
           <div className="flex items-center gap-5">
             <Show when="signed-in">
+              {/* Radically simplified: Just the profile picture since nav links handle the rest now */}
               <div className="flex items-center gap-4">
-                {/* Hide the word Dashboard on mobile, keep it on PC */}
-                <Link
-                  href={dashboardLink}
-                  className="hidden md:block text-sm font-bold text-slate-500 hover:text-[#0F766E] transition"
-                >
-                  Dashboard
-                </Link>
                 <UserButton afterSignOutUrl="/" />
               </div>
             </Show>
@@ -81,13 +118,11 @@ export default function Navbar() {
                 </button>
               </SignInButton>
 
-              {/* Hide "Book Now" pill on mobile to save space, keep on PC */}
               <Link
                 href="/search"
                 className="
-                  hidden
-                  md:block
-                  bg-linear-to-r from-[#0F766E] to-[#0891B2]
+                  hidden md:block
+                  bg-linera-to-r from-[#0F766E] to-[#0891B2]
                   text-white px-5 py-2.5 rounded-full text-sm font-bold
                   shadow-lg shadow-cyan-100 hover:scale-105 transition
                 "
@@ -100,43 +135,42 @@ export default function Navbar() {
       </nav>
 
       {/* --- MOBILE BOTTOM PILL TRAY (Hidden on PC) --- */}
-      <div className="md:hidden fixed bottom-6 inset-x-6 z-50 mx-auto max-w-sm">
-      <div className="bg-white/50 backdrop-blur-sm backdrop-saturate-200 border border-[#0F5A53]/60 shadow-[0_8px_32px_rgba(15,118,110,0.15)] rounded-full px-4 py-2.5 flex items-center justify-around">          
-          {/* Always Show: Search */}
-          <BottomNavLink 
-            href="/search" 
-            icon={<Search size={22} />} 
-            label="Ride" 
-            isActive={pathname === '/search'} 
-          />
-
-          {/* Show if Signed In: Dashboard */}
-          <Show when="signed-in">
-            <BottomNavLink 
-              href={dashboardLink} 
-              icon={<LayoutDashboard size={22} />} 
-              label="Dash" 
-              isActive={pathname === dashboardLink || pathname === '/onboarding'} 
-            />
+      <div className="md:hidden fixed bottom-5 inset-x-6 z-50 mx-auto max-w-sm transition-colors duration-300">
+        <div className={`
+          backdrop-blur-sm backdrop-saturate-200 border shadow-lg rounded-full px-4 py-1.5 flex items-center justify-around transition-colors duration-500
+          ${isDarkBg 
+            ? 'bg-slate-900/60 border-slate-700/80 shadow-black/20' // DARK MODE GLASS
+            : 'bg-white/60 border-[#0F5A53]/30 shadow-[#0F766E]/10' // LIGHT MODE GLASS
+          }
+        `}>         
+          
+          {/* 1. VIEW: SIGNED OUT */}
+          <Show when="signed-out">
+            <BottomNavLink href="/search" icon={<Search size={22} />} label="Ride" isActive={pathname === '/search'} isDarkBg={isDarkBg} />
+            <BottomNavLink href="/drive" icon={<Car size={22} />} label="Drive" isActive={pathname === '/drive'} isDarkBg={isDarkBg} />
+            <BottomNavLink href="/support" icon={<LifeBuoy size={22} />} label="Support" isActive={pathname === '/support'} isDarkBg={isDarkBg} />
           </Show>
 
-          {/* Show if NOT a Driver: Drive */}
-          {userRole !== "driver" && (
-            <BottomNavLink 
-              href="/drive" 
-              icon={<Car size={22} />} 
-              label="Drive" 
-              isActive={pathname === '/drive'} 
-            />
-          )}
-
-          {/* Always Show: Support */}
-          <BottomNavLink 
-            href="/support" 
-            icon={<LifeBuoy size={22} />} 
-            label="Support" 
-            isActive={pathname === '/support'} 
-          />
+          <Show when="signed-in">
+            {/* 2. VIEW: LOGGED IN AS RIDER */}
+            {userRole !== "driver" ? (
+              <>
+                <BottomNavLink href="/search" icon={<LayoutGrid size={22} />} label="Services" isActive={pathname === '/search'} isDarkBg={isDarkBg} />
+                <BottomNavLink href="/favourites" icon={<Heart size={22} />} label="Favs" isActive={pathname === '/favourites'} isDarkBg={isDarkBg} />
+                <BottomNavLink href="/account" icon={<User size={22} />} label="Profile" isActive={pathname === '/account'} isDarkBg={isDarkBg} />
+                <BottomNavLink href="/support" icon={<LifeBuoy size={22} />} label="Support" isActive={pathname === '/support'} isDarkBg={isDarkBg} />
+              </>
+            ) : 
+            /* 3. VIEW: LOGGED IN AS DRIVER */
+            (
+              <>
+                <BottomNavLink href="/drive/dashboard" icon={<LayoutDashboard size={22} />} label="Dash" isActive={pathname === '/drive/dashboard'} isDarkBg={isDarkBg} />
+                <BottomNavLink href="/drive/earnings" icon={<Wallet size={22} />} label="Earnings" isActive={pathname === '/drive/earnings'} isDarkBg={isDarkBg} />
+                <BottomNavLink href="/drive/profile" icon={<UserCircle size={22} />} label="Profile" isActive={pathname === '/drive/profile'} isDarkBg={isDarkBg} />
+                <BottomNavLink href="/support" icon={<LifeBuoy size={22} />} label="Support" isActive={pathname === '/support'} isDarkBg={isDarkBg} />
+              </>
+            )}
+          </Show>
 
         </div>
       </div>
@@ -145,18 +179,24 @@ export default function Navbar() {
 }
 
 // --- HELPER COMPONENT FOR BOTTOM TRAY LINKS ---
-function BottomNavLink({ href, icon, label, isActive }) {
+function BottomNavLink({ href, icon, label, isActive, isDarkBg }) {
+  
+  // Dynamic color logic based on the background!
+  const activeColor = isDarkBg ? "text-emerald-400" : "text-[#0F766E]";
+  const inactiveColor = isDarkBg ? "text-slate-400 hover:text-slate-200" : "text-slate-500 hover:text-slate-800";
+  const activeBg = isDarkBg ? "bg-slate-800/80" : "bg-teal-50";
+
   return (
     <Link
       href={href}
       className={`
-        flex flex-col items-center justify-center w-14 gap-1 transition-all duration-200
-        ${isActive ? "text-[#0F766E]" : "text-slate-400 hover:text-slate-600"}
+        flex flex-col items-center justify-center w-14 gap-1 transition-all duration-300
+        ${isActive ? activeColor : inactiveColor}
       `}
     >
       <div className={`
-        p-1.5 rounded-full transition-all duration-200
-        ${isActive ? "bg-teal-50 scale-110" : "bg-transparent"}
+        p-1.5 rounded-full transition-all duration-300
+        ${isActive ? `${activeBg} scale-110` : "bg-transparent"}
       `}>
         {icon}
       </div>
