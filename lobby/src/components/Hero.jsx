@@ -27,22 +27,16 @@ export default function Hero() {
         </div>
 
         {/* Headline */}
-        <h1 className="max-w-5xl text-5xl md:text-8xl font-[Proxima_Nova_Semibold] tracking-tight text-slate-900 leading-[0.95] mb-8">
+        <h1 className="max-w-4xl text-4xl sm:text-5xl md:text-7xl font-[Proxima_Nova_Semibold] tracking-tight text-slate-900 leading-[0.98] mb-5 md:mb-6">
           Get There.
-          <span className="block text-[#0F766E] font-[Sailors_Slant_Normal]">
+          <span className="block text-[#0F766E]">
             The Local Way.
           </span>
         </h1>
 
         {/* Tagline */}
-        <p className="text-2xl md:text-3xl font-[Proxima_Nova_Semibold] text-slate-500 mb-5">
+        <p className="text-xl md:text-2xl font-[Proxima_Nova_Semibold] text-slate-500 mb-6">
           Call. Confirm. Go.
-        </p>
-
-        <p className="max-w-2xl text-lg text-slate-500 font-medium leading-relaxed mb-12">
-          Connecting riders and drivers directly across Nagaland.
-          No middlemen, no surge pricing—just local rides, trusted drivers,
-          and fair fares.
         </p>
 
         {/* Floating Search Container - Tighter padding on mobile */}
