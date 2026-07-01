@@ -12,7 +12,7 @@ export default function Footer() {
           
           {/* Column 1: Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="text-2xl font-extrabold tracking-tight text-white block mb-4">
+            <Link href="/" className="text-2xl font-[Sailors_Slant_Normal] tracking-tight text-white block mb-4">
              THE LOBBY<span className="text-[#F08991]">.</span>
             </Link>
 

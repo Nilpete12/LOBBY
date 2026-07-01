@@ -36,18 +36,18 @@ export default function Hero() {
         </h1>
 
         {/* Tagline */}
-        <p className="text-2xl md:text-3xl font-[Sailors_Slant_Italic] text-slate-500 italic font-semibold mb-5">
+        <p className="text-2xl md:text-3xl font-[Proxima_Nova_Semibold] text-slate-500 mb-5">
           Call. Confirm. Go.
         </p>
 
-        {/* <p className="max-w-2xl text-lg text-slate-500 font-medium leading-relaxed mb-12">
+        <p className="max-w-2xl text-lg text-slate-500 font-medium leading-relaxed mb-12">
           Connecting riders and drivers directly across Nagaland.
           No middlemen, no surge pricing—just local rides, trusted drivers,
           and fair fares.
-        </p> */}
+        </p>
 
         {/* Floating Search Container - Tighter padding on mobile */}
-        <div className="bg-white/90 backdrop-blur-xl p-3 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(15,90,83,0.15)] w-full max-w-3xl border border-white">
+        <div className="bg-white/90 backdrop-blur-xl p-3 md:p-6 rounded-3xl md:rounded-4xl shadow-[0_20px_60px_-15px_rgba(15,90,83,0.15)] w-full max-w-3xl border border-white">
           
           {/* Input Row */}
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
@@ -93,7 +93,7 @@ export default function Hero() {
 function FeatureItem({ text }) {
   return (
     <span className="flex items-center gap-2 text-[13px] md:text-sm font-semibold text-slate-500">
-      <CheckCircle2 className="text-[#0F766E] w-4 h-4 md:w-[18px] md:h-[18px]" strokeWidth={2.5} /> 
+      <CheckCircle2 className="text-[#0F766E] w-4 h-4 md:w-4.5 md:h-4.5" strokeWidth={2.5} /> 
       {text}
     </span>
   );
