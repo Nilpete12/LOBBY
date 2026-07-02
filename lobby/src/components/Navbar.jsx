@@ -70,7 +70,7 @@ export default function Navbar() {
           </Link>
 
           {/* --- DESKTOP NAVIGATION (Hidden on Mobile) --- */}
-          <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
+          <div className="hidden md:flex items-center mr-10 gap-8 text-sm font-semibold text-slate-600">
             
             {/* 1. VIEW: SIGNED OUT */}
             <Show when="signed-out">
@@ -95,7 +95,7 @@ export default function Navbar() {
                 <>
                   <Link href="/drive/dashboard" className="hover:text-[#0F766E] transition">Dashboard</Link>
                   <Link href="/drive/earnings" className="hover:text-[#0F766E] transition">Earnings</Link>
-                  <Link href="/drive/profile" className="hover:text-[#0F766E] transition">Driver Profile</Link>
+                  <Link href="/drive/TripHistory" className="hover:text-[#0F766E] transition">Trip History</Link>
                   <Link href="/support" className="hover:text-[#0F766E] transition">Support</Link>
                 </>
               )}
