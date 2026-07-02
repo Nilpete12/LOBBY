@@ -90,9 +90,9 @@ export default function RiderDashboard() {
       <div className="mx-auto max-w-4xl">
 
         {/* Header */}
-        <div className="mb-6 flex flex-col gap-5 rounded-[1.5rem] border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:rounded-[2rem] sm:p-8">
+        <div className="mb-6 flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:rounded-4xl sm:p-8">
           <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] text-xl font-bold text-[#0F766E] shadow-sm sm:h-16 sm:w-16 sm:text-2xl">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-[#DCFCE7] to-[#DBEAFE] text-xl font-bold text-[#0F766E] shadow-sm sm:h-16 sm:w-16 sm:text-2xl">
               {user.imageUrl ? (
                 <Image
                   src={user.imageUrl}
@@ -127,9 +127,9 @@ export default function RiderDashboard() {
         </div>
 
         {/* Recent Contacts */}
-        <div className="min-h-[26rem] rounded-[1.5rem] border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-[2rem] sm:p-8">
+        <div className="min-h-104 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-8">
           <div className="mb-5 flex items-center gap-3 border-b border-slate-100 pb-5 sm:mb-6 sm:pb-6">
-            <div className="rounded-2xl bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] p-2.5 text-[#0F766E] shadow-sm sm:p-3">
+            <div className="rounded-2xl bg-linear-to-br from-[#DCFCE7] to-[#DBEAFE] p-2.5 text-[#0F766E] shadow-sm sm:p-3">
               <History size={24} />
             </div>
 
@@ -164,7 +164,7 @@ export default function RiderDashboard() {
                 >
                   <div className="flex items-center gap-3 sm:gap-4">
                     {/* Driver Pic */}
-                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] shadow-sm">
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-linear-to-br from-[#DCFCE7] to-[#DBEAFE] shadow-sm">
                       {driver.profilePic ? (
                         <Image
                           src={driver.profilePic}
@@ -222,7 +222,7 @@ export default function RiderDashboard() {
         {/* Modal */}
         {showComplaint && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-3 sm:items-center sm:p-4">
-            <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-[2rem] border border-slate-200 bg-white/95 p-5 text-left shadow-2xl backdrop-blur-sm sm:rounded-[2rem] sm:p-8 sm:text-center">
+            <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-4xl border border-slate-200 bg-white/95 p-5 text-left shadow-2xl backdrop-blur-sm sm:rounded-4xl sm:p-8 sm:text-center">
               <h3 className="mb-4 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
                 Report an Issue
               </h3>
