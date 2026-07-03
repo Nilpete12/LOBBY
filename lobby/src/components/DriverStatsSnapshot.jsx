@@ -19,7 +19,7 @@ export default function DriverStatsSnapshot() {
         
         {/* Section Header */}
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900">Today's Overview</h2>
+          <h2 className="text-xl font-bold text-slate-900">Today&apos;s Overview</h2>
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <Clock size={14} /> Auto-updating
           </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Download, X } from "lucide-react";
 
 const DISMISSED_AT_KEY = "installPopupDismissedAt";
@@ -27,10 +28,13 @@ function wasRecentlyDismissed() {
   return dismissedAt && Date.now() - dismissedAt < DISMISS_COOLDOWN_MS;
 }
 
+function markInstallDismissed() {
+  localStorage.setItem(DISMISSED_AT_KEY, String(Date.now()));
+}
+
 export default function InstallPopup() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [installMode, setInstallMode] = useState("native");
 
   useEffect(() => {
     if (wasRecentlyDismissed() || isStandaloneApp()) return;
@@ -40,7 +44,6 @@ export default function InstallPopup() {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setInstallMode("native");
 
       showTimer = window.setTimeout(() => {
         setShowPopup(true);
@@ -49,7 +52,7 @@ export default function InstallPopup() {
 
     const handleInstalled = () => {
       setShowPopup(false);
-      localStorage.setItem(DISMISSED_AT_KEY, String(Date.now()));
+      markInstallDismissed();
     };
 
     window.addEventListener(
@@ -63,7 +66,6 @@ export default function InstallPopup() {
     );
 
     if (isIOSSafari()) {
-      setInstallMode("ios");
       showTimer = window.setTimeout(() => {
         setShowPopup(true);
       }, 2500);
@@ -94,7 +96,8 @@ export default function InstallPopup() {
         setShowPopup(false);
       }
 
-      localStorage.setItem(DISMISSED_AT_KEY, String(Date.now()));
+      setShowPopup(false);
+      markInstallDismissed();
       setDeferredPrompt(null);
       return;
     }
@@ -104,12 +107,12 @@ export default function InstallPopup() {
 
   const handleClose = () => {
     setShowPopup(false);
-    localStorage.setItem(DISMISSED_AT_KEY, String(Date.now()));
+    markInstallDismissed();
   };
 
   if (!showPopup) return null;
 
-  const isIOSMode = installMode === "ios";
+  const isIOSMode = !deferredPrompt;
 
   return (
     <div
@@ -129,10 +132,13 @@ export default function InstallPopup() {
 
       <div className="flex items-center gap-4 mb-5">
         <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] shadow-md shrink-0">
-          <img
+          <Image
             src="/favicon-512.png"
             alt="THE LOBBY"
+            width={56}
+            height={56}
             className="w-full h-full object-cover"
+            sizes="56px"
           />
         </div>
 

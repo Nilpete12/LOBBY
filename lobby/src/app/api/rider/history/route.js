@@ -1,23 +1,23 @@
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Analytics from '@/models/Analytics';
 import User from '@/models/User';
 
-export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const riderId = searchParams.get('riderId');
+export async function GET() {
+  const { userId } = await auth();
 
-  if (!riderId) {
+  if (!userId) {
     return NextResponse.json(
-      { success: false, message: 'riderId is required' },
-      { status: 400 }
+      { success: false, message: 'Unauthorized' },
+      { status: 401 }
     );
   }
 
   try {
     await connectDB();
 
-    const events = await Analytics.find({ type: 'call_click', riderId })
+    const events = await Analytics.find({ type: 'call_click', riderId: userId })
       .sort({ timestamp: -1 })
       .limit(50)
       .lean();

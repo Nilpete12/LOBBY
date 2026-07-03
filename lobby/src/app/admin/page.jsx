@@ -20,6 +20,7 @@ export default function AdminPage() {
   maintenance: false,
   registration: true
 });
+  const [resetState, setResetState] = useState({ status: 'idle', message: '' });
 
   const [stats, setStats] = useState({ totalUsers: 0, totalDrivers: 0, activeDrivers: 0, totalCalls: 0 });
 
@@ -73,6 +74,35 @@ const resolveComplaint = async (id) => {
     await fetch(`${API_BASE_URL}/admin/logout`, { method: 'POST' });
     setIsAuthenticated(false);
     router.push('/');
+  };
+
+  const handleResetAnalytics = async () => {
+    if (!window.confirm("Are you sure you want to wipe all analytics data? This cannot be undone.")) return;
+
+    setResetState({ status: 'loading', message: '' });
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/analytics/reset`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Analytics reset failed');
+      }
+
+      setStats(prev => ({ ...prev, totalCalls: 0 }));
+      setResetState({
+        status: 'success',
+        message: `Deleted ${data.deletedCount || 0} analytics records.`,
+      });
+    } catch (error) {
+      console.error('Failed to reset analytics', error);
+      setResetState({
+        status: 'error',
+        message: 'Analytics data could not be reset. Please try again.',
+      });
+    }
   };
 
   if (isCheckingAuth) {
@@ -174,11 +204,21 @@ const resolveComplaint = async (id) => {
               <h3 className="font-bold text-red-800 mb-2">Danger Zone</h3>
               <p className="text-sm text-red-600 mb-4">Irreversible actions for system management.</p>
               <button 
-                onClick={() => window.confirm("Are you surely you want to wipe all analytics data? This cannot be undone.") && alert("Data reset command sent.")}
-                className="bg-white text-red-600 border border-red-200 font-bold py-2 px-4 rounded-lg text-sm hover:bg-red-600 hover:text-white transition"
+                onClick={handleResetAnalytics}
+                disabled={resetState.status === 'loading'}
+                className="bg-white text-red-600 border border-red-200 font-bold py-2 px-4 rounded-lg text-sm hover:bg-red-600 hover:text-white transition disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Reset All Analytics Data
+                {resetState.status === 'loading' ? 'Resetting...' : 'Reset All Analytics Data'}
               </button>
+              {resetState.message && (
+                <p
+                  className={`mt-3 text-sm font-semibold ${
+                    resetState.status === 'success' ? 'text-green-700' : 'text-red-700'
+                  }`}
+                >
+                  {resetState.message}
+                </p>
+              )}
             </div>
           </div>
         );

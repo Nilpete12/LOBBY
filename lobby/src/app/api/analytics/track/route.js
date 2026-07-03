@@ -1,10 +1,21 @@
+import { auth } from '@clerk/nextjs/server';
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Analytics from '@/models/Analytics';
+import { rateLimit } from '@/lib/rateLimit';
 
 export async function POST(request) {
+  const limited = rateLimit(request, {
+    keyPrefix: 'analytics-track',
+    limit: 30,
+    windowMs: 60 * 1000,
+  });
+
+  if (limited) return limited;
+
   try {
+    const { userId } = await auth();
     const body = await request.json();
 
     if (body.type !== 'call_click') {
@@ -26,7 +37,7 @@ export async function POST(request) {
     await Analytics.create({
       type: 'call_click',
       driverId: body.driverId,
-      riderId: typeof body.riderId === 'string' ? body.riderId : undefined,
+      riderId: userId || undefined,
     });
 
     return NextResponse.json({ success: true }, { status: 201 });

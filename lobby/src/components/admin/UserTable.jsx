@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
 import { CheckCircle, Clock, Trash2, Search } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
@@ -97,7 +98,18 @@ export default function UserTable({ role, limit }) {
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold overflow-hidden">
-                      {user.profilePic ? <img src={user.profilePic} alt={user.fullName} className="w-full h-full object-cover"/> : user.fullName[0]}
+                      {user.profilePic ? (
+                        <Image
+                          src={user.profilePic}
+                          alt={user.fullName}
+                          width={40}
+                          height={40}
+                          className="w-full h-full object-cover"
+                          sizes="40px"
+                        />
+                      ) : (
+                        user.fullName[0]
+                      )}
                     </div>
                     <div>
                       <div className="font-bold text-slate-900">{user.fullName}</div>

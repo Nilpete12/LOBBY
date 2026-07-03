@@ -77,9 +77,7 @@ export default function RiderDashboard() {
 
     const fetchHistory = async () => {
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/rider/history?riderId=${user.id}`
-        );
+        const res = await fetch(`${API_BASE_URL}/rider/history`);
         const data = await res.json();
 
         if (data.success) {

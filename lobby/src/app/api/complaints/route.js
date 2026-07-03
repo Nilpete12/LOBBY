@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Complaint from '@/models/Complaint';
+import { rateLimit } from '@/lib/rateLimit';
 
 const ALLOWED_ROLES = new Set(['rider', 'driver', 'guest']);
 
@@ -9,6 +10,14 @@ function cleanString(value, maxLength = 5000) {
 }
 
 export async function POST(request) {
+  const limited = rateLimit(request, {
+    keyPrefix: 'complaints',
+    limit: 5,
+    windowMs: 10 * 60 * 1000,
+  });
+
+  if (limited) return limited;
+
   try {
     const body = await request.json();
     const name = cleanString(body.name, 160);
