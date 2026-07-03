@@ -20,7 +20,7 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className="py-28 border-y border-slate-200 bg-gradient-to-b from-[#F8FAFC] via-white to-[#F0FDF4]">
+    <section className="py-28 border-y border-slate-200 bg-linear-to-b from-[#F8FAFC] via-white to-[#F0FDF4]">
       <div className="max-w-7xl mx-auto px-6">
         
         <div className="text-center max-w-2xl mx-auto mb-20">

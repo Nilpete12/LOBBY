@@ -7,11 +7,11 @@ export default function JoinSteps() {
         
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <div>
-            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-[1.1] text-slate-900 mb-6">
+            <h2 className="text-3xl md:text-6xl font-[Proxima_Nova_Extrabold] tracking-tight leading-[1.1] text-slate-900 mb-6">
               Simple steps to get started.
             </h2>
 
-            <p className="text-slate-500 font-medium mb-8 text-lg leading-relaxed">
+            <p className="text-slate-500 font-[Proxima_Nova_Semibold] mb-8 text-lg leading-relaxed">
               We verify every driver to ensure safety. Have your Driving License and Vehicle Registration (RC) ready.
             </p>
 
@@ -22,7 +22,7 @@ export default function JoinSteps() {
                 { num: "03", title: "Get Verified", text: "Our team approves your profile within 24 hours." },
                 { num: "04", title: "Go Online", text: "Toggle your status to Green and start receiving calls." }
               ].map((step, i) => (
-                <div key={i} className="flex gap-6">
+                <div key={i} className="flex gap-6 font-[Proxima_Nova_Extrabold] items-start">
                   <span className="text-3xl font-extrabold text-[#0F766E] opacity-80">
                     {step.num}
                   </span>
@@ -47,8 +47,8 @@ export default function JoinSteps() {
               Ready to hit the road?
             </h3>
 
-            <p className="text-slate-500 font-medium mb-8">
-              Join THE LOBBY today!
+            <p className="text-slate-500 font-[Proxima_Nova_Semibold] mb-8">
+              Join <span className="font-[Sailors_Slant_Normal] text-[#0F766E]">THE LOBBY</span> today!
             </p>
 
             <Link

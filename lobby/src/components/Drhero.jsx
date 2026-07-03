@@ -18,13 +18,13 @@ export default function DriverHero() {
             Accepting New Drivers
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.05]">
+          <h1 className="text-5xl md:text-7xl font-[Proxima_Nova_Semibold] tracking-tight mb-6 leading-[1.05]">
             Your Car. <br/>
-            <span className="text-[#0F766E]">Your Business.</span>
+            <span className="font-[Sailors_Slant_Normal] text-[#0F766E]">Your Business.</span>
           </h1>
           
-          <p className="text-xl font-medium text-slate-500 mb-8 leading-relaxed md:w-4/5">
-            Stop paying huge commissions. Join THE LOBBY to connect directly with riders in your city and keep 100% of the fare.
+          <p className="text-lg font-[Proxima_Nova_Semibold] text-slate-500 mb-8 leading-relaxed md:w-4/5">
+            Stop paying huge commissions. Join <span className="font-[Sailors_Slant_Normal]">THE LOBBY</span> to connect directly with riders in your city and keep 100% of the fare.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">

@@ -28,8 +28,8 @@ export default function DriverBenefits() {
     <section className="py-24 bg-[#F8FAFC]">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 mb-4">
-            Why drive with THE LOBBY?
+          <h2 className="text-3xl md:text-4xl font-[Proxima_Nova_Extrabold] tracking-tight text-slate-900 mb-4">
+            Why drive with <span className="font-[Sailors_Slant_Normal] text-[#0F766E]">THE LOBBY</span>?
           </h2>
           <p className="text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
             We are building a directory, not a dispatch service. You are the boss of your own taxi business.
@@ -46,11 +46,11 @@ export default function DriverBenefits() {
                 {item.icon}
               </div>
 
-              <h3 className="text-xl font-bold tracking-tight text-slate-900 mb-3">
+              <h3 className="text-xl font-[Sailors_Slant_Normal] tracking-tight text-slate-900 mb-3">
                 {item.title}
               </h3>
 
-              <p className="text-slate-500 font-medium leading-relaxed text-sm">
+              <p className="text-slate-500 font-[Proxima_Nova_Semibold] leading-relaxed text-sm">
                 {item.desc}
               </p>
             </div>
