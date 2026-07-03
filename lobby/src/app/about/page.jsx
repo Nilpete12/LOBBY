@@ -72,7 +72,8 @@ export default function AboutPage() {
           <CreatorCard
             name="Khalong Kichu"
             role="Chief Executive Officer"
-            image="https://api.dicebear.com/7.x/avataaars/svg?seed=veget"
+            image="/khalong-kichu.jpg"
+            imagePosition="50% 45%"
             bio="The visionary ensuring THE LOBBY delivers the best experience for both riders and drivers across the city."
             links={{
               github: "https://github.com/khalongkichu348-ops",
