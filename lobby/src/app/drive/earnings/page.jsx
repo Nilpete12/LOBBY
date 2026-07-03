@@ -84,7 +84,7 @@ export default function DriverEarningsPage() {
           </div>
         </section>
 
-        <section className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+        <section className="grid gap-3 sm:grid-cols-3 sm:gap-4 font-[Sailors_Slant_Normal]">
           <StatCard icon={PhoneCall} label="Total rider calls" value={stats.totalCalls} />
           <StatCard icon={CalendarDays} label="Calls today" value={stats.callsToday} />
           <StatCard icon={Wallet} label="Calls this week" value={stats.callsThisWeek} />
@@ -99,11 +99,11 @@ export default function DriverEarningsPage() {
               <h2 className="text-xl font-extrabold tracking-tight text-slate-900">
                 App-collected fare
               </h2>
-              <p className="mt-2 text-4xl font-extrabold tracking-tight text-slate-900">
+              <p className="mt-2 text-4xl font-[Sailors_Slant_Normal] tracking-tight text-slate-900">
                 ₹0
               </p>
               <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-slate-500">
-                THE LOBBY does not collect trip payments from riders during this pilot.
+                <span className="font-[Sailors_Slant_Normal]">The Lobby</span> does not collect trip payments from riders during this pilot.
               </p>
             </div>
           </div>
