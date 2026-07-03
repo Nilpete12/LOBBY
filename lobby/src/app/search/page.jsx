@@ -8,6 +8,11 @@ import API_BASE_URL from '@/config';
 
 const FILTERS = ['All Rides', 'Hatchback', 'SUV', 'Top Rated'];
 
+function getInitialSearchQuery() {
+  if (typeof window === 'undefined') return '';
+  return new URLSearchParams(window.location.search).get('q') || '';
+}
+
 async function requestDrivers(query = '') {
   const params = new URLSearchParams();
   if (query.trim()) params.set('destination', query.trim());
@@ -25,7 +30,7 @@ async function requestDrivers(query = '') {
 
 export default function SearchPage() {
   const { user } = useUser();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(getInitialSearchQuery);
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -65,8 +70,9 @@ export default function SearchPage() {
     let isMounted = true;
 
     async function loadInitialDrivers() {
+      const initialQuery = getInitialSearchQuery();
       try {
-        const initialDrivers = await requestDrivers();
+        const initialDrivers = await requestDrivers(initialQuery);
         if (isMounted) setDrivers(initialDrivers);
       } catch (err) {
         console.error("Fetch error:", err);

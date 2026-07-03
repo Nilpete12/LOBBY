@@ -40,7 +40,7 @@ export default function Hero() {
         </p>
 
         {/* Floating Search Container - Tighter padding on mobile */}
-        <div className="bg-white/90 backdrop-blur-xl p-3 md:p-6 rounded-3xl md:rounded-4xl shadow-[0_20px_60px_-15px_rgba(15,90,83,0.15)] w-full max-w-3xl border border-white">
+        <form action="/search" className="bg-white/90 backdrop-blur-xl p-3 md:p-6 rounded-3xl md:rounded-4xl shadow-[0_20px_60px_-15px_rgba(15,90,83,0.15)] w-full max-w-3xl border border-white">
           
           {/* Input Row */}
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
@@ -56,13 +56,15 @@ export default function Hero() {
               {/* Text Input - Slightly shorter on mobile */}
               <input 
                 type="text" 
+                name="q"
                 placeholder="Where to?" 
+                aria-label="Destination"
                 className="w-full h-12 md:h-14 bg-transparent outline-none text-base md:text-lg text-slate-800 placeholder-slate-400 px-2"
               />
             </div>
 
             {/* Search Button */}
-            <button className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#0F766E] hover:bg-[#0a423d] text-white rounded-xl md:rounded-2xl font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 shrink-0 text-sm md:text-base">
+            <button type="submit" className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#0F766E] hover:bg-[#0a423d] text-white rounded-xl md:rounded-2xl font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 shrink-0 text-sm md:text-base">
               Search <ArrowRight size={18} className="md:w-5 md:h-5" />
             </button>
           </div>
@@ -76,7 +78,7 @@ export default function Hero() {
             <span className="hidden md:block text-slate-200">|</span>
             <FeatureItem text="100% Direct Contact" />
           </div>
-        </div>
+        </form>
 
       </div>
     </section>
