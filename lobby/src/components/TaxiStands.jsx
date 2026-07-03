@@ -74,11 +74,11 @@ export default function TaxiStands({ isDriverView = false }) {
         
         {/* DYNAMIC SECTION HEADER */}
         <div className="mb-12 md:text-center max-w-2xl md:mx-auto">
-          <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4 tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-[Proxima_Nova_Semibold] text-slate-900 mb-4 tracking-tight">
             {isDriverView ? (
-              <>Current <span className="text-[#0F766E]">Demand Zones</span></>
+              <>Current <span className="text-[#0F766E] font-[Sailors_Slant_Normal]">Demand Zones</span></>
             ) : (
-              <>Find Rides from <span className="text-[#0F766E]">Major Stands</span></>
+              <>Find Rides from <span className="text-[#0F766E] font-[Sailors_Slant_Normal]">Major Stands</span></>
             )}
           </h2>
           <p className="text-slate-500 font-medium text-lg">
@@ -106,7 +106,7 @@ export default function TaxiStands({ isDriverView = false }) {
                 </span>
               </div>
 
-              <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-[#0F766E] transition-colors">
+              <h3 className="text-xl font-[Proxima_Nova_Semibold] text-slate-900 mb-2 group-hover:text-[#0F766E] transition-colors">
                 {stand.name}
               </h3>
               <p className="text-sm text-slate-500 font-medium mb-6 line-clamp-2">
@@ -142,14 +142,14 @@ export default function TaxiStands({ isDriverView = false }) {
           {visibleCount < standsData.length ? (
             <button
               onClick={showMore}
-              className="bg-slate-900 dark-section text-white px-8 py-3.5 rounded-full font-bold text-sm hover:bg-slate-800 transition shadow-lg shadow-slate-200 flex items-center gap-2"
+              className="bg-slate-900 dark-section text-white px-8 py-3.5 rounded-full font-[Proxima_Nova_Semibold] text-sm hover:bg-slate-800 transition shadow-lg shadow-slate-200 flex items-center gap-2"
             >
               View All Zones
             </button>
           ) : (
             <button
               onClick={showLess}
-              className="bg-white border border-slate-200 text-slate-700 px-8 py-3.5 rounded-full font-bold text-sm hover:bg-slate-50 transition flex items-center gap-2"
+              className="bg-white border border-slate-200 text-slate-700 px-8 py-3.5 rounded-full font-[Proxima_Nova_Semibold] text-sm hover:bg-slate-50 transition flex items-center gap-2"
             >
               Show Less
             </button>

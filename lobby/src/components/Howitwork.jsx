@@ -24,8 +24,8 @@ export default function HowItWorks() {
       <div className="max-w-7xl mx-auto px-6">
         
         <div className="text-center max-w-2xl mx-auto mb-20">
-          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-5">
-            How THE LOBBY works
+          <h2 className="text-4xl md:text-5xl font-[Proxima_Nova_Extrabold] tracking-tight text-slate-900 mb-5">
+            How <span className="font-[Sailors_Slant_Normal] text-[#0F766E]">THE LOBBY</span> works
           </h2>
 
           <p className="text-slate-500 text-lg font-medium leading-relaxed">
@@ -45,11 +45,11 @@ export default function HowItWorks() {
                 {step.icon}
               </div>
 
-              <h3 className="text-2xl font-extrabold tracking-tight text-slate-900 mb-4">
+              <h3 className="text-2xl font-[Proxima_Nova_Extrabold] tracking-tight text-slate-900 mb-4">
                 {step.title}
               </h3>
 
-              <p className="text-slate-500 font-medium leading-relaxed px-6">
+              <p className="text-slate-500 font-[Proxima_Nova_Semibold] leading-relaxed px-6">
                 {step.desc}
               </p>
 

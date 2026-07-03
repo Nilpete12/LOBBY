@@ -39,11 +39,11 @@ export default function Features() {
               {item.icon}
             </div>
 
-            <h3 className="text-2xl font-extrabold tracking-tight text-slate-900 mb-4">
+            <h3 className="text-2xl font-[Sailors_Slant_Normal] tracking-tight text-slate-900 mb-4">
               {item.title}
             </h3>
 
-            <p className="text-slate-500 font-medium leading-relaxed">
+            <p className="text-slate-500 font-[Proxima_Nova_Semibold] leading-relaxed">
               {item.desc}
             </p>
           </div>

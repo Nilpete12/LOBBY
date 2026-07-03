@@ -68,7 +68,7 @@ export default function Footer() {
 
         {/* Bottom Section: Copyright */}
         <div className="pt-8 border-t border-[#3F4E4F] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#c7c5c5] font-medium">
-          <p>&copy; {new Date().getFullYear()} THE LOBBY Platform. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} <span className="font-[Sailors_Slant_Normal]">THE LOBBY</span> Platform. All rights reserved.</p>
           <p>Made with ❤️ in the hills.</p>
         </div>
 
