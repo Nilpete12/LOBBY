@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useUser, useClerk } from '@clerk/nextjs';
-import { Phone, Clock, LogOut, History } from 'lucide-react';
+import { Phone, Clock, LogOut, History, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 export default function RiderDashboard() {
@@ -15,27 +15,51 @@ export default function RiderDashboard() {
   const [loading, setLoading] = useState(true);
   const [showComplaint, setShowComplaint] = useState(false);
   const [complaintText, setComplaintText] = useState("");
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportNotice, setReportNotice] = useState(null);
 
   const handleReport = async () => {
     const message = complaintText.trim();
-    if (!message) return;
+    if (!message) {
+      setReportNotice({ type: 'error', message: 'Please describe the issue before submitting.' });
+      return;
+    }
 
-    await fetch(`${API_BASE_URL}/complaints`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: user.id,
-        name: user.fullName,
-        email: user.primaryEmailAddress?.emailAddress,
-        role: user.publicMetadata?.role || 'rider',
-        topic: 'Rider Issue',
-        message
-      })
-    });
+    setIsReporting(true);
 
-    setShowComplaint(false);
-    setComplaintText("");
-    alert("Issue reported to Admin.");
+    try {
+      const res = await fetch(`${API_BASE_URL}/complaints`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          name: user.fullName,
+          email: user.primaryEmailAddress?.emailAddress,
+          role: user.publicMetadata?.role || 'rider',
+          topic: 'Rider Issue',
+          message
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('Complaint submission failed');
+      }
+
+      setShowComplaint(false);
+      setComplaintText("");
+      setReportNotice({
+        type: 'success',
+        message: 'Issue reported. Our team has received it and will review it shortly.'
+      });
+    } catch (error) {
+      console.error("Failed to report issue", error);
+      setReportNotice({
+        type: 'error',
+        message: 'We could not send your report. Please try again.'
+      });
+    } finally {
+      setIsReporting(false);
+    }
   };
 
   useEffect(() => {
@@ -71,6 +95,13 @@ export default function RiderDashboard() {
     fetchHistory();
   }, [isLoaded, isSignedIn, user, router]);
 
+  useEffect(() => {
+    if (!reportNotice) return;
+
+    const timer = window.setTimeout(() => setReportNotice(null), 5000);
+    return () => window.clearTimeout(timer);
+  }, [reportNotice]);
+
   const handleLogout = () => {
     signOut(() => router.push('/'));
   };
@@ -88,6 +119,9 @@ export default function RiderDashboard() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-4xl">
+        {reportNotice && (
+          <ReportNotice notice={reportNotice} onDismiss={() => setReportNotice(null)} />
+        )}
 
         {/* Header */}
         <div className="mb-6 flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:rounded-4xl sm:p-8">
@@ -237,6 +271,7 @@ export default function RiderDashboard() {
               <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
                 <button
                   onClick={() => setShowComplaint(false)}
+                  disabled={isReporting}
                   className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-50 sm:border-transparent sm:py-2"
                 >
                   Cancel
@@ -244,10 +279,10 @@ export default function RiderDashboard() {
 
                 <button
                   onClick={handleReport}
-                  disabled={!complaintText.trim()}
+                  disabled={!complaintText.trim() || isReporting}
                   className="rounded-2xl bg-[#0F766E] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50 sm:py-2"
                 >
-                  Submit
+                  {isReporting ? 'Submitting...' : 'Submit'}
                 </button>
               </div>
             </div>
@@ -255,6 +290,39 @@ export default function RiderDashboard() {
         )}
 
       </div>
+    </div>
+  );
+}
+
+function ReportNotice({ notice, onDismiss }) {
+  const isSuccess = notice.type === 'success';
+  const Icon = isSuccess ? CheckCircle2 : AlertCircle;
+
+  return (
+    <div
+      className={`mb-6 flex items-start gap-3 rounded-2xl border p-4 shadow-sm ${
+        isSuccess
+          ? 'border-green-200 bg-green-50 text-green-800'
+          : 'border-red-200 bg-red-50 text-red-800'
+      }`}
+      role="status"
+    >
+      <div
+        className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+          isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+        }`}
+      >
+        <Icon size={20} />
+      </div>
+      <p className="min-w-0 flex-1 text-sm font-bold leading-relaxed">{notice.message}</p>
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="rounded-full p-1 opacity-70 transition hover:bg-white/60 hover:opacity-100"
+        aria-label="Dismiss message"
+      >
+        <X size={17} />
+      </button>
     </div>
   );
 }

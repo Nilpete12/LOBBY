@@ -1,8 +1,9 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useUser, useClerk } from '@clerk/nextjs'; 
-import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText } from 'lucide-react';
+import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 export default function DriverDashboard() {
@@ -19,6 +20,19 @@ export default function DriverDashboard() {
   const [isOnline, setIsOnline] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingLicense, setUploadingLicense] = useState(false);
+  const [notice, setNotice] = useState(null);
+  const [dashboardError, setDashboardError] = useState('');
+
+  const showNotice = useCallback((type, title, message) => {
+    setNotice({ type, title, message });
+  }, []);
+
+  useEffect(() => {
+    if (!notice) return;
+
+    const timer = window.setTimeout(() => setNotice(null), 4500);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
 
   // --- 1. LOAD DATA (CLERK + MONGODB SYNC) ---
   useEffect(() => {
@@ -45,6 +59,8 @@ export default function DriverDashboard() {
 
     // Inside your useEffect...
     const fetchDriverProfile = async () => {
+      setDashboardError('');
+
       try {
         const res = await fetch(`${API_BASE_URL}/driver/${clerkUser.id}`);
         const data = await res.json();
@@ -58,18 +74,21 @@ export default function DriverDashboard() {
           });
           setIsOnline(data.driver.isAvailable || false);
         } else {
-          // If the backend says "User not found", alert us!
-          alert(`Backend Error: ${data.message}`);
+          const message = data.message || 'Driver profile could not be loaded.';
+          setDashboardError(message);
+          showNotice('error', 'Profile could not load', message);
           console.error("Backend response:", data);
         }
       } catch (err) { 
         console.error("Failed to fetch MongoDB driver data", err); 
-        alert("API Fetch completely failed. Check console.");
+        const message = 'Unable to connect to the driver profile service. Please refresh and try again.';
+        setDashboardError(message);
+        showNotice('error', 'Connection failed', message);
       }
     };
     
     fetchDriverProfile();
-  }, [isLoaded, isSignedIn, clerkUser, router]); 
+  }, [isLoaded, isSignedIn, clerkUser, router, showNotice]);
 
   // --- 2. UPDATE TEXT DETAILS ---
   const handleUpdate = async (newStatus) => {
@@ -93,9 +112,24 @@ export default function DriverDashboard() {
       if (data.success) {
         setDriverDbData(data.driver);
         setIsOnline(data.driver.isAvailable);
-        if (newStatus === undefined) alert("Profile Saved!");
+        if (newStatus === undefined) {
+          showNotice('success', 'Profile saved', 'Your vehicle, phone, and route details were updated.');
+        } else {
+          showNotice(
+            'success',
+            data.driver.isAvailable ? 'You are online' : 'You are offline',
+            data.driver.isAvailable ? 'Riders can now find you in search.' : 'You are hidden from rider search for now.'
+          );
+        }
+      } else {
+        showNotice('error', 'Could not save', data.message || 'Please check your details and try again.');
+        if (newStatus !== undefined) setIsOnline(!newStatus);
       }
-    } catch (err) { alert("Failed to save."); } 
+    } catch (err) {
+      console.error("Failed to save driver profile", err);
+      if (newStatus !== undefined) setIsOnline(!newStatus);
+      showNotice('error', 'Save failed', 'Your changes could not be saved. Please try again.');
+    }
     finally { setIsSaving(false); }
   };
 
@@ -129,16 +163,16 @@ export default function DriverDashboard() {
       if (data.success) {
         setDriverDbData(data.driver);
         if (data.driver.verificationStatus === 'Approved') {
-          alert('✅ AI Verification Successful! Your license is approved.');
+          showNotice('success', 'License approved', 'Your license was verified successfully.');
         } else {
-          alert('⏳ Uploaded! Awaiting manual admin review (AI could not read the name clearly).');
+          showNotice('info', 'License uploaded', 'Your document is now awaiting manual admin review.');
         }
       } else {
-        alert("Upload failed.");
+        showNotice('error', 'Upload failed', data.message || 'Please try uploading the license again.');
       }
     } catch (err) {
       console.error(err);
-      alert('❌ Server error during license upload.');
+      showNotice('error', 'Upload failed', 'The license could not be uploaded. Please try again.');
     } finally {
       setUploadingLicense(false);
     }
@@ -147,13 +181,38 @@ export default function DriverDashboard() {
   const handleLogout = () => { signOut(() => router.push('/')); };
 
   // Show loading while Clerk initializes OR while MongoDB data fetches
-  if (!isLoaded || !driverDbData) return <div className="p-20 text-center text-slate-400 font-bold flex items-center justify-center min-h-screen"><Loader2 className="animate-spin mr-2"/> Loading Dashboard...</div>;
+  if (!isLoaded) return <div className="p-20 text-center text-slate-400 font-bold flex items-center justify-center min-h-screen"><Loader2 className="animate-spin mr-2"/> Loading Dashboard...</div>;
+
+  if (dashboardError && !driverDbData) {
+    return (
+      <div className="min-h-screen bg-slate-50 px-6 py-24">
+        <div className="mx-auto max-w-lg rounded-3xl border border-red-100 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-500">
+            <AlertCircle size={28} />
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Dashboard unavailable</h1>
+          <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">{dashboardError}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-6 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-black"
+          >
+            Refresh Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!driverDbData) return <div className="p-20 text-center text-slate-400 font-bold flex items-center justify-center min-h-screen"><Loader2 className="animate-spin mr-2"/> Loading Dashboard...</div>;
   
   const isVerified = driverDbData.isVerified === true;
 
   return (
     <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6">
       <div className="max-w-5xl mx-auto">
+        {notice && (
+          <DashboardNotice notice={notice} onDismiss={() => setNotice(null)} />
+        )}
         
         {/* Verification Warning */}
         {!isVerified && (
@@ -174,7 +233,14 @@ export default function DriverDashboard() {
             <div className="relative group">
               <div className="w-20 h-20 rounded-full overflow-hidden bg-slate-100 border-2 border-slate-200 flex items-center justify-center font-bold text-2xl text-slate-400">
                 {driverDbData.profilePic || clerkUser.imageUrl ? (
-                  <img src={driverDbData.profilePic || clerkUser.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                  <Image
+                    src={driverDbData.profilePic || clerkUser.imageUrl}
+                    alt="Profile"
+                    width={80}
+                    height={80}
+                    sizes="80px"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   clerkUser.fullName?.charAt(0) || "D"
                 )}
@@ -186,7 +252,7 @@ export default function DriverDashboard() {
                   type="file" 
                   className="hidden" 
                   accept="image/*"
-                  onChange={(e) => handleImageUpload(e.target.files[0], 'profile', clerkUser.id, setDriverDbData)}
+                  onChange={(e) => handleImageUpload(e.target.files[0], 'profile', clerkUser.id, setDriverDbData, showNotice)}
                 />
               </label>
             </div>
@@ -263,7 +329,13 @@ export default function DriverDashboard() {
                 <label className="text-xs font-bold text-slate-400 uppercase ml-1">Vehicle Photo</label>
                 <div className="mt-2 relative h-32 w-full rounded-xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 group">
                   {driverDbData.carPic ? (
-                    <img src={driverDbData.carPic} alt="Car" className="w-full h-full object-cover" />
+                    <Image
+                      src={driverDbData.carPic}
+                      alt="Car"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 480px"
+                      className="object-cover"
+                    />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
                       <UploadCloud size={24} />
@@ -277,7 +349,7 @@ export default function DriverDashboard() {
                       type="file" 
                       className="hidden" 
                       accept="image/*"
-                      onChange={(e) => handleImageUpload(e.target.files[0], 'car', clerkUser.id, setDriverDbData)}
+                      onChange={(e) => handleImageUpload(e.target.files[0], 'car', clerkUser.id, setDriverDbData, showNotice)}
                     />
                   </label>
                 </div>
@@ -342,8 +414,47 @@ export default function DriverDashboard() {
   );
 }
 
+function DashboardNotice({ notice, onDismiss }) {
+  const isSuccess = notice.type === 'success';
+  const isInfo = notice.type === 'info';
+
+  const tone = isSuccess
+    ? 'border-green-200 bg-green-50 text-green-800'
+    : isInfo
+      ? 'border-blue-200 bg-blue-50 text-blue-800'
+      : 'border-red-200 bg-red-50 text-red-800';
+
+  const iconTone = isSuccess
+    ? 'bg-green-100 text-green-700'
+    : isInfo
+      ? 'bg-blue-100 text-blue-700'
+      : 'bg-red-100 text-red-700';
+
+  const Icon = isSuccess ? CheckCircle2 : AlertCircle;
+
+  return (
+    <div className={`mb-6 flex items-start gap-3 rounded-2xl border p-4 shadow-sm ${tone}`} role="status">
+      <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${iconTone}`}>
+        <Icon size={20} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <h2 className="font-bold">{notice.title}</h2>
+        <p className="mt-0.5 text-sm font-medium opacity-85">{notice.message}</p>
+      </div>
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="rounded-full p-1 opacity-70 transition hover:bg-white/60 hover:opacity-100"
+        aria-label="Dismiss message"
+      >
+        <X size={17} />
+      </button>
+    </div>
+  );
+}
+
 // --- HELPER: HANDLE IMAGE UPLOAD ---
-async function handleImageUpload(file, type, clerkId, setDriverDbData) {
+async function handleImageUpload(file, type, clerkId, setDriverDbData, showNotice) {
   if (!file) return;
 
   const formData = new FormData();
@@ -360,12 +471,16 @@ async function handleImageUpload(file, type, clerkId, setDriverDbData) {
     const data = await res.json();
     if (data.success) {
       setDriverDbData(data.driver);
-      alert(`${type === 'profile' ? 'Profile' : 'Car'} photo updated!`);
+      showNotice(
+        'success',
+        `${type === 'profile' ? 'Profile' : 'Car'} photo updated`,
+        'Your new image is now saved to your driver profile.'
+      );
     } else {
-      alert("Upload failed.");
+      showNotice('error', 'Upload failed', data.message || 'Please try uploading the image again.');
     }
   } catch (err) {
     console.error(err);
-    alert("Server error during upload.");
+    showNotice('error', 'Upload failed', 'The image could not be uploaded. Please try again.');
   }
 }

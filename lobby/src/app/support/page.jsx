@@ -116,8 +116,7 @@ export default function ContactPage() {
 
         const result = await res.json();
         if (!result.success) {
-          setFormError("Something went wrong. Please try again.");
-          return;
+          console.warn("Support email notification failed", result);
         }
       }
 
@@ -231,8 +230,8 @@ export default function ContactPage() {
               <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle size={32} />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Message Sent! ✓</h3>
-              <p className="text-slate-500">Thank you for reaching out. Our support team will get back to you within 24 hours.</p>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Request received</h3>
+              <p className="text-slate-500">Thank you for reaching out. Your message is saved in the support queue and our team will get back to you within 24 hours.</p>
               <button onClick={() => setIsSubmitted(false)} className="mt-6 text-sm font-bold text-blue-600 hover:underline transition">
                 Send another message
               </button>
