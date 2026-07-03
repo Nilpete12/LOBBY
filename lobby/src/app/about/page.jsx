@@ -60,7 +60,8 @@ export default function AboutPage() {
           <CreatorCard
             name="Nilesh Sen"
             role="Chief Technical Officer"
-            image="https://api.dicebear.com/7.x/avataaars/svg?seed=happy"
+            image="/nilesh-sen.jpeg"
+            imagePosition="50% 38%"
             bio="The technical bulldozer behind the platform. The force that keeps things moving in THE LOBBY."
             links={{
               github: "https://github.com/Nilpete12",
@@ -129,12 +130,20 @@ function FeatureCard({ icon: Icon, title, desc }) {
   );
 }
 
-function CreatorCard({ name, role, image, bio, links }) {
+function CreatorCard({ name, role, image, imagePosition = "center", bio, links }) {
   return (
     <div className="bg-white/80 backdrop-blur-sm p-8 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl transition flex flex-col items-center text-center">
 
       <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white mb-5 shadow-sm bg-[#F8FAFC]">
-        <img src={image} alt={name} className="w-full h-full object-cover" />
+        <div
+          role="img"
+          aria-label={name}
+          className="w-full h-full bg-cover bg-no-repeat"
+          style={{
+            backgroundImage: `url("${image}")`,
+            backgroundPosition: imagePosition
+          }}
+        />
       </div>
 
       <h3 className="text-2xl font-extrabold tracking-tight text-slate-900">
