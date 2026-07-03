@@ -70,8 +70,7 @@ export default function Navbar() {
           </Link>
 
           {/* --- DESKTOP NAVIGATION (Hidden on Mobile) --- */}
-          <div className="hidden md:flex items-center mr-10 gap-8 text-sm font-semibold text-slate-600">
-            
+          <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-sm font-semibold text-slate-600">            
             {/* 1. VIEW: SIGNED OUT */}
             <Show when="signed-out">
               <Link href="/search" className="hover:text-[#0F766E] transition">Find a Ride</Link>
