@@ -6,7 +6,7 @@ export default function DriverStatsSnapshot() {
   // DUMMY DATA: You will eventually fetch this from your MongoDB database
   // via a Server Component or a `useEffect` fetch to an API route.
   const stats = {
-    earnings: "₹1,250",
+    earnings: "₹ 1,250",
     ridesCompleted: 8,
     rating: 4.9,
     hoursOnline: "4.5h",
@@ -34,13 +34,13 @@ export default function DriverStatsSnapshot() {
               <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-[#0F766E] group-hover:bg-[#0F766E] group-hover:text-white transition-colors">
                 <Wallet size={24} />
               </div>
-              <div className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+              <div className="flex items-center gap-1 text-xs font-[Proxima_Nova_Extrabold] text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
                 <TrendingUp size={12} />
                 {stats.earningsTrend}
               </div>
             </div>
             <p className="text-sm font-semibold text-slate-500 mb-1">Total Earnings</p>
-            <h3 className="text-3xl font-black text-slate-900 tracking-tight">
+            <h3 className="text-3xl font-[Sailors_Slant_Normal] text-slate-900 tracking-tight">
               {stats.earnings}
             </h3>
           </div>
@@ -56,7 +56,7 @@ export default function DriverStatsSnapshot() {
               </div>
             </div>
             <p className="text-sm font-semibold text-slate-500 mb-1">Rides Completed</p>
-            <h3 className="text-3xl font-black text-slate-900 tracking-tight">
+            <h3 className="text-3xl font-[Sailors_Slant_Normal] text-slate-900 tracking-tight">
               {stats.ridesCompleted}
             </h3>
           </div>
@@ -73,10 +73,10 @@ export default function DriverStatsSnapshot() {
             </div>
             <p className="text-sm font-semibold text-slate-500 mb-1">Current Rating</p>
             <div className="flex items-end gap-2">
-              <h3 className="text-3xl font-black text-slate-900 tracking-tight">
+              <h3 className="text-3xl font-[Sailors_Slant_Normal] text-slate-900 tracking-tight">
                 {stats.rating}
               </h3>
-              <span className="text-sm font-bold text-slate-400 mb-1.5">/ 5.0</span>
+              <span className="text-sm font-[Sailors_Slant_Normal] text-slate-400 mb-1.5">/ 5.0</span>
             </div>
           </div>
 

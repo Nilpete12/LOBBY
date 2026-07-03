@@ -60,7 +60,7 @@ export default function DriverHero({ userName = "Nilesh" }) {
           </div>
 
           {/* Greeting */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-slate-900 mb-4 leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-[Sailors_Slant_Normal] tracking-tight text-slate-900 mb-4 leading-tight">
             Ready to drive, <br className="hidden sm:block" />
             <span className={isOnline ? "text-[#0F766E]" : "text-slate-400"}>
               {userName}?

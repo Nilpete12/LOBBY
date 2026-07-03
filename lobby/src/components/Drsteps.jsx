@@ -42,7 +42,7 @@ export default function JoinSteps() {
           </div>
 
           {/* Right Side: CTA Box */}
-          <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-[2rem] p-10 md:p-14 text-center shadow-xl">
+          <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-4xl p-10 md:p-14 text-center shadow-xl">
             <h3 className="text-2xl font-extrabold tracking-tight mb-4 text-slate-900">
               Ready to hit the road?
             </h3>

@@ -42,7 +42,7 @@ export default function DriverBenefits() {
               key={i}
               className="p-8 rounded-3xl bg-white/80 border border-slate-200 shadow-sm hover:shadow-xl transition duration-300 group backdrop-blur-sm"
             >
-              <div className="w-14 h-14 bg-gradient-to-br from-[#DCFCE7] to-[#BFDBFE] rounded-2xl flex items-center justify-center text-[#0F766E] shadow-sm mb-6 group-hover:scale-110 transition">
+              <div className="w-14 h-14 bg-linear-to-br from-[#DCFCE7] to-[#BFDBFE] rounded-2xl flex items-center justify-center text-[#0F766E] shadow-sm mb-6 group-hover:scale-110 transition">
                 {item.icon}
               </div>
 
