@@ -146,10 +146,10 @@ export default function ContactPage() {
     <div className="min-h-screen bg-slate-50 pt-20 pb-12">
       
       {/* Header */}
-      <div className="bg-slate-900 text-white py-16 px-6 mb-12">
+      <div className="bg-[#033b37] text-white py-16 px-6 mb-12">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl font-bold tracking-tight mb-4">How can we help?</h1>
-          <p className="text-slate-400 text-lg">
+          <h1 className="text-4xl font-[Proxima_Nova_Extrabold] tracking-tight mb-4">How can we help?</h1>
+          <p className="text-slate-400 text-lg font-[Proxima_Nova_Semibold]">
             We are here for you. Report an issue, find a lost item, or just say hello.
           </p>
         </div>
@@ -159,7 +159,7 @@ export default function ContactPage() {
         
         {/* --- LEFT COLUMN: Info & FAQ --- */}
         <div className="space-y-8">
-          <section className="grid sm:grid-cols-2 gap-4">
+          <section className="grid sm:grid-cols-2 gap-4 font-[Proxima_Nova_Extrabold]">
             <div className="bg-linear-to-br from-blue-100/90 to-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
               <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4">
                 <Phone size={24} />
@@ -191,8 +191,8 @@ export default function ContactPage() {
               <MapPin size={24} />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900">THE LOBBY HQ</h3>
-              <p className="text-slate-500 mt-1 leading-relaxed">
+              <h3 className="font-bold text-slate-900"><span className="font-[Sailors_Slant_Normal] ">THE LOBBY</span> HQ</h3>
+              <p className="text-slate-500 mt-1 font-[Proxima_Nova_Semibold] text-sm">
                 Laitumkhrah Main Road,<br />
                 Near Beat House, Shillong,<br />
                 Meghalaya - 793003
