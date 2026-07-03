@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import { Search, MapPin, Star, Phone, X, Car, Loader2 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
 import API_BASE_URL from '@/config';
@@ -30,6 +31,7 @@ async function requestDrivers(query = '') {
 
 export default function SearchPage() {
   const { user } = useUser();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState(getInitialSearchQuery);
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +93,15 @@ export default function SearchPage() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchDrivers(searchQuery);
+    const query = searchQuery.trim();
+    const params = new URLSearchParams();
+
+    if (query) params.set('q', query);
+
+    setActiveFilter('All Rides');
+    setSelectedDriver(null);
+    router.push(`/search${params.toString() ? `?${params.toString()}` : ''}`);
+    fetchDrivers(query);
   };
 
   const trackCall = async (driver) => {
@@ -145,10 +155,12 @@ export default function SearchPage() {
         {/* Search Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="mb-2 text-3xl font-bold text-slate-900">Find a Ride</h1>
-          <form onSubmit={handleSearch} className="relative flex items-center">
+          <form action="/search" onSubmit={handleSearch} className="relative flex items-center">
             <MapPin className="absolute left-4 text-slate-400" size={20} />
             <input 
               type="text" 
+              name="q"
+              aria-label="Destination"
               placeholder="Where do you want to go? (e.g. Dawki)" 
               className="w-full rounded-2xl border border-slate-200 py-4 pl-12 pr-14 text-base font-medium shadow-sm outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 sm:text-lg"
               value={searchQuery}
