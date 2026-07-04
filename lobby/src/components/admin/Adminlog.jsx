@@ -43,14 +43,14 @@ export default function AdminLogin({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[#033b37] flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-800 text-blue-500 mb-6 border border-slate-700 shadow-xl">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-800 text-[#0F766E] mb-6 border border-slate-700 shadow-xl">
             <Shield size={32} />
           </div>
 
-          <h1 className="text-3xl font-bold text-white tracking-tight">
+          <h1 className="text-3xl font-[Sailors_Slant_Normal] text-white tracking-tight">
             System Access
           </h1>
 
@@ -59,7 +59,7 @@ export default function AdminLogin({ onLogin }) {
           </p>
         </div>
 
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-3xl p-8 shadow-2xl">
+        <div className="bg-[#032a37]/50 backdrop-blur-sm border border-slate-700 rounded-3xl p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
@@ -77,7 +77,7 @@ export default function AdminLogin({ onLogin }) {
                 value={email}
                 disabled={isLoading}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono text-sm disabled:opacity-60"
+                className="w-full bg-[#031a37] border border-slate-700 text-white px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono text-sm disabled:opacity-60"
                 placeholder="admin@lobby.com"
               />
             </div>
@@ -99,7 +99,7 @@ export default function AdminLogin({ onLogin }) {
                   value={password}
                   disabled={isLoading}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono text-sm disabled:opacity-60"
+                  className="w-full bg-[#031a37] border border-slate-700 text-white px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono text-sm disabled:opacity-60"
                   placeholder="••••••••"
                 />
 
@@ -119,7 +119,7 @@ export default function AdminLogin({ onLogin }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full bg-[#0F766E] hover:bg-[#0d625b] text-white font-bold py-4 rounded-xl transition shadow-lg shadow-[#0F766E]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading ? "Verifying..." : "Authenticate"}
             </button>

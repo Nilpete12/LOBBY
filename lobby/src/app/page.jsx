@@ -1,6 +1,8 @@
 import { currentUser } from '@clerk/nextjs/server';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
+import connectDB from '@/lib/mongodb'; // NEW: Import DB
+import User from '@/models/User'; // NEW: Import User Model
 import HowItWorks from '@/components/Howitwork';
 import TaxiStands from '@/components/TaxiStands';
 import DriverHero from '@/components/DriverHero';
@@ -12,10 +14,22 @@ export default async function HomePage() {
 
   // 2. THE DRIVER VIEW
   if (userRole === "driver") {
+    await connectDB();
+    const driverDoc = await User.findOne({ clerkId: user.id }).lean();
+
+    // 2. Extract their current status
+    const isVerified = driverDoc?.isVerified || false;
+    const isOnline = driverDoc?.isAvailable || false;
+
     return (
       <main className="min-h-screen bg-[#F8FAFC]">
         {/* A custom Hero with an Online/Offline toggle instead of a search bar */}
-        <DriverHero userName={user.firstName} />
+        <DriverHero 
+          userName={user?.firstName || "Driver"} 
+          clerkId={user.id}           // Pass Clerk ID so we can update DB
+          initialIsOnline={isOnline}  // Pass current DB status
+          isVerified={isVerified} 
+          />
         
         {/* Quick stats for the day */}
         <DriverStatsSnapshot />
