@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUser, useClerk } from '@clerk/nextjs'; 
 import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import API_BASE_URL from '@/config';
+import IncomingRideAlert from '@/components/IncomingRideAlert';
 
 export default function DriverDashboard() {
   const router = useRouter();
@@ -218,6 +219,7 @@ export default function DriverDashboard() {
         {notice && (
           <DashboardNotice notice={notice} onDismiss={() => setNotice(null)} />
         )}
+        <IncomingRideAlert />
         
         {/* Verification Warning */}
         {!isVerified && (

@@ -1,21 +1,63 @@
 import { NextResponse } from 'next/server';
 import connectMongo from '@/lib/mongodb';
 import Booking from '@/models/Bookings';
+import User from '@/models/User';
+import { auth } from '@clerk/nextjs/server';
 
-export async function GET(req) {
+function sanitizeIncomingBooking(booking) {
+  return {
+    _id: booking._id,
+    riderName: booking.riderName,
+    pickupLocation: booking.pickupLocation,
+    destination: booking.destination,
+    status: booking.status,
+    createdAt: booking.createdAt,
+  };
+}
+
+export async function GET() {
   try {
-    await connectMongo();
-    
-    // Fetch all bookings that are currently waiting for a driver
-    // We sort by createdAt -1 so the newest requests show up first
-    const pendingBookings = await Booking.find({ status: 'pending' })
-                                         .sort({ createdAt: -1 })
-                                         .lean();
+    const { userId } = await auth();
 
-    return NextResponse.json({ success: true, bookings: pendingBookings });
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    await connectMongo();
+
+    const driver = await User.findOne({ clerkId: userId, role: 'driver' })
+      .select('isAvailable isVerified')
+      .lean();
+
+    if (!driver || !driver.isVerified) {
+      return NextResponse.json(
+        { success: false, message: 'Verified driver access required' },
+        { status: 403 }
+      );
+    }
+
+    if (!driver.isAvailable) {
+      return NextResponse.json({ success: true, bookings: [] });
+    }
+
+    const pendingBookings = await Booking.find({ status: 'pending' })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
+
+    return NextResponse.json({
+      success: true,
+      bookings: pendingBookings.map(sanitizeIncomingBooking),
+    });
     
   } catch (error) {
     console.error("Incoming Bookings Error:", error);
-    return NextResponse.json({ error: 'Failed to fetch incoming bookings' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: 'Failed to fetch incoming bookings' },
+      { status: 500 }
+    );
   }
 }
