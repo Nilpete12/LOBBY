@@ -208,6 +208,13 @@ export default function DriverDashboard() {
   const isVerified = driverDbData.isVerified === true;
 
   return (
+    <div className="min-h-screen bg-slate-50 pb-20">
+      
+      {/* Drop the alert component right at the top of the dashboard. 
+        It is completely invisible until a ride request hits the database! 
+      */}
+      <IncomingRideAlert />
+      
     <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6">
       <div className="max-w-5xl mx-auto">
         {notice && (
@@ -410,6 +417,7 @@ export default function DriverDashboard() {
 
         </div>
       </div>
+    </div>
     </div>
   );
 }

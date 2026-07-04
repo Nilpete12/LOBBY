@@ -60,7 +60,7 @@ export default function DriverEarningsPage() {
   return (
     <main className="min-h-screen bg-[#F8FAFC] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-5xl">
-        <section className="mb-6 rounded-[1.5rem] border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-[2rem] sm:p-8">
+        <section className="mb-6 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#0F766E]">
@@ -90,7 +90,7 @@ export default function DriverEarningsPage() {
           <StatCard icon={Wallet} label="Calls this week" value={stats.callsThisWeek} />
         </section>
 
-        <section className="mt-6 rounded-[1.5rem] border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-[2rem] sm:p-8">
+        <section className="mt-6 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-8">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#0F766E]">
               <Banknote size={24} />
