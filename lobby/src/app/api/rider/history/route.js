@@ -4,6 +4,8 @@ import connectDB from '@/lib/mongodb';
 import Analytics from '@/models/Analytics';
 import User from '@/models/User';
 
+const RIDER_HISTORY_DRIVER_FIELDS = 'fullName phone vehicle profilePic carPic rating';
+
 export async function GET() {
   const { userId } = await auth();
 
@@ -31,7 +33,9 @@ export async function GET() {
     }
 
     const driverIds = Array.from(latestByDriver.keys());
-    const drivers = await User.find({ _id: { $in: driverIds } }).select('-password').lean();
+    const drivers = await User.find({ _id: { $in: driverIds } })
+      .select(RIDER_HISTORY_DRIVER_FIELDS)
+      .lean();
     const driverById = new Map(drivers.map((driver) => [String(driver._id), driver]));
 
     const history = driverIds

@@ -3,8 +3,6 @@ import { Mail, MapPin, Phone, MessageSquare, ChevronDown, ChevronUp, CheckCircle
 import { useState } from 'react';
 import API_BASE_URL from '@/config';
 
-const WEB3FORMS_ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
-
 export default function ContactPage() {
   // 1. Form State
   const [formData, setFormData] = useState({
@@ -97,43 +95,33 @@ export default function ContactPage() {
         throw new Error('Failed to save message to database');
       }
 
-      if (WEB3FORMS_ACCESS_KEY) {
-        const payload = {
-          access_key: WEB3FORMS_ACCESS_KEY,
-          subject: `New Support Message from ${formData.firstName}`,
-          from_name: "Lobby App Support",
-          ...formData
-        };
+      const notificationResponse = await fetch(`${API_BASE_URL}/support/notify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-        const res = await fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-
-        const result = await res.json();
-        if (!result.success) {
-          console.warn("Support email notification failed", result);
-        }
+      if (!notificationResponse.ok) {
+        console.warn("Support email notification failed");
       }
 
-        // Show the green success message
-        setIsSubmitted(true);
+      // Show the green success message
+      setIsSubmitted(true);
         
-        // Clear the form
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          topic: 'General Inquiry',
-          message: ''
-        });
+      // Clear the form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        topic: 'General Inquiry',
+        message: ''
+      });
 
-        // Hide success message after 5 seconds
-        setTimeout(() => setIsSubmitted(false), 5000);
+      // Hide success message after 5 seconds
+      setTimeout(() => setIsSubmitted(false), 5000);
     } catch (error) {
       console.error("Error submitting form", error);
       setFormError("Network error. Please check your connection and try again.");

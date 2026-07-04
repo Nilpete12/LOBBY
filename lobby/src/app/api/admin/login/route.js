@@ -4,8 +4,17 @@ import {
   isAdminConfigReady,
   validateAdminCredentials,
 } from '@/lib/adminAuth';
+import { rateLimit } from '@/lib/rateLimit';
 
 export async function POST(request) {
+  const limited = rateLimit(request, {
+    keyPrefix: 'admin-login',
+    limit: 5,
+    windowMs: 15 * 60 * 1000,
+  });
+
+  if (limited) return limited;
+
   if (!isAdminConfigReady()) {
     return NextResponse.json(
       { success: false, message: 'Admin login is not configured' },
