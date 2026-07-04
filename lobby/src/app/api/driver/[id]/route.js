@@ -8,8 +8,8 @@ export async function GET(request, context) {
 
     const params = await context.params;
     
-    // Search MongoDB using the clerkId we passed in the URL
-    const driver = await User.findOne({ clerkId: params.id });
+    // ADD .lean() HERE to ensure Next.js can serialize the object perfectly
+    const driver = await User.findOne({ clerkId: params.id }).lean();
 
     if (!driver) {
       return NextResponse.json(

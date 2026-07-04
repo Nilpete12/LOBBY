@@ -92,9 +92,9 @@ export default function Navbar() {
               {/* 3. VIEW: LOGGED IN AS DRIVER */}
               {userRole === "driver" && (
                 <>
-                  <Link href="/drive/dashboard" className="hover:text-[#0F766E] transition">Dashboard</Link>
+                  <Link href="/drive/dashboard" className="hover:text-[#0F766E] transition">Profile</Link>
                   <Link href="/drive/earnings" className="hover:text-[#0F766E] transition">Earnings</Link>
-                  <Link href="/drive/TripHistory" className="hover:text-[#0F766E] transition">Trip History</Link>
+                  <Link href="/drive/tripHistory" className="hover:text-[#0F766E] transition">Trip History</Link>
                   <Link href="/support" className="hover:text-[#0F766E] transition">Support</Link>
                 </>
               )}
@@ -163,9 +163,9 @@ export default function Navbar() {
             /* 3. VIEW: LOGGED IN AS DRIVER */
             (
               <>
-                <BottomNavLink href="/drive/dashboard" icon={<LayoutDashboard size={22} />} label="Dash" isActive={pathname === '/drive/dashboard'} isDarkBg={isDarkBg} />
+                <BottomNavLink href="/drive/dashboard" icon={<UserCircle size={22} />} label="Profile" isActive={pathname === '/drive/dashboard'} isDarkBg={isDarkBg} />
                 <BottomNavLink href="/drive/earnings" icon={<Wallet size={22} />} label="Earnings" isActive={pathname === '/drive/earnings'} isDarkBg={isDarkBg} />
-                <BottomNavLink href="/drive/profile" icon={<UserCircle size={22} />} label="Profile" isActive={pathname === '/drive/profile'} isDarkBg={isDarkBg} />
+                <BottomNavLink href="/drive/trip-history" icon={<LayoutDashboard size={22} />} label="Trip History" isActive={pathname === '/drive/trip-history'} isDarkBg={isDarkBg} />
                 <BottomNavLink href="/support" icon={<LifeBuoy size={22} />} label="Support" isActive={pathname === '/support'} isDarkBg={isDarkBg} />
               </>
             )}

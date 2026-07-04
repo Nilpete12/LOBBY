@@ -62,7 +62,12 @@ export default function DriverDashboard() {
       setDashboardError('');
 
       try {
-        const res = await fetch(`${API_BASE_URL}/driver/${clerkUser.id}`);
+        // 1. Force the exact local relative path
+        // 2. Add 'no-store' to destroy any cached {} responses
+        const res = await fetch(`/api/driver/${clerkUser.id}`, {
+          cache: 'no-store' 
+        });
+        
         const data = await res.json();
         
         if (data.success && data.driver) {
@@ -207,14 +212,7 @@ export default function DriverDashboard() {
   
   const isVerified = driverDbData.isVerified === true;
 
-  return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      
-      {/* Drop the alert component right at the top of the dashboard. 
-        It is completely invisible until a ride request hits the database! 
-      */}
-      <IncomingRideAlert />
-      
+  return (    
     <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6">
       <div className="max-w-5xl mx-auto">
         {notice && (
@@ -417,7 +415,6 @@ export default function DriverDashboard() {
 
         </div>
       </div>
-    </div>
     </div>
   );
 }
