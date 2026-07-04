@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
 import API_BASE_URL from '@/config';
+import InstantBook from '@/components/InstantBook';
 
 const FILTERS = ['All Rides', 'Hatchback', 'SUV', 'Top Rated'];
 
@@ -195,6 +196,25 @@ export default function SearchPage() {
           ))}
         </div>
 
+        {/* --- NEW: INSTANT BOOK QUICK ACTION --- */}
+        <div className="mb-10 rounded-4xl bg-linear-to-br from-teal-50 to-emerald-50/30 p-1 sm:p-2 border border-teal-100/50 shadow-sm">
+          <div className="px-4 pt-6 pb-2 text-center sm:px-6">
+            <h2 className="text-xl font-[Sailors_Slant_Normal] text-slate-900 tracking-tight">In a hurry?</h2>
+            <p className="text-sm font-medium text-slate-500 mt-1 mb-6">
+              Skip the manual search. Let us find the nearest available driver for you.
+            </p>
+          </div>
+          {/* Divider before manual results */}
+        {/* ------------------------------------- */}
+          {/* We pass the current searchQuery as the destination so they don't have to type it twice! */}
+          <InstantBook destination={searchQuery || "Kohima"} />
+        </div>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="h-px bg-slate-200 flex-1"></div>
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Or choose manually</span>
+            <div className="h-px bg-slate-200 flex-1"></div>
+          </div>
+
         {/* Results Area */}
         {loading ? (
           <SearchResultsSkeletons count={3} />
@@ -251,7 +271,7 @@ export default function SearchPage() {
       )}
 
       {toast && (
-        <div className="fixed inset-x-4 bottom-28 z-[60] mx-auto max-w-sm rounded-2xl border border-[#DCFCE7] bg-white px-4 py-3 text-center text-sm font-bold text-[#0F766E] shadow-xl shadow-slate-900/10 md:bottom-8">
+        <div className="fixed inset-x-4 bottom-28 z-60 mx-auto max-w-sm rounded-2xl border border-[#DCFCE7] bg-white px-4 py-3 text-center text-sm font-bold text-[#0F766E] shadow-xl shadow-slate-900/10 md:bottom-8">
           {toast}
         </div>
       )}
@@ -282,7 +302,7 @@ function DriverAvatar({ driver, size = 64 }) {
           className="object-cover"
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-900 to-slate-700 text-xl font-bold">
+        <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-slate-900 to-slate-700 text-xl font-bold">
           {getDriverInitial(driver)}
         </div>
       )}
@@ -357,7 +377,7 @@ function DriverDetailsSheet({ driver, onClose, onCall }) {
       onClick={onClose}
     >
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-[2rem] border border-slate-200 bg-white p-5 shadow-2xl sm:rounded-[2rem] sm:p-6"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-4xl border border-slate-200 bg-white p-5 shadow-2xl sm:rounded-4xl sm:p-6"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-slate-200 sm:hidden"></div>
@@ -392,7 +412,7 @@ function DriverDetailsSheet({ driver, onClose, onCall }) {
         </div>
 
         {driver.carPic && (
-          <div className="relative mb-5 aspect-[16/10] w-full overflow-hidden rounded-3xl bg-slate-100">
+          <div className="relative mb-5 aspect-16/10 w-full overflow-hidden rounded-3xl bg-slate-100">
             <Image
               src={driver.carPic}
               alt={`${driver.fullName || 'Driver'} vehicle`}
