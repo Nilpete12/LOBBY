@@ -29,10 +29,10 @@ export async function GET() {
     await connectMongo();
 
     const driver = await User.findOne({ clerkId: userId, role: 'driver' })
-      .select('isAvailable isVerified')
+      .select('isAvailable isVerified accountStatus')
       .lean();
 
-    if (!driver || !driver.isVerified) {
+    if (!driver || !driver.isVerified || driver.accountStatus === 'suspended') {
       return NextResponse.json(
         { success: false, message: 'Verified driver access required' },
         { status: 403 }

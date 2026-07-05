@@ -1,10 +1,11 @@
 "use client";
 import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { CheckCircle, Clock, Trash2, Search, ShieldCheck } from 'lucide-react';
+import { CheckCircle, Clock, Eye, Trash2, Search, ShieldCheck } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 function getStatus(user) {
+  if (user.accountStatus === 'suspended') return { label: 'Suspended', tone: 'red', icon: Clock };
   if (user.role === 'rider') return { label: 'Active', tone: 'slate', icon: null };
   if (user.isVerified) return { label: 'Verified', tone: 'green', icon: CheckCircle };
   if (user.licenseUrl) return { label: user.verificationStatus || 'Pending', tone: 'yellow', icon: Clock };
@@ -17,6 +18,7 @@ function StatusBadge({ user }) {
   const tones = {
     green: 'bg-green-50 text-green-700 ring-green-100',
     yellow: 'bg-yellow-50 text-yellow-700 ring-yellow-100',
+    red: 'bg-red-50 text-red-700 ring-red-100',
     slate: 'bg-slate-100 text-slate-600 ring-slate-200',
   };
 
@@ -52,7 +54,7 @@ function Avatar({ user, size = 44 }) {
   );
 }
 
-export default function UserTable({ role, limit, onChanged }) {
+export default function UserTable({ role, limit, onChanged, onSelectUser }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -189,6 +191,13 @@ export default function UserTable({ role, limit, onChanged }) {
             )}
 
             <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => onSelectUser?.(user._id)}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-3 py-2 text-sm font-black text-white"
+              >
+                <Eye size={16} />
+                View
+              </button>
               {user.role === 'driver' && !user.isVerified && (
                 <button
                   onClick={() => handleApprove(user._id)}
@@ -202,7 +211,7 @@ export default function UserTable({ role, limit, onChanged }) {
               <button
                 onClick={() => handleDelete(user._id, user.fullName)}
                 disabled={workingId === user._id}
-                className={`flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-red-50 px-3 py-2 text-sm font-black text-red-600 ring-1 ring-red-100 disabled:opacity-50 ${user.role === 'driver' && !user.isVerified ? '' : 'col-span-2'}`}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-red-50 px-3 py-2 text-sm font-black text-red-600 ring-1 ring-red-100 disabled:opacity-50"
               >
                 <Trash2 size={16} />
                 Delete
@@ -261,6 +270,13 @@ export default function UserTable({ role, limit, onChanged }) {
                 </td>
                 <td className="p-4 text-right">
                   <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => onSelectUser?.(user._id)}
+                      className="rounded-xl bg-slate-100 p-2 text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-200"
+                      title="View profile"
+                    >
+                      <Eye size={18} />
+                    </button>
                     {user.role === 'driver' && !user.isVerified && (
                       <button
                         onClick={() => handleApprove(user._id)}

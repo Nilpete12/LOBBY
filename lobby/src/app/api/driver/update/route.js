@@ -20,7 +20,7 @@ export async function POST(request) {
     await connectDB();
 
     const existingDriver = await User.findOne({ clerkId: userId, role: 'driver' }).select(
-      'isVerified'
+      'isVerified accountStatus'
     );
 
     if (!existingDriver) {
@@ -33,6 +33,13 @@ export async function POST(request) {
     if (Boolean(body.isAvailable) && !existingDriver.isVerified) {
       return NextResponse.json(
         { success: false, message: 'Driver verification is required before going online' },
+        { status: 403 }
+      );
+    }
+
+    if (existingDriver.accountStatus === 'suspended') {
+      return NextResponse.json(
+        { success: false, message: 'This driver account is suspended' },
         { status: 403 }
       );
     }

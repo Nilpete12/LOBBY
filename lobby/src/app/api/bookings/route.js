@@ -3,6 +3,7 @@ import connectMongo from '@/lib/mongodb';
 import Booking from '@/models/Bookings';
 import User from '@/models/User';
 import { auth, currentUser } from '@clerk/nextjs/server';
+import { getPlatformSettings } from '@/lib/platformSettings';
 import { rateLimit } from '@/lib/rateLimit';
 
 function cleanString(value, maxLength = 500) {
@@ -48,10 +49,25 @@ export async function POST(req) {
 
     await connectMongo();
 
-    const [clerkUser, riderProfile] = await Promise.all([
+    const [settings, clerkUser, riderProfile] = await Promise.all([
+      getPlatformSettings(),
       currentUser(),
-      User.findOne({ clerkId: userId }).select('fullName phone role').lean(),
+      User.findOne({ clerkId: userId }).select('fullName phone role accountStatus').lean(),
     ]);
+
+    if (settings.maintenanceMode || !settings.bookingOpen) {
+      return NextResponse.json(
+        { success: false, message: 'Bookings are temporarily closed' },
+        { status: 503 }
+      );
+    }
+
+    if (riderProfile?.accountStatus === 'suspended') {
+      return NextResponse.json(
+        { success: false, message: 'This account is suspended' },
+        { status: 403 }
+      );
+    }
 
     if (riderProfile?.role === 'driver') {
       return NextResponse.json(

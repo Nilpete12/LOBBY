@@ -15,7 +15,12 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const destination = searchParams.get('destination')?.trim().slice(0, 80);
 
-    let query = { role: 'driver', isAvailable: true, isVerified: true };
+    let query = {
+      role: 'driver',
+      isAvailable: true,
+      isVerified: true,
+      accountStatus: { $ne: 'suspended' },
+    };
 
     if (destination) {
       query.routes = { $regex: escapeRegex(destination), $options: 'i' };

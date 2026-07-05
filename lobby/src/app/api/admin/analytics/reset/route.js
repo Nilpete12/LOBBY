@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Analytics from '@/models/Analytics';
+import { logAdminActivity } from '@/lib/adminActivity';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 export async function DELETE() {
@@ -9,6 +10,14 @@ export async function DELETE() {
   try {
     await connectDB();
     const result = await Analytics.deleteMany({});
+
+    await logAdminActivity({
+      action: 'analytics.reset',
+      targetType: 'analytics',
+      targetId: 'all',
+      targetLabel: 'Analytics',
+      summary: `Reset analytics data (${result.deletedCount || 0} records)`,
+    });
 
     return NextResponse.json({
       success: true,

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Complaint from '@/models/Complaint';
+import { getPlatformSettings } from '@/lib/platformSettings';
 import { rateLimit } from '@/lib/rateLimit';
 
 const ALLOWED_ROLES = new Set(['rider', 'driver', 'guest']);
@@ -34,6 +35,14 @@ export async function POST(request) {
     }
 
     await connectDB();
+    const settings = await getPlatformSettings();
+    if (settings.maintenanceMode || !settings.supportOpen) {
+      return NextResponse.json(
+        { success: false, message: 'Support messages are temporarily closed' },
+        { status: 503 }
+      );
+    }
+
     const complaint = await Complaint.create({
       userId: cleanString(body.userId, 160) || undefined,
       name,

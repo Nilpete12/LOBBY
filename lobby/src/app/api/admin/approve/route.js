@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import VerificationRequest from '@/models/VerificationRequest';
+import { logAdminActivity } from '@/lib/adminActivity';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 export async function POST(request) {
@@ -50,6 +51,15 @@ export async function POST(request) {
       },
       { sort: { createdAt: -1 } }
     );
+
+    await logAdminActivity({
+      action: 'driver.approve',
+      targetType: 'user',
+      targetId: String(driver._id),
+      targetLabel: driver.fullName,
+      summary: `Approved driver ${driver.fullName}`,
+      metadata: { email: driver.email },
+    });
 
     return NextResponse.json({ success: true, driver });
   } catch (error) {

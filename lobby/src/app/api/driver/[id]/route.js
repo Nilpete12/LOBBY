@@ -15,7 +15,13 @@ export async function GET(request, context) {
     const isOwner = userId === params.id;
     const query = isOwner
       ? { clerkId: params.id, role: 'driver' }
-      : { clerkId: params.id, role: 'driver', isAvailable: true, isVerified: true };
+      : {
+          clerkId: params.id,
+          role: 'driver',
+          isAvailable: true,
+          isVerified: true,
+          accountStatus: { $ne: 'suspended' },
+        };
     const projection = isOwner ? OWNER_DRIVER_FIELDS : PUBLIC_DRIVER_FIELDS;
 
     const driver = await User.findOne(query).select(projection).lean();

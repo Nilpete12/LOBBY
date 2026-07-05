@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
+import AdminActivityLog from '@/models/AdminActivityLog';
 import Analytics from '@/models/Analytics';
+import Booking from '@/models/Bookings';
 import Complaint from '@/models/Complaint';
 import User from '@/models/User';
 import VerificationRequest from '@/models/VerificationRequest';
@@ -19,16 +21,36 @@ export async function GET() {
       pendingDrivers,
       pendingVerificationRequests,
       pendingComplaints,
+      suspendedUsers,
       totalCalls,
+      bookingStatusRows,
+      topDestinationRows,
+      recentActivity,
     ] = await Promise.all([
       User.countDocuments({}),
       User.countDocuments({ role: 'driver' }),
       User.countDocuments({ role: 'driver', isAvailable: true }),
       User.countDocuments({ role: 'driver', isVerified: false, licenseUrl: { $exists: true, $ne: '' } }),
       VerificationRequest.countDocuments({ status: 'pending' }),
-      Complaint.countDocuments({ status: 'pending' }),
+      Complaint.countDocuments({ status: { $ne: 'resolved' } }),
+      User.countDocuments({ accountStatus: 'suspended' }),
       Analytics.countDocuments({ type: 'call_click' }),
+      Booking.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Booking.aggregate([
+        { $group: { _id: '$destination', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 5 },
+      ]),
+      AdminActivityLog.find({}).sort({ createdAt: -1 }).limit(5).lean(),
     ]);
+    const bookingStatus = bookingStatusRows.reduce(
+      (acc, row) => ({ ...acc, [row._id || 'unknown']: row.count }),
+      {}
+    );
+    const topDestinations = topDestinationRows.map((row) => ({
+      destination: row._id || 'Unknown',
+      count: row.count,
+    }));
 
     return NextResponse.json({
       success: true,
@@ -39,7 +61,11 @@ export async function GET() {
         pendingDrivers,
         pendingVerificationRequests,
         pendingComplaints,
+        suspendedUsers,
         totalCalls,
+        bookingStatus,
+        topDestinations,
+        recentActivity,
       },
     });
   } catch (error) {

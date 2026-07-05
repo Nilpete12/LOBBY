@@ -37,7 +37,7 @@ function serializeBooking(booking, { includeRiderPhone = false, driver = null } 
 
 async function getViewer(userId) {
   return User.findOne({ clerkId: userId })
-    .select('clerkId role isVerified isAvailable')
+    .select('clerkId role isVerified isAvailable accountStatus')
     .lean();
 }
 
@@ -136,7 +136,13 @@ export async function PATCH(req, context) {
     const viewer = await getViewer(userId);
 
     if (status === 'accepted') {
-      if (!viewer || viewer.role !== 'driver' || !viewer.isVerified || !viewer.isAvailable) {
+      if (
+        !viewer ||
+        viewer.role !== 'driver' ||
+        !viewer.isVerified ||
+        !viewer.isAvailable ||
+        viewer.accountStatus === 'suspended'
+      ) {
         return NextResponse.json(
           { success: false, message: 'Only verified online drivers can accept rides' },
           { status: 403 }

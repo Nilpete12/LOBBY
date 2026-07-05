@@ -1,14 +1,29 @@
 "use client";
-import { LayoutDashboard, Users, Car, Settings, LogOut, X, MessagesSquare, ShieldCheck } from 'lucide-react';
+import {
+  Activity,
+  BarChart3,
+  BookOpenCheck,
+  Car,
+  LayoutDashboard,
+  LogOut,
+  MessagesSquare,
+  Settings,
+  ShieldCheck,
+  Users,
+  X,
+} from 'lucide-react';
 
 export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLogout, badges = {} }) {
   
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'verifications', label: 'Verifications', icon: ShieldCheck },
+    { id: 'bookings', label: 'Bookings', icon: BookOpenCheck },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'riders',    label: 'Riders',    icon: Users },
     { id: 'drivers',   label: 'Drivers',   icon: Car },
     { id: 'complaints', label: 'Complaints', icon: MessagesSquare },
+    { id: 'activity', label: 'Activity Log', icon: Activity },
     { id: 'settings',  label: 'Settings',  icon: Settings },
   ];
 

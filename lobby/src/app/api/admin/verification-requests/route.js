@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import VerificationRequest from '@/models/VerificationRequest';
+import { logAdminActivity } from '@/lib/adminActivity';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 const ALLOWED_STATUSES = new Set(['pending', 'approved', 'rejected', 'superseded']);
@@ -124,6 +125,15 @@ export async function PATCH(request) {
     verificationRequest.reviewNotes = nextNote;
     verificationRequest.reviewedAt = new Date();
     await verificationRequest.save();
+
+    await logAdminActivity({
+      action: approved ? 'verification.approve' : 'verification.reject',
+      targetType: 'verification_request',
+      targetId: String(verificationRequest._id),
+      targetLabel: verificationRequest.driverName,
+      summary: `${approved ? 'Approved' : 'Rejected'} verification for ${verificationRequest.driverName}`,
+      metadata: { driverId: String(verificationRequest.driverId), reviewNotes: nextNote },
+    });
 
     return NextResponse.json({
       success: true,

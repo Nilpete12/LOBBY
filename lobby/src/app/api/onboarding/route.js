@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import connectDB from '@/lib/mongodb';
+import { getPlatformSettings } from '@/lib/platformSettings';
 import User from '@/models/User';
 
 export async function POST(request) {
@@ -16,6 +17,33 @@ export async function POST(request) {
       return NextResponse.json({ success: false, message: "Invalid role" }, { status: 400 });
     }
 
+    await connectDB();
+    const [settings, existingUser] = await Promise.all([
+      getPlatformSettings(),
+      User.findOne({ clerkId: userId }).select('_id accountStatus').lean(),
+    ]);
+
+    if (settings.maintenanceMode) {
+      return NextResponse.json(
+        { success: false, message: "The platform is temporarily in maintenance mode" },
+        { status: 503 }
+      );
+    }
+
+    if (!settings.registrationOpen && !existingUser) {
+      return NextResponse.json(
+        { success: false, message: "New registrations are currently closed" },
+        { status: 403 }
+      );
+    }
+
+    if (existingUser?.accountStatus === 'suspended') {
+      return NextResponse.json(
+        { success: false, message: "This account is suspended" },
+        { status: 403 }
+      );
+    }
+
     // 1. Fetch user details from Clerk so MongoDB doesn't crash from missing fields!
     const client = await clerkClient();
     const clerkUser = await client.users.getUser(userId);
@@ -23,9 +51,6 @@ export async function POST(request) {
     const email = clerkUser.emailAddresses[0]?.emailAddress || '';
     const fullName = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'New User';
 
-    // 2. Connect to DB
-    await connectDB();
-    
     // 3. Upsert with ALL required Mongoose fields
     await User.findOneAndUpdate(
       { clerkId: userId },

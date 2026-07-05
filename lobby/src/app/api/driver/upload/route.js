@@ -121,18 +121,29 @@ export async function POST(request) {
     };
 
     await connectDB();
-    const driver = await User.findOneAndUpdate(
-      { clerkId: userId, role: 'driver' },
-      { $set: updateByType[type] },
-      { new: true }
-    ).select('-password');
+    const existingDriver = await User.findOne({ clerkId: userId, role: 'driver' })
+      .select('accountStatus')
+      .lean();
 
-    if (!driver) {
+    if (!existingDriver) {
       return NextResponse.json(
         { success: false, message: 'Driver profile not found' },
         { status: 404 }
       );
     }
+
+    if (existingDriver.accountStatus === 'suspended') {
+      return NextResponse.json(
+        { success: false, message: 'This driver account is suspended' },
+        { status: 403 }
+      );
+    }
+
+    const driver = await User.findOneAndUpdate(
+      { clerkId: userId, role: 'driver' },
+      { $set: updateByType[type] },
+      { new: true }
+    ).select('-password');
 
     if (type === 'license') {
       await VerificationRequest.updateMany(
