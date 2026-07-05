@@ -4,6 +4,8 @@ import { usePathname } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import InstallPopup from '@/components/popup'; // Check your exact filename capitalization here!
+import PlatformGate from '@/components/PlatformGate';
+import NavigationWarmup from '@/components/NavigationWarmup';
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
@@ -11,10 +13,12 @@ export default function ClientLayout({ children }) {
   // Check if the current path starts with "/admin"
   const isAdmin = pathname?.startsWith('/admin');
 
-  return (
+  const content = (
     <>
       {/* Conditionally render Navbar */}
       {!isAdmin && <Navbar />}
+
+      {!isAdmin && <NavigationWarmup />}
       
       {!isAdmin && <InstallPopup />}
       
@@ -27,4 +31,6 @@ export default function ClientLayout({ children }) {
       {!isAdmin && <Footer />} 
     </>
   );
+
+  return isAdmin ? content : <PlatformGate>{content}</PlatformGate>;
 }

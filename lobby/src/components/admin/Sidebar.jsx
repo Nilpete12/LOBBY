@@ -1,13 +1,29 @@
 "use client";
-import { LayoutDashboard, Users, Car, Settings, LogOut, X, MessagesSquare } from 'lucide-react';
+import {
+  Activity,
+  BarChart3,
+  BookOpenCheck,
+  Car,
+  LayoutDashboard,
+  LogOut,
+  MessagesSquare,
+  Settings,
+  ShieldCheck,
+  Users,
+  X,
+} from 'lucide-react';
 
-export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLogout }) {
+export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLogout, badges = {} }) {
   
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'verifications', label: 'Verifications', icon: ShieldCheck },
+    { id: 'bookings', label: 'Bookings', icon: BookOpenCheck },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'riders',    label: 'Riders',    icon: Users },
     { id: 'drivers',   label: 'Drivers',   icon: Car },
     { id: 'complaints', label: 'Complaints', icon: MessagesSquare },
+    { id: 'activity', label: 'Activity Log', icon: Activity },
     { id: 'settings',  label: 'Settings',  icon: Settings },
   ];
 
@@ -40,7 +56,12 @@ export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLo
               }`}
             >
               <item.icon size={20} />
-              {item.label}
+              <span className="flex-1 text-left">{item.label}</span>
+              {badges[item.id] > 0 && (
+                <span className="min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
+                  {badges[item.id]}
+                </span>
+              )}
             </button>
           ))}
         </nav>

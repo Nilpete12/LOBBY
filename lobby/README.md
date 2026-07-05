@@ -29,7 +29,7 @@ Required for driver image uploads:
 
 Optional for support form email delivery:
 
-- `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY`
+- `WEB3FORMS_ACCESS_KEY`
 
 ## Getting Started
 

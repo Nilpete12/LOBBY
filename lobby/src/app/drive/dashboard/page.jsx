@@ -5,6 +5,42 @@ import { useRouter } from 'next/navigation';
 import { useUser, useClerk } from '@clerk/nextjs'; 
 import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import API_BASE_URL from '@/config';
+import IncomingRideAlert from '@/components/IncomingRideAlert';
+
+const DRIVER_PROFILE_CACHE_TTL = 60 * 1000;
+
+function getDriverProfileCacheKey(clerkId) {
+  return `lobby:driver-profile:${clerkId}`;
+}
+
+function readCachedDriverProfile(clerkId) {
+  if (typeof window === 'undefined' || !clerkId) return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(getDriverProfileCacheKey(clerkId));
+    if (!raw) return null;
+
+    const cached = JSON.parse(raw);
+    if (!cached?.savedAt || Date.now() - cached.savedAt > DRIVER_PROFILE_CACHE_TTL) return null;
+
+    return cached.driver || null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedDriverProfile(clerkId, driver) {
+  if (typeof window === 'undefined' || !clerkId || !driver) return;
+
+  try {
+    window.sessionStorage.setItem(
+      getDriverProfileCacheKey(clerkId),
+      JSON.stringify({ savedAt: Date.now(), driver })
+    );
+  } catch {
+    // Cache writes are best-effort only.
+  }
+}
 
 export default function DriverDashboard() {
   const router = useRouter();
@@ -27,6 +63,16 @@ export default function DriverDashboard() {
     setNotice({ type, title, message });
   }, []);
 
+  const applyDriverProfile = useCallback((driver) => {
+    setDriverDbData(driver);
+    setFormData({
+      vehicle: driver.vehicle || '',
+      phone: driver.phone || '',
+      routes: driver.routes ? driver.routes.join(', ') : ''
+    });
+    setIsOnline(driver.isAvailable || false);
+  }, []);
+
   useEffect(() => {
     if (!notice) return;
 
@@ -36,6 +82,8 @@ export default function DriverDashboard() {
 
   // --- 1. LOAD DATA (CLERK + MONGODB SYNC) ---
   useEffect(() => {
+    let cancelled = false;
+
     // 1. Wait for Clerk to load
     if (!isLoaded) return;
     
@@ -57,6 +105,13 @@ export default function DriverDashboard() {
       return;
     }
 
+    const cachedDriver = readCachedDriverProfile(clerkUser.id);
+    if (cachedDriver) {
+      window.queueMicrotask(() => {
+        if (!cancelled) applyDriverProfile(cachedDriver);
+      });
+    }
+
     // Inside your useEffect...
     const fetchDriverProfile = async () => {
       setDashboardError('');
@@ -71,29 +126,28 @@ export default function DriverDashboard() {
         const data = await res.json();
         
         if (data.success && data.driver) {
-          setDriverDbData(data.driver);
-          setFormData({
-            vehicle: data.driver.vehicle || '',
-            phone: data.driver.phone || '',
-            routes: data.driver.routes ? data.driver.routes.join(', ') : ''
-          });
-          setIsOnline(data.driver.isAvailable || false);
+          applyDriverProfile(data.driver);
+          writeCachedDriverProfile(clerkUser.id, data.driver);
         } else {
           const message = data.message || 'Driver profile could not be loaded.';
           setDashboardError(message);
-          showNotice('error', 'Profile could not load', message);
+          if (!cachedDriver) showNotice('error', 'Profile could not load', message);
           console.error("Backend response:", data);
         }
       } catch (err) { 
         console.error("Failed to fetch MongoDB driver data", err); 
         const message = 'Unable to connect to the driver profile service. Please refresh and try again.';
         setDashboardError(message);
-        showNotice('error', 'Connection failed', message);
+        if (!cachedDriver) showNotice('error', 'Connection failed', message);
       }
     };
     
     fetchDriverProfile();
-  }, [isLoaded, isSignedIn, clerkUser, router, showNotice]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoaded, isSignedIn, clerkUser, router, showNotice, applyDriverProfile]);
 
   // --- 2. UPDATE TEXT DETAILS ---
   const handleUpdate = async (newStatus) => {
@@ -115,8 +169,8 @@ export default function DriverDashboard() {
       
       const data = await res.json();
       if (data.success) {
-        setDriverDbData(data.driver);
-        setIsOnline(data.driver.isAvailable);
+        applyDriverProfile(data.driver);
+        writeCachedDriverProfile(clerkUser.id, data.driver);
         if (newStatus === undefined) {
           showNotice('success', 'Profile saved', 'Your vehicle, phone, and route details were updated.');
         } else {
@@ -166,7 +220,8 @@ export default function DriverDashboard() {
       const data = await res.json();
       
       if (data.success) {
-        setDriverDbData(data.driver);
+        applyDriverProfile(data.driver);
+        writeCachedDriverProfile(clerkUser.id, data.driver);
         if (data.driver.verificationStatus === 'Approved') {
           showNotice('success', 'License approved', 'Your license was verified successfully.');
         } else {
@@ -186,7 +241,7 @@ export default function DriverDashboard() {
   const handleLogout = () => { signOut(() => router.push('/')); };
 
   // Show loading while Clerk initializes OR while MongoDB data fetches
-  if (!isLoaded) return <div className="p-20 text-center text-slate-400 font-bold flex items-center justify-center min-h-screen"><Loader2 className="animate-spin mr-2"/> Loading Dashboard...</div>;
+  if (!isLoaded) return <DriverDashboardSkeleton message="Loading dashboard..." />;
 
   if (dashboardError && !driverDbData) {
     return (
@@ -208,7 +263,7 @@ export default function DriverDashboard() {
     );
   }
 
-  if (!driverDbData) return <div className="p-20 text-center text-slate-400 font-bold flex items-center justify-center min-h-screen"><Loader2 className="animate-spin mr-2"/> Loading Dashboard...</div>;
+  if (!driverDbData) return <DriverDashboardSkeleton message="Loading your driver profile..." />;
   
   const isVerified = driverDbData.isVerified === true;
 
@@ -218,6 +273,7 @@ export default function DriverDashboard() {
         {notice && (
           <DashboardNotice notice={notice} onDismiss={() => setNotice(null)} />
         )}
+        <IncomingRideAlert />
         
         {/* Verification Warning */}
         {!isVerified && (
@@ -419,6 +475,46 @@ export default function DriverDashboard() {
   );
 }
 
+function DriverDashboardSkeleton({ message }) {
+  return (
+    <div className="min-h-screen bg-slate-50 px-6 pb-12 pt-24">
+      <div className="mx-auto max-w-5xl animate-pulse">
+        <div className="mb-4 flex items-center justify-center gap-2 text-sm font-bold text-slate-400">
+          <Loader2 className="animate-spin" size={18} />
+          {message}
+        </div>
+
+        <div className="mb-8 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
+          <div className="flex items-center gap-5">
+            <div className="h-20 w-20 rounded-full bg-slate-200" />
+            <div className="flex-1 space-y-3">
+              <div className="h-5 w-40 rounded bg-slate-200" />
+              <div className="h-3 w-64 max-w-full rounded bg-slate-100" />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-2">
+          <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm">
+            <div className="mx-auto mb-8 h-5 w-32 rounded bg-slate-200" />
+            <div className="mx-auto h-32 w-32 rounded-full bg-slate-200" />
+            <div className="mx-auto mt-8 h-4 w-36 rounded bg-slate-100" />
+          </div>
+
+          <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-8 shadow-sm">
+            <div className="mb-6 h-5 w-32 rounded bg-slate-200" />
+            <div className="h-12 rounded-xl bg-slate-100" />
+            <div className="h-12 rounded-xl bg-slate-100" />
+            <div className="h-12 rounded-xl bg-slate-100" />
+            <div className="h-32 rounded-xl bg-slate-100" />
+            <div className="h-12 rounded-xl bg-slate-200" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DashboardNotice({ notice, onDismiss }) {
   const isSuccess = notice.type === 'success';
   const isInfo = notice.type === 'info';
@@ -476,6 +572,7 @@ async function handleImageUpload(file, type, clerkId, setDriverDbData, showNotic
     const data = await res.json();
     if (data.success) {
       setDriverDbData(data.driver);
+      writeCachedDriverProfile(clerkId, data.driver);
       showNotice(
         'success',
         `${type === 'profile' ? 'Profile' : 'Car'} photo updated`,

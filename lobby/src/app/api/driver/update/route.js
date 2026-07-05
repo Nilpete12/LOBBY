@@ -17,16 +17,41 @@ export async function POST(request) {
       return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
     }
 
+    await connectDB();
+
+    const existingDriver = await User.findOne({ clerkId: userId, role: 'driver' }).select(
+      'isVerified accountStatus'
+    );
+
+    if (!existingDriver) {
+      return NextResponse.json(
+        { success: false, message: 'Driver profile not found' },
+        { status: 404 }
+      );
+    }
+
+    if (Boolean(body.isAvailable) && !existingDriver.isVerified) {
+      return NextResponse.json(
+        { success: false, message: 'Driver verification is required before going online' },
+        { status: 403 }
+      );
+    }
+
+    if (existingDriver.accountStatus === 'suspended') {
+      return NextResponse.json(
+        { success: false, message: 'This driver account is suspended' },
+        { status: 403 }
+      );
+    }
+
     const updates = {
       vehicle: typeof body.vehicle === 'string' ? body.vehicle.trim().slice(0, 120) : '',
       phone: typeof body.phone === 'string' ? body.phone.trim().slice(0, 40) : '',
       routes: Array.isArray(body.routes)
         ? body.routes.map((route) => String(route).trim()).filter(Boolean).slice(0, 20)
         : [],
-      isAvailable: Boolean(body.isAvailable),
+      isAvailable: existingDriver.isVerified ? Boolean(body.isAvailable) : false,
     };
-
-    await connectDB();
 
     const driver = await User.findOneAndUpdate(
       { clerkId: userId, role: 'driver' },

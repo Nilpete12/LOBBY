@@ -3,10 +3,14 @@ import { v2 as cloudinary } from 'cloudinary';
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
+import VerificationRequest from '@/models/VerificationRequest';
+import { rateLimit } from '@/lib/rateLimit';
 
 export const runtime = 'nodejs';
 
 const ALLOWED_TYPES = new Set(['profile', 'car', 'license']);
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 function isCloudinaryConfigured() {
   return Boolean(
@@ -49,6 +53,14 @@ export async function POST(request) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
+  const limited = rateLimit(request, {
+    keyPrefix: `driver-upload:${userId}`,
+    limit: 10,
+    windowMs: 10 * 60 * 1000,
+  });
+
+  if (limited) return limited;
+
   if (!isCloudinaryConfigured()) {
     return NextResponse.json(
       { success: false, message: 'Image upload is not configured' },
@@ -70,6 +82,20 @@ export async function POST(request) {
       return NextResponse.json(
         { success: false, message: 'Image file is required' },
         { status: 400 }
+      );
+    }
+
+    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      return NextResponse.json(
+        { success: false, message: 'Please upload a JPG, PNG, or WebP image' },
+        { status: 400 }
+      );
+    }
+
+    if (typeof file.size !== 'number' || file.size <= 0 || file.size > MAX_IMAGE_BYTES) {
+      return NextResponse.json(
+        { success: false, message: 'Image must be smaller than 5 MB' },
+        { status: 413 }
       );
     }
 
@@ -95,17 +121,53 @@ export async function POST(request) {
     };
 
     await connectDB();
+    const existingDriver = await User.findOne({ clerkId: userId, role: 'driver' })
+      .select('accountStatus')
+      .lean();
+
+    if (!existingDriver) {
+      return NextResponse.json(
+        { success: false, message: 'Driver profile not found' },
+        { status: 404 }
+      );
+    }
+
+    if (existingDriver.accountStatus === 'suspended') {
+      return NextResponse.json(
+        { success: false, message: 'This driver account is suspended' },
+        { status: 403 }
+      );
+    }
+
     const driver = await User.findOneAndUpdate(
       { clerkId: userId, role: 'driver' },
       { $set: updateByType[type] },
       { new: true }
     ).select('-password');
 
-    if (!driver) {
-      return NextResponse.json(
-        { success: false, message: 'Driver profile not found' },
-        { status: 404 }
+    if (type === 'license') {
+      await VerificationRequest.updateMany(
+        { clerkId: userId, status: 'pending' },
+        {
+          $set: {
+            status: 'superseded',
+            reviewNotes: 'Superseded by a newer license upload',
+            reviewedAt: new Date(),
+          },
+        }
       );
+
+      await VerificationRequest.create({
+        driverId: driver._id,
+        clerkId: userId,
+        driverName: driver.fullName,
+        email: driver.email,
+        phone: driver.phone,
+        vehicle: driver.vehicle,
+        licenseUrl: imageUrl,
+        status: 'pending',
+        notes: 'Uploaded for admin review',
+      });
     }
 
     return NextResponse.json({ success: true, driver });

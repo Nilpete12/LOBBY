@@ -6,6 +6,9 @@ const UserSchema = new mongoose.Schema({
   email:    { type: String, required: true, unique: true },
   clerkId: { type: String, unique: true, sparse: true }, // Clerk ID for authentication
   role:     { type: String, enum: ['rider', 'driver', 'admin'], default: 'rider' },
+  accountStatus: { type: String, enum: ['active', 'suspended'], default: 'active' },
+  suspendedAt: { type: Date, default: null },
+  suspensionReason: { type: String, default: '' },
   
   // Driver Specific Fields (Optional for Riders)
   phone:       { type: String },
@@ -23,5 +26,9 @@ const UserSchema = new mongoose.Schema({
   
   createdAt: { type: Date, default: Date.now },
 });
+
+UserSchema.index({ role: 1, isAvailable: 1, isVerified: 1, accountStatus: 1 });
+UserSchema.index({ role: 1, createdAt: -1 });
+UserSchema.index({ routes: 1 });
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);

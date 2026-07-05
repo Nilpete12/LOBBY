@@ -5,18 +5,31 @@ import { useUser } from "@clerk/nextjs";
 import { MapPin, Navigation, User, CheckCircle, XCircle, Phone, Clock } from "lucide-react";
 
 export default function IncomingRideAlert() {
-  const { user } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
   const [incomingRide, setIncomingRide] = useState(null);
   const [activeRide, setActiveRide] = useState(null);
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // 1. The Polling Mechanism (Checks every 5 seconds)
   useEffect(() => {
     // If the driver already has an active ride, stop polling for new ones!
+    if (!isLoaded || !isSignedIn || user?.publicMetadata?.role !== "driver") return;
     if (activeRide) return;
 
+    let controller;
+
     const pollForRides = async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+
+      controller?.abort();
+      controller = new AbortController();
+
       try {
-        const res = await fetch("/api/bookings/incoming");
+        const res = await fetch("/api/bookings/incoming", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
         const data = await res.json();
         
         if (data.success && data.bookings.length > 0) {
@@ -26,35 +39,69 @@ export default function IncomingRideAlert() {
           setIncomingRide(null);
         }
       } catch (error) {
+        if (error.name === "AbortError") return;
         console.error("Failed to fetch incoming rides:", error);
       }
     };
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden) pollForRides();
+    };
+
+    pollForRides();
     const intervalId = setInterval(pollForRides, 5000);
-    return () => clearInterval(intervalId); // Cleanup on unmount
-  }, [activeRide]);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      controller?.abort();
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [activeRide, isLoaded, isSignedIn, user]);
 
   // 2. Handle Accept
   const handleAccept = async () => {
     if (!incomingRide) return;
-    
+
+    setIsAccepting(true);
+    setErrorMessage("");
+
     try {
       const res = await fetch(`/api/bookings/${incomingRide._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          status: "accepted", 
-          driverId: user?.id 
-        }),
+        body: JSON.stringify({ status: "accepted" }),
       });
 
       const data = await res.json();
-      if (data.success) {
-        setActiveRide(data.booking);
-        setIncomingRide(null); // Clear the alert modal
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Could not accept this ride");
       }
+
+      setActiveRide(data.booking);
+      setIncomingRide(null); // Clear the alert modal
     } catch (error) {
       console.error("Failed to accept ride:", error);
+      setErrorMessage(error.message || "Could not accept this ride.");
+    } finally {
+      setIsAccepting(false);
+    }
+  };
+
+  const handleCompleteRide = async () => {
+    if (!activeRide) return;
+
+    try {
+      await fetch(`/api/bookings/${activeRide._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "completed" }),
+      });
+    } catch (error) {
+      console.error("Failed to complete ride:", error);
+    } finally {
+      setActiveRide(null);
     }
   };
 
@@ -63,8 +110,60 @@ export default function IncomingRideAlert() {
     setIncomingRide(null);
   };
 
+  useEffect(() => {
+    if (!activeRide?._id) return undefined;
+
+    let controller;
+
+    const refreshActiveRide = async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+
+      controller?.abort();
+      controller = new AbortController();
+
+      try {
+        const res = await fetch(`/api/bookings/${activeRide._id}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          setActiveRide(data.booking);
+        }
+      } catch (error) {
+        if (error.name === "AbortError") return;
+        console.error("Failed to refresh active ride:", error);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) refreshActiveRide();
+    };
+
+    const intervalId = setInterval(refreshActiveRide, 5000);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      controller?.abort();
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [activeRide?._id]);
+
+  const getMapsHref = (ride) => {
+    const lat = ride?.pickupLocation?.lat;
+    const lng = ride?.pickupLocation?.lng;
+
+    if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) return null;
+
+    return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  };
+
   // --- UI: ACTIVE RIDE (Driver Accepted) ---
   if (activeRide) {
+    const mapsHref = getMapsHref(activeRide);
+
     return (
       <div className="fixed bottom-24 inset-x-4 md:inset-x-auto md:right-8 md:bottom-8 md:w-96 bg-white border-2 border-[#0F766E] rounded-3xl p-6 shadow-2xl z-50 animate-in slide-in-from-bottom-5">
         <div className="flex items-center gap-3 mb-4">
@@ -80,21 +179,43 @@ export default function IncomingRideAlert() {
         <div className="bg-slate-50 rounded-2xl p-4 mb-4">
           <p className="text-sm font-bold text-slate-900 mb-1">{activeRide.riderName}</p>
           <p className="text-xs text-slate-500 mb-3 line-clamp-1">{activeRide.pickupLocation.address}</p>
+          {mapsHref && (
+            <a
+              href={mapsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-3 w-full border border-slate-200 bg-white text-slate-700 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-100 transition"
+            >
+              <Navigation size={16} />
+              Open Live Pickup
+            </a>
+          )}
           
-          <a
-            href={`tel:${activeRide.riderPhone}`}
-            className="w-full bg-[#0F766E] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#0d625b] transition"
-          >
-            <Phone size={16} />
-            Call Rider
-          </a>
+          {activeRide.riderPhone ? (
+            <a
+              href={`tel:${activeRide.riderPhone}`}
+              className="w-full bg-[#0F766E] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#0d625b] transition"
+            >
+              <Phone size={16} />
+              Call Rider
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="w-full bg-slate-200 text-slate-500 py-3 rounded-xl font-bold flex items-center justify-center gap-2"
+            >
+              <Phone size={16} />
+              Rider phone unavailable
+            </button>
+          )}
         </div>
         
         <button 
-          onClick={() => setActiveRide(null)} // In a real app, this would mark the ride as "Completed"
+          onClick={handleCompleteRide}
           className="w-full text-xs font-bold text-slate-400 hover:text-slate-600 transition"
         >
-          End Ride / Close
+          Mark Ride Complete
         </button>
       </div>
     );
@@ -149,9 +270,15 @@ export default function IncomingRideAlert() {
             </div>
 
             {/* Action Buttons */}
+            {errorMessage && (
+              <p className="mb-3 rounded-2xl bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-600">
+                {errorMessage}
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <button 
                 onClick={handleDecline}
+                disabled={isAccepting}
                 className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
               >
                 <XCircle size={18} />
@@ -159,10 +286,11 @@ export default function IncomingRideAlert() {
               </button>
               <button 
                 onClick={handleAccept}
-                className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm bg-[#0F766E] text-white shadow-lg shadow-teal-100 hover:bg-[#0d625b] transition"
+                disabled={isAccepting}
+                className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm bg-[#0F766E] text-white shadow-lg shadow-teal-100 hover:bg-[#0d625b] transition disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <CheckCircle size={18} />
-                Accept
+                {isAccepting ? "Accepting..." : "Accept"}
               </button>
             </div>
           </div>

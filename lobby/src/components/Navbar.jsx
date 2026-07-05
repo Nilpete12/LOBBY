@@ -32,9 +32,11 @@ export default function Navbar() {
   }, [isLoaded, isSignedIn, userRole, pathname, router]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      // Find every section on your page that has the class "dark-section"
-      const darkSections = document.querySelectorAll('.dark-section');
+    let frameId = 0;
+    let darkSections = Array.from(document.querySelectorAll('.dark-section'));
+
+    const measureNavBackground = () => {
+      frameId = 0;
       let overDark = false;
 
       darkSections.forEach((section) => {
@@ -49,10 +51,26 @@ export default function Navbar() {
       setIsDarkBg(overDark);
     };
 
-    handleScroll();
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    const requestMeasure = () => {
+      if (frameId) return;
+      frameId = window.requestAnimationFrame(measureNavBackground);
+    };
+
+    const refreshSections = () => {
+      darkSections = Array.from(document.querySelectorAll('.dark-section'));
+      requestMeasure();
+    };
+
+    refreshSections();
+    window.addEventListener('scroll', requestMeasure, { passive: true });
+    window.addEventListener('resize', refreshSections);
+
+    return () => {
+      if (frameId) window.cancelAnimationFrame(frameId);
+      window.removeEventListener('scroll', requestMeasure);
+      window.removeEventListener('resize', refreshSections);
+    };
+  }, [pathname]);
 
   return (
     <>
@@ -94,7 +112,7 @@ export default function Navbar() {
                 <>
                   <Link href="/drive/dashboard" className="hover:text-[#0F766E] transition">Profile</Link>
                   <Link href="/drive/earnings" className="hover:text-[#0F766E] transition">Earnings</Link>
-                  <Link href="/drive/tripHistory" className="hover:text-[#0F766E] transition">Trip History</Link>
+                  <Link href="/drive/TripHistory" className="hover:text-[#0F766E] transition">Trip History</Link>
                   <Link href="/support" className="hover:text-[#0F766E] transition">Support</Link>
                 </>
               )}
@@ -165,7 +183,7 @@ export default function Navbar() {
               <>
                 <BottomNavLink href="/drive/dashboard" icon={<UserCircle size={22} />} label="Profile" isActive={pathname === '/drive/dashboard'} isDarkBg={isDarkBg} />
                 <BottomNavLink href="/drive/earnings" icon={<Wallet size={22} />} label="Earnings" isActive={pathname === '/drive/earnings'} isDarkBg={isDarkBg} />
-                <BottomNavLink href="/drive/tripHistory" icon={<LayoutDashboard size={22} />} label="Trip History" isActive={pathname === '/drive/trip-history'} isDarkBg={isDarkBg} />
+                <BottomNavLink href="/drive/TripHistory" icon={<LayoutDashboard size={22} />} label="Trip History" isActive={pathname === '/drive/TripHistory'} isDarkBg={isDarkBg} />
                 <BottomNavLink href="/support" icon={<LifeBuoy size={22} />} label="Support" isActive={pathname === '/support'} isDarkBg={isDarkBg} />
               </>
             )}
@@ -189,7 +207,7 @@ function BottomNavLink({ href, icon, label, isActive, isDarkBg }) {
     <Link
       href={href}
       className={`
-        flex flex-col items-center justify-center w-14 gap-1 transition-all duration-300
+        flex flex-col items-center justify-center w-14 gap-1 transition-all duration-200 active:scale-95
         ${isActive ? activeColor : inactiveColor}
       `}
     >

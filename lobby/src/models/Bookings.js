@@ -22,6 +22,10 @@ const BookingSchema = new mongoose.Schema({
     lng: { type: Number, required: true },
     address: { type: String, default: 'Kohima Area' }
   },
+  locationUpdatedAt: {
+    type: Date,
+    default: Date.now
+  },
   destination: { 
     type: String, 
     required: true 
@@ -31,11 +35,19 @@ const BookingSchema = new mongoose.Schema({
     enum: ['pending', 'accepted', 'completed', 'cancelled'],
     default: 'pending'
   },
+  acceptedAt: {
+    type: Date,
+    default: null
+  },
   createdAt: { 
     type: Date, 
     default: Date.now 
   }
-});
+}, { timestamps: true });
+
+BookingSchema.index({ status: 1, createdAt: -1 });
+BookingSchema.index({ riderId: 1, createdAt: -1 });
+BookingSchema.index({ driverId: 1, createdAt: -1 });
 
 // Prevent Mongoose from recompiling the model if it already exists
 export default mongoose.models.Booking || mongoose.model('Booking', BookingSchema);
