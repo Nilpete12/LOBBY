@@ -1,7 +1,7 @@
 "use client";
 import Image from 'next/image';
 import { Search, MapPin, Star, Phone, X, Car, Loader2 } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
@@ -9,19 +9,59 @@ import API_BASE_URL from '@/config';
 import InstantBook from '@/components/InstantBook';
 
 const FILTERS = ['All Rides', 'Hatchback', 'SUV', 'Top Rated'];
+const SEARCH_CACHE_TTL = 45 * 1000;
 
 function getInitialSearchQuery() {
   if (typeof window === 'undefined') return '';
   return new URLSearchParams(window.location.search).get('q') || '';
 }
 
-async function requestDrivers(query = '') {
+function getSearchCacheKey(query = '') {
+  const normalizedQuery = query.trim().toLowerCase() || 'all';
+  return `lobby:driver-search:${normalizedQuery}`;
+}
+
+function readCachedDrivers(query = '') {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(getSearchCacheKey(query));
+    if (!raw) return null;
+
+    const cached = JSON.parse(raw);
+    if (!cached?.savedAt || Date.now() - cached.savedAt > SEARCH_CACHE_TTL) return null;
+    if (!Array.isArray(cached.drivers)) return null;
+
+    return cached.drivers;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedDrivers(query = '', drivers = []) {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.sessionStorage.setItem(
+      getSearchCacheKey(query),
+      JSON.stringify({ savedAt: Date.now(), drivers })
+    );
+  } catch {
+    // Session storage is a speed hint only.
+  }
+}
+
+async function requestDrivers(query = '', options = {}) {
   const params = new URLSearchParams();
   if (query.trim()) params.set('destination', query.trim());
 
   const url = `${API_BASE_URL}/driver/search${params.toString() ? `?${params.toString()}` : ''}`;
-  const res = await fetch(url);
+  const res = await fetch(url, { signal: options.signal });
   const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || 'Search failed');
+  }
 
   if (data.success && Array.isArray(data.drivers)) {
     return data.drivers;
@@ -40,6 +80,8 @@ export default function SearchPage() {
   const [activeFilter, setActiveFilter] = useState('All Rides');
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [toast, setToast] = useState('');
+  const activeFetchRef = useRef(0);
+  const abortRef = useRef(null);
 
   const visibleDrivers = useMemo(() => {
     if (activeFilter === 'Top Rated') {
@@ -55,42 +97,53 @@ export default function SearchPage() {
     return drivers;
   }, [activeFilter, drivers]);
 
-  const fetchDrivers = async (query = '') => {
-    setLoading(true);
-    setError('');
-    try {
-      setDrivers(await requestDrivers(query));
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setError("Could not connect to server. Is it running?");
-    } finally {
+  const fetchDrivers = useCallback(async (query = '', options = {}) => {
+    const cachedDrivers = options.preferCache ? readCachedDrivers(query) : null;
+    const fetchId = Date.now();
+
+    activeFetchRef.current = fetchId;
+    abortRef.current?.abort();
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    if (cachedDrivers) {
+      setDrivers(cachedDrivers);
       setLoading(false);
+    } else {
+      setLoading(true);
     }
-  };
+
+    setError('');
+
+    try {
+      const nextDrivers = await requestDrivers(query, { signal: controller.signal });
+      if (activeFetchRef.current !== fetchId) return;
+
+      setDrivers(nextDrivers);
+      writeCachedDrivers(query, nextDrivers);
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.error("Fetch error:", err);
+      if (!cachedDrivers) setError("Could not connect to server. Is it running?");
+    } finally {
+      if (activeFetchRef.current === fetchId) setLoading(false);
+    }
+  }, []);
 
   // 1. Fetch Drivers on Load
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadInitialDrivers() {
-      const initialQuery = getInitialSearchQuery();
-      try {
-        const initialDrivers = await requestDrivers(initialQuery);
-        if (isMounted) setDrivers(initialDrivers);
-      } catch (err) {
-        console.error("Fetch error:", err);
-        if (isMounted) setError("Could not connect to server. Is it running?");
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    loadInitialDrivers();
+    let cancelled = false;
+    const initialQuery = getInitialSearchQuery();
+    window.queueMicrotask(() => {
+      if (!cancelled) fetchDrivers(initialQuery, { preferCache: true });
+    });
 
     return () => {
-      isMounted = false;
+      cancelled = true;
+      abortRef.current?.abort();
     };
-  }, []);
+  }, [fetchDrivers]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -102,7 +155,7 @@ export default function SearchPage() {
     setActiveFilter('All Rides');
     setSelectedDriver(null);
     router.push(`/search${params.toString() ? `?${params.toString()}` : ''}`);
-    fetchDrivers(query);
+    fetchDrivers(query, { preferCache: true });
   };
 
   const trackCall = async (driver) => {

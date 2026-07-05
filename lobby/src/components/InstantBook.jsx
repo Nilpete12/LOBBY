@@ -17,6 +17,8 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
 
   // 1. The Main Booking Action
   const handleInstantBook = () => {
+    if (status !== "idle") return;
+
     setErrorMessage("");
 
     if (!isLoaded) return;
@@ -44,13 +46,13 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
         },
         (error) => {
           console.error("Location error:", error);
-          alert("Please enable location services to book a ride.");
+          setErrorMessage("Please enable location access so nearby drivers can find your pickup point.");
           setStatus("idle");
         },
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 12000 }
       );
     } else {
-      alert("Geolocation is not supported by your browser.");
+      setErrorMessage("This browser does not support location booking. Please call a driver directly.");
       setStatus("idle");
     }
   };
@@ -143,6 +145,8 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
     return () => navigator.geolocation.clearWatch(watchId);
   }, [bookingId, status]);
 
+  const isBusy = status !== "idle";
+
   return (
     <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-slate-200/60 shadow-[0_20px_50px_-15px_rgba(15,23,42,0.07)] max-w-sm mx-auto w-full">
       
@@ -169,7 +173,8 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
           )}
           <button
             onClick={handleInstantBook}
-            className="w-full bg-[#0F766E] text-white py-3.5 rounded-2xl font-bold hover:bg-[#0d625b] transition shadow-lg shadow-[#0F766E]/20 flex items-center justify-center gap-2"
+            disabled={isBusy}
+            className="w-full bg-[#0F766E] text-white py-3.5 rounded-2xl font-bold hover:bg-[#0d625b] transition shadow-lg shadow-[#0F766E]/20 flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.99]"
           >
             <Navigation size={18} />
             {isSignedIn ? "Instant Book" : "Sign in to book"}

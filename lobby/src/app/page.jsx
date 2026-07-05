@@ -15,7 +15,9 @@ export default async function HomePage() {
   // 2. THE DRIVER VIEW
   if (userRole === "driver") {
     await connectDB();
-    const driverDoc = await User.findOne({ clerkId: user.id }).lean();
+    const driverDoc = await User.findOne({ clerkId: user.id })
+      .select('isVerified isAvailable accountStatus')
+      .lean();
 
     // 2. Extract their current status
     const isVerified = driverDoc?.isVerified || false;

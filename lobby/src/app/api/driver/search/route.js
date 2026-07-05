@@ -31,7 +31,9 @@ export async function GET(request) {
       .limit(50)
       .lean();
 
-    return NextResponse.json({ success: true, drivers });
+    const response = NextResponse.json({ success: true, drivers });
+    response.headers.set('Cache-Control', 'private, max-age=15, stale-while-revalidate=30');
+    return response;
     
   } catch (error) {
     console.error("Search API Error:", error);

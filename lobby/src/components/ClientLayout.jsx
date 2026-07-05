@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import InstallPopup from '@/components/popup'; // Check your exact filename capitalization here!
 import PlatformGate from '@/components/PlatformGate';
+import NavigationWarmup from '@/components/NavigationWarmup';
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
@@ -16,6 +17,8 @@ export default function ClientLayout({ children }) {
     <>
       {/* Conditionally render Navbar */}
       {!isAdmin && <Navbar />}
+
+      {!isAdmin && <NavigationWarmup />}
       
       {!isAdmin && <InstallPopup />}
       

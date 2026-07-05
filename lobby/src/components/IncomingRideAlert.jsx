@@ -17,9 +17,19 @@ export default function IncomingRideAlert() {
     if (!isLoaded || !isSignedIn || user?.publicMetadata?.role !== "driver") return;
     if (activeRide) return;
 
+    let controller;
+
     const pollForRides = async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+
+      controller?.abort();
+      controller = new AbortController();
+
       try {
-        const res = await fetch("/api/bookings/incoming", { cache: "no-store" });
+        const res = await fetch("/api/bookings/incoming", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
         const data = await res.json();
         
         if (data.success && data.bookings.length > 0) {
@@ -29,13 +39,24 @@ export default function IncomingRideAlert() {
           setIncomingRide(null);
         }
       } catch (error) {
+        if (error.name === "AbortError") return;
         console.error("Failed to fetch incoming rides:", error);
       }
     };
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden) pollForRides();
+    };
+
     pollForRides();
     const intervalId = setInterval(pollForRides, 5000);
-    return () => clearInterval(intervalId); // Cleanup on unmount
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      controller?.abort();
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [activeRide, isLoaded, isSignedIn, user]);
 
   // 2. Handle Accept
@@ -92,21 +113,42 @@ export default function IncomingRideAlert() {
   useEffect(() => {
     if (!activeRide?._id) return undefined;
 
+    let controller;
+
     const refreshActiveRide = async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+
+      controller?.abort();
+      controller = new AbortController();
+
       try {
-        const res = await fetch(`/api/bookings/${activeRide._id}`, { cache: "no-store" });
+        const res = await fetch(`/api/bookings/${activeRide._id}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
         const data = await res.json();
 
         if (data.success) {
           setActiveRide(data.booking);
         }
       } catch (error) {
+        if (error.name === "AbortError") return;
         console.error("Failed to refresh active ride:", error);
       }
     };
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden) refreshActiveRide();
+    };
+
     const intervalId = setInterval(refreshActiveRide, 5000);
-    return () => clearInterval(intervalId);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      controller?.abort();
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [activeRide?._id]);
 
   const getMapsHref = (ride) => {

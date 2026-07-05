@@ -6,10 +6,12 @@ export async function GET() {
   try {
     await connectDB();
     const settings = await getPlatformSettings();
-    return NextResponse.json({ success: true, settings: serializePlatformSettings(settings) });
+    const response = NextResponse.json({ success: true, settings: serializePlatformSettings(settings) });
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    return response;
   } catch (error) {
     console.error('Failed to load platform settings:', error);
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       settings: {
         maintenanceMode: false,
@@ -19,5 +21,7 @@ export async function GET() {
         notice: '',
       },
     });
+    response.headers.set('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=60');
+    return response;
   }
 }

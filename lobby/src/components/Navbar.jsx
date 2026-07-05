@@ -32,9 +32,11 @@ export default function Navbar() {
   }, [isLoaded, isSignedIn, userRole, pathname, router]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      // Find every section on your page that has the class "dark-section"
-      const darkSections = document.querySelectorAll('.dark-section');
+    let frameId = 0;
+    let darkSections = Array.from(document.querySelectorAll('.dark-section'));
+
+    const measureNavBackground = () => {
+      frameId = 0;
       let overDark = false;
 
       darkSections.forEach((section) => {
@@ -49,10 +51,26 @@ export default function Navbar() {
       setIsDarkBg(overDark);
     };
 
-    handleScroll();
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    const requestMeasure = () => {
+      if (frameId) return;
+      frameId = window.requestAnimationFrame(measureNavBackground);
+    };
+
+    const refreshSections = () => {
+      darkSections = Array.from(document.querySelectorAll('.dark-section'));
+      requestMeasure();
+    };
+
+    refreshSections();
+    window.addEventListener('scroll', requestMeasure, { passive: true });
+    window.addEventListener('resize', refreshSections);
+
+    return () => {
+      if (frameId) window.cancelAnimationFrame(frameId);
+      window.removeEventListener('scroll', requestMeasure);
+      window.removeEventListener('resize', refreshSections);
+    };
+  }, [pathname]);
 
   return (
     <>
@@ -189,7 +207,7 @@ function BottomNavLink({ href, icon, label, isActive, isDarkBg }) {
     <Link
       href={href}
       className={`
-        flex flex-col items-center justify-center w-14 gap-1 transition-all duration-300
+        flex flex-col items-center justify-center w-14 gap-1 transition-all duration-200 active:scale-95
         ${isActive ? activeColor : inactiveColor}
       `}
     >
