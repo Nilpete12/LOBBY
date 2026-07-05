@@ -77,7 +77,8 @@ export default function AdminLogin({ onLogin }) {
                 value={email}
                 disabled={isLoading}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#031a37] border border-slate-700 !text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#031a37_inset] px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"                placeholder="admin@lobby.com"
+                className="w-full bg-[#031a37] border border-slate-700 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#031a37_inset] px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"                
+                placeholder="admin@lobby.com"
               />
             </div>
 
@@ -98,7 +99,7 @@ export default function AdminLogin({ onLogin }) {
                   value={password}
                   disabled={isLoading}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#031a37] border border-slate-700 !text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#031a37_inset] px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono text-sm disabled:opacity-60"                  placeholder="••••••••"
+                  className="w-full bg-[#031a37] border border-slate-700 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#031a37_inset] px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono text-sm disabled:opacity-60"                  placeholder="••••••••"
                 />
 
                 <Lock
