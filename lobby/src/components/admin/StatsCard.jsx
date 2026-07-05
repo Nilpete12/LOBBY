@@ -14,10 +14,10 @@ export default function StatsCard({ title, value, icon: Icon, trend, color }) {
   const activeColor = colorClasses[color] || colorClasses.blue;
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-      <div className="flex justify-between items-start mb-4">
-        <div className={`p-3 rounded-xl ${activeColor}`}>
-          <Icon size={24} />
+    <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md sm:p-6">
+      <div className="mb-4 flex items-start justify-between gap-2">
+        <div className={`rounded-2xl p-2.5 sm:p-3 ${activeColor}`}>
+          <Icon size={22} />
         </div>
         
         {trend && (
@@ -27,8 +27,8 @@ export default function StatsCard({ title, value, icon: Icon, trend, color }) {
         )}
       </div>
       
-      <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-1">{title}</h3>
-      <p className="text-3xl font-black text-slate-900">{value}</p>
+      <h3 className="mb-1 text-xs font-black uppercase tracking-wide text-slate-500 sm:text-sm">{title}</h3>
+      <p className="text-2xl font-black text-slate-900 sm:text-3xl">{value}</p>
     </div>
   );
 }

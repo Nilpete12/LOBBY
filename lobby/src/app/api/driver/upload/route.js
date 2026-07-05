@@ -3,6 +3,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
+import VerificationRequest from '@/models/VerificationRequest';
 import { rateLimit } from '@/lib/rateLimit';
 
 export const runtime = 'nodejs';
@@ -131,6 +132,31 @@ export async function POST(request) {
         { success: false, message: 'Driver profile not found' },
         { status: 404 }
       );
+    }
+
+    if (type === 'license') {
+      await VerificationRequest.updateMany(
+        { clerkId: userId, status: 'pending' },
+        {
+          $set: {
+            status: 'superseded',
+            reviewNotes: 'Superseded by a newer license upload',
+            reviewedAt: new Date(),
+          },
+        }
+      );
+
+      await VerificationRequest.create({
+        driverId: driver._id,
+        clerkId: userId,
+        driverName: driver.fullName,
+        email: driver.email,
+        phone: driver.phone,
+        vehicle: driver.vehicle,
+        licenseUrl: imageUrl,
+        status: 'pending',
+        notes: 'Uploaded for admin review',
+      });
     }
 
     return NextResponse.json({ success: true, driver });

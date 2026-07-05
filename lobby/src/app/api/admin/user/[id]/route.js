@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
+import VerificationRequest from '@/models/VerificationRequest';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 export async function DELETE(request, context) {
@@ -18,7 +19,7 @@ export async function DELETE(request, context) {
 
   try {
     await connectDB();
-    const user = await User.findByIdAndDelete(id);
+    const user = await User.findById(id);
 
     if (!user) {
       return NextResponse.json(
@@ -26,6 +27,23 @@ export async function DELETE(request, context) {
         { status: 404 }
       );
     }
+
+    if (user.role === 'admin') {
+      return NextResponse.json(
+        { success: false, message: 'Admin users cannot be deleted here' },
+        { status: 403 }
+      );
+    }
+
+    const verificationCleanupQuery = [{ driverId: user._id }];
+    if (user.clerkId) verificationCleanupQuery.push({ clerkId: user.clerkId });
+
+    await Promise.all([
+      User.deleteOne({ _id: id }),
+      VerificationRequest.deleteMany({
+        $or: verificationCleanupQuery,
+      }),
+    ]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

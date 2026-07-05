@@ -1,10 +1,11 @@
 "use client";
-import { LayoutDashboard, Users, Car, Settings, LogOut, X, MessagesSquare } from 'lucide-react';
+import { LayoutDashboard, Users, Car, Settings, LogOut, X, MessagesSquare, ShieldCheck } from 'lucide-react';
 
-export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLogout }) {
+export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLogout, badges = {} }) {
   
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'verifications', label: 'Verifications', icon: ShieldCheck },
     { id: 'riders',    label: 'Riders',    icon: Users },
     { id: 'drivers',   label: 'Drivers',   icon: Car },
     { id: 'complaints', label: 'Complaints', icon: MessagesSquare },
@@ -40,7 +41,12 @@ export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLo
               }`}
             >
               <item.icon size={20} />
-              {item.label}
+              <span className="flex-1 text-left">{item.label}</span>
+              {badges[item.id] > 0 && (
+                <span className="min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
+                  {badges[item.id]}
+                </span>
+              )}
             </button>
           ))}
         </nav>
