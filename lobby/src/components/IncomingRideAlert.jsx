@@ -256,7 +256,7 @@ export default function IncomingRideAlert() {
 
           {/* Header with pulsing indicator */}
           <div className="bg-slate-900 p-6 text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-400 animate-pulse"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-emerald-400 via-teal-500 to-emerald-400 animate-pulse"></div>
             <h2 className="text-white font-black text-2xl tracking-tight mb-1">Incoming Request</h2>
             <div className="flex items-center justify-center gap-1.5 text-emerald-400 text-xs font-bold uppercase tracking-wider">
               <Clock size={14} className="animate-pulse" /> Just now

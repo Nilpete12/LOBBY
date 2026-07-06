@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'; // The file we created in Phase 3
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+  const WEBHOOK_SECRET = process.env.CLERK_SECRET;
   if (!WEBHOOK_SECRET) return new Response('Missing Secret', { status: 500 });
 
   const headerPayload = headers();

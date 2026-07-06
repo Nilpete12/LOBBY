@@ -1,23 +1,25 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
+// Define the routes that require authentication
 const isProtectedRoute = createRouteMatcher([
-  '/drive/dashboard(.*)',
-  '/drive/earnings(.*)',
-  '/drive/profile(.*)',
-  '/drive/TripHistory(.*)',
+  '/drive(.*)',
   '/account(.*)',
-  '/favourites(.*)'
+  '/admin(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
-    await auth.protect();
+    // 1. Await the async auth function to get session information
+    const session = await auth();
+    
+    // 2. If no user is logged in, force a redirect to sign-in
+    if (!session.userId) {
+      return session.redirectToSignIn();
+    }
   }
 });
 
 export const config = {
-  matcher: [
-    '/((?!_next/image|_next/static|_next/data|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-    '/(api|trpc)(.*)'
-  ],
+  // Protects all routes except static assets and internal system files
+  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 };
