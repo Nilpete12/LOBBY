@@ -1,7 +1,5 @@
-import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/supabase';
-import Complaint from '@/models/Complaint';
+import { supabase } from '@/lib/supabase';
 import { logAdminActivity } from '@/lib/adminActivity';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
@@ -16,7 +14,7 @@ export async function PUT(request, context) {
 
   const { id } = await context.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
+  if (!supabase.auth.user() || !id) {
     return NextResponse.json(
       { success: false, message: 'Invalid complaint id' },
       { status: 400 }

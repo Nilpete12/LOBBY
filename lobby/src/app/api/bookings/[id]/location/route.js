@@ -1,8 +1,6 @@
-import mongoose from 'mongoose';
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import connectMongo from '@/lib/supabase';
-import Booking from '@/models/Bookings';
 
 function getValidLocation(value) {
   const lat = Number(value?.lat);

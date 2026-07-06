@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/supabase';
-import Complaint from '@/models/Complaint';
+import { supabase } from '@/lib/supabase';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
   try {
-    await connectDB();
-    const complaints = await Complaint.find({}).sort({ createdAt: -1 }).lean();
+    await supabase.connect();
+    const { data: complaints, error } = await supabase
+      .from('complaints')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
 
     return NextResponse.json({ success: true, complaints });
   } catch (error) {

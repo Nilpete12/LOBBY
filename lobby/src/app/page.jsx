@@ -1,8 +1,7 @@
 import { currentUser } from '@clerk/nextjs/server';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
-import connectDB from '@/lib/supabase'; // NEW: Import DB
-import User from '@/models/User'; // NEW: Import User Model
+import { supabase } from '@/lib/supabase';
 import HowItWorks from '@/components/Howitwork';
 import TaxiStands from '@/components/TaxiStands';
 import DriverHero from '@/components/DriverHero';
