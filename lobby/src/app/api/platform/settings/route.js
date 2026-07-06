@@ -1,33 +1,53 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getPlatformSettings, serializePlatformSettings } from '@/lib/platformSettings';
+// Import only the function that exists
+import { getPlatformSettings } from '@/lib/platformSettings';
+import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 export async function GET() {
+  // If you are using this for riders/drivers, remove the admin check
+  // If this is strictly for admin, keep the check below:
+  if (!(await isAdminAuthenticated())) return adminUnauthorized();
+
   try {
-    await supabase.connect();
-    const { data: settings, error } = await supabase
+    const settings = await getPlatformSettings();
+    return NextResponse.json({ success: true, settings });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
+  }
+}
+
+export async function POST(req) {
+  if (!(await isAdminAuthenticated())) return adminUnauthorized();
+
+  try {
+    const body = await req.json();
+    const { baseFare, perKmRate, serviceFeePercentage } = body;
+
+    // Delete and Re-insert
+    await supabase.from('platform_settings').delete().neq('base_fare', -999); 
+    
+    const { data, error } = await supabase
       .from('platform_settings')
-      .select('*')
+      .insert([{ 
+        base_fare: baseFare, 
+        per_km_rate: perKmRate, 
+        service_fee_percentage: serviceFeePercentage 
+      }])
+      .select()
       .single();
 
     if (error) throw error;
 
-    const response = NextResponse.json({ success: true, settings: serializePlatformSettings(settings) });
-    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-    return response;
-  } catch (error) {
-    console.error('Failed to load platform settings:', error);
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       settings: {
-        maintenanceMode: false,
-        registrationOpen: true,
-        bookingOpen: true,
-        supportOpen: true,
-        notice: '',
+        baseFare: data.base_fare,
+        perKmRate: data.per_km_rate,
+        serviceFeePercentage: data.service_fee_percentage,
       },
     });
-    response.headers.set('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=60');
-    return response;
+  } catch (error) {
+    return NextResponse.json({ success: false, message: 'Failed to update settings' }, { status: 500 });
   }
 }
