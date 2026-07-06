@@ -1,77 +1,37 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
+import { supabase } from '@/lib/supabase';
 
-export async function POST(request) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-  }
-
+export async function POST(req) {
   try {
-    const body = await request.json();
+    const body = await req.json();
+    const { clerkId, vehicle, phone, routes, isAvailable } = body;
 
-    if (body.clerkId && body.clerkId !== userId) {
-      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
-    }
+    // Update the row in Supabase
+    const { data, error } = await supabase
+      .from('users')
+      .update({ 
+        vehicle, 
+        phone, 
+        routes, 
+        is_available: isAvailable 
+      })
+      .eq('clerk_id', clerkId)
+      .select()
+      .single();
 
-    await connectDB();
+    if (error) throw error;
 
-    const existingDriver = await User.findOne({ clerkId: userId, role: 'driver' }).select(
-      'isVerified accountStatus'
-    );
-
-    if (!existingDriver) {
-      return NextResponse.json(
-        { success: false, message: 'Driver profile not found' },
-        { status: 404 }
-      );
-    }
-
-    if (Boolean(body.isAvailable) && !existingDriver.isVerified) {
-      return NextResponse.json(
-        { success: false, message: 'Driver verification is required before going online' },
-        { status: 403 }
-      );
-    }
-
-    if (existingDriver.accountStatus === 'suspended') {
-      return NextResponse.json(
-        { success: false, message: 'This driver account is suspended' },
-        { status: 403 }
-      );
-    }
-
-    const updates = {
-      vehicle: typeof body.vehicle === 'string' ? body.vehicle.trim().slice(0, 120) : '',
-      phone: typeof body.phone === 'string' ? body.phone.trim().slice(0, 40) : '',
-      routes: Array.isArray(body.routes)
-        ? body.routes.map((route) => String(route).trim()).filter(Boolean).slice(0, 20)
-        : [],
-      isAvailable: existingDriver.isVerified ? Boolean(body.isAvailable) : false,
+    // Format for frontend
+    const formattedDriver = {
+      ...data,
+      isAvailable: data.is_available,
+      isVerified: data.is_verified
     };
 
-    const driver = await User.findOneAndUpdate(
-      { clerkId: userId, role: 'driver' },
-      { $set: updates },
-      { new: true }
-    ).select('-password');
-
-    if (!driver) {
-      return NextResponse.json(
-        { success: false, message: 'Driver profile not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ success: true, driver });
+    return NextResponse.json({ success: true, driver: formattedDriver });
+    
   } catch (error) {
-    console.error('Failed to update driver:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to update driver profile' },
-      { status: 500 }
-    );
+    console.error("Update failed:", error);
+    return NextResponse.json({ success: false, message: 'Update failed' }, { status: 500 });
   }
 }

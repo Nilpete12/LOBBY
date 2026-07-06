@@ -1,79 +1,45 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Analytics from '@/models/Analytics';
-import User from '@/models/User';
+import { supabase } from '@/lib/supabase';
+import { auth } from '@clerk/nextjs/server';
 
-function startOfDay(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-function startOfWeek(date) {
-  const day = date.getDay();
-  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-  return new Date(date.getFullYear(), date.getMonth(), diff);
-}
-
-export async function GET() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-  }
-
+export async function GET(req) {
   try {
-    await connectDB();
-
-    const driver = await User.findOne({ clerkId: userId, role: 'driver' }).select('-password').lean();
-
-    if (!driver) {
-      return NextResponse.json(
-        { success: false, message: 'Driver profile not found' },
-        { status: 404 }
-      );
+    // 1. Securely get the logged-in driver's ID from Clerk
+    const { userId } = auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const now = new Date();
-    const today = startOfDay(now);
-    const week = startOfWeek(now);
+    // 2. Fetch all bookings assigned to this driver, newest first
+    const { data: history, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('driver_id', userId)
+      .order('created_at', { ascending: false });
 
-    const [events, totalCalls, callsToday, callsThisWeek] = await Promise.all([
-      Analytics.find({ type: 'call_click', driverId: driver._id })
-        .sort({ timestamp: -1 })
-        .limit(50)
-        .lean(),
-      Analytics.countDocuments({ type: 'call_click', driverId: driver._id }),
-      Analytics.countDocuments({ type: 'call_click', driverId: driver._id, timestamp: { $gte: today } }),
-      Analytics.countDocuments({ type: 'call_click', driverId: driver._id, timestamp: { $gte: week } }),
-    ]);
+    if (error) throw error;
 
-    const riderIds = [...new Set(events.map((event) => event.riderId).filter(Boolean))];
-    const riders = await User.find({ clerkId: { $in: riderIds } }).select('clerkId fullName email').lean();
-    const riderByClerkId = new Map(riders.map((rider) => [rider.clerkId, rider]));
-
-    const history = events.map((event) => ({
-      _id: String(event._id),
-      timestamp: event.timestamp,
-      rider: event.riderId
-        ? riderByClerkId.get(event.riderId) || { fullName: 'Rider', email: '' }
-        : { fullName: 'Guest rider', email: '' },
+    // 3. Format the Postgres flat rows back into the nested JSON your React frontend expects
+    const formattedHistory = history.map(ride => ({
+      ...ride,
+      _id: ride.id,
+      riderId: ride.rider_id,
+      driverId: ride.driver_id,
+      riderName: ride.rider_name,
+      riderPhone: ride.rider_phone,
+      // Re-pack the coordinates into the object structure your frontend uses
+      pickupLocation: {
+        lat: ride.pickup_lat,
+        lng: ride.pickup_lng,
+        address: ride.pickup_address
+      },
+      createdAt: ride.created_at
     }));
 
-    return NextResponse.json({
-      success: true,
-      driver,
-      stats: {
-        totalCalls,
-        callsToday,
-        callsThisWeek,
-      },
-      history,
-    });
+    return NextResponse.json({ success: true, history: formattedHistory });
+    
   } catch (error) {
-    console.error('Failed to load driver history:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to load driver history' },
-      { status: 500 }
-    );
+    console.error("History fetch error:", error);
+    return NextResponse.json({ success: false, message: 'Failed to fetch history' }, { status: 500 });
   }
 }

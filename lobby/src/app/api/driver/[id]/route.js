@@ -1,45 +1,34 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
-
-const PUBLIC_DRIVER_FIELDS = 'fullName phone vehicle routes rating profilePic carPic';
-const OWNER_DRIVER_FIELDS = '-password -__v';
+import { supabase } from '@/lib/supabase';
 
 export async function GET(request, context) {
   try {
-    await connectDB();
-
-    const { userId } = await auth();
     const params = await context.params;
-    const isOwner = userId === params.id;
-    const query = isOwner
-      ? { clerkId: params.id, role: 'driver' }
-      : {
-          clerkId: params.id,
-          role: 'driver',
-          isAvailable: true,
-          isVerified: true,
-          accountStatus: { $ne: 'suspended' },
-        };
-    const projection = isOwner ? OWNER_DRIVER_FIELDS : PUBLIC_DRIVER_FIELDS;
+    
+    // Search Supabase using the clerk_id
+    const { data: driver, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('clerk_id', params.id)
+      .single();
 
-    const driver = await User.findOne(query).select(projection).lean();
-
-    if (!driver) {
-      return NextResponse.json(
-        { success: false, message: "Driver profile not found in database." }, 
-        { status: 404 }
-      );
+    if (error || !driver) {
+      return NextResponse.json({ success: false, message: "Driver not found." }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, driver }, { status: 200 });
+    // Convert snake_case from DB back to camelCase for your React frontend
+    const formattedDriver = {
+      ...driver,
+      clerkId: driver.clerk_id,
+      fullName: driver.full_name,
+      isAvailable: driver.is_available,
+      isVerified: driver.is_verified,
+      carPic: driver.car_pic
+    };
+
+    return NextResponse.json({ success: true, driver: formattedDriver }, { status: 200 });
   } catch (error) {
     console.error("Driver lookup failed:", error);
-    
-    return NextResponse.json(
-      { success: false, message: "Unable to load driver profile" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: "Unable to load profile" }, { status: 500 });
   }
 }

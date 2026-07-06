@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import connectDB from '@/lib/supabase';
 import Complaint from '@/models/Complaint';
 import { logAdminActivity } from '@/lib/adminActivity';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';

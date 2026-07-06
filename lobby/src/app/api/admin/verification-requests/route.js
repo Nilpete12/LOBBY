@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import connectDB from '@/lib/supabase';
 import User from '@/models/User';
 import VerificationRequest from '@/models/VerificationRequest';
 import { logAdminActivity } from '@/lib/adminActivity';

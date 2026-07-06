@@ -1,72 +1,46 @@
-import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
-import VerificationRequest from '@/models/VerificationRequest';
-import { logAdminActivity } from '@/lib/adminActivity';
-import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
+import { supabase } from '@/lib/supabase';
+import { isAdminAuthenticated, adminUnauthorized } from '@/lib/adminAuth';
 
-export async function POST(request) {
+export async function POST(req) {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
-  const { id } = await request.json();
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid user id' },
-      { status: 400 }
-    );
-  }
-
   try {
-    await connectDB();
+    const body = await req.json();
+    const { clerkId, action } = body; // action: 'approve' or 'reject'
 
-    const driver = await User.findOneAndUpdate(
-      { _id: id, role: 'driver' },
-      {
-        $set: {
-          isVerified: true,
-          verificationStatus: 'Approved',
-          aiNotes: 'Approved by admin',
-        },
-      },
-      { new: true }
-    ).select('-password');
-
-    if (!driver) {
-      return NextResponse.json(
-        { success: false, message: 'Driver not found' },
-        { status: 404 }
-      );
+    if (!clerkId) {
+      return NextResponse.json({ success: false, message: 'Driver clerkId required' }, { status: 400 });
     }
 
-    await VerificationRequest.findOneAndUpdate(
-      { driverId: driver._id, status: 'pending' },
-      {
-        $set: {
-          status: 'approved',
-          reviewNotes: 'Approved by admin',
-          reviewedAt: new Date(),
-        },
-      },
-      { sort: { createdAt: -1 } }
-    );
+    const isApproved = action === 'approve';
+    const newStatus = isApproved ? 'Approved' : 'Rejected';
 
-    await logAdminActivity({
-      action: 'driver.approve',
-      targetType: 'user',
-      targetId: String(driver._id),
-      targetLabel: driver.fullName,
-      summary: `Approved driver ${driver.fullName}`,
-      metadata: { email: driver.email },
-    });
+    // Update Postgres driver record
+    const { data: updatedDriver, error } = await supabase
+      .from('users')
+      .update({
+        is_verified: isApproved,
+        verification_status: newStatus
+      })
+      .eq('clerk_id', clerkId)
+      .select()
+      .single();
 
-    return NextResponse.json({ success: true, driver });
+    if (error) throw error;
+
+    const formattedDriver = {
+      ...updatedDriver,
+      _id: updatedDriver.id,
+      clerkId: updatedDriver.clerk_id,
+      fullName: updatedDriver.full_name,
+      isVerified: updatedDriver.is_verified,
+      verificationStatus: updatedDriver.verification_status
+    };
+
+    return NextResponse.json({ success: true, driver: formattedDriver });
   } catch (error) {
-    console.error('Failed to approve driver:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to approve driver' },
-      { status: 500 }
-    );
+    console.error("Admin Approval Error:", error);
+    return NextResponse.json({ success: false, message: 'Failed to update driver status' }, { status: 500 });
   }
 }

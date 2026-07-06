@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
+import { createClient } from '@supabase/supabase-js';
 import { MapPin, Navigation, User, CheckCircle, XCircle, Phone, Clock } from "lucide-react";
+
+// Initialize Supabase Client for frontend subscriptions
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 export default function IncomingRideAlert() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -11,55 +18,64 @@ export default function IncomingRideAlert() {
   const [isAccepting, setIsAccepting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // 1. The Polling Mechanism (Checks every 5 seconds)
+  // --- 1. SUPABASE REALTIME SUBSCRIPTION (Replaces Polling) ---
   useEffect(() => {
-    // If the driver already has an active ride, stop polling for new ones!
+    // Stop listening if not a driver, or if already on an active ride
     if (!isLoaded || !isSignedIn || user?.publicMetadata?.role !== "driver") return;
     if (activeRide) return;
 
-    let controller;
+    // A. Fetch any existing pending ride on initial load
+    const fetchInitialPendingRide = async () => {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-    const pollForRides = async () => {
-      if (typeof document !== "undefined" && document.hidden) return;
-
-      controller?.abort();
-      controller = new AbortController();
-
-      try {
-        const res = await fetch("/api/bookings/incoming", {
-          cache: "no-store",
-          signal: controller.signal,
-        });
-        const data = await res.json();
-        
-        if (data.success && data.bookings.length > 0) {
-          // Grab the newest pending ride
-          setIncomingRide(data.bookings[0]);
-        } else {
-          setIncomingRide(null);
-        }
-      } catch (error) {
-        if (error.name === "AbortError") return;
-        console.error("Failed to fetch incoming rides:", error);
+      if (!error && data && data.length > 0) {
+        // Map DB 'id' to '_id' for frontend compatibility
+        setIncomingRide({ ...data[0], _id: data[0].id }); 
       }
     };
 
-    const handleVisibilityChange = () => {
-      if (!document.hidden) pollForRides();
-    };
+    fetchInitialPendingRide();
 
-    pollForRides();
-    const intervalId = setInterval(pollForRides, 5000);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    // B. Subscribe to LIVE incoming requests
+    const channel = supabase
+      .channel('public:bookings')
+      .on(
+        'postgres_changes',
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'bookings', 
+          filter: "status=eq.pending" 
+        },
+        (payload) => {
+          // Instantly show the new ride when it hits the database
+          setIncomingRide({
+            ...payload.new,
+            _id: payload.new.id,
+            pickupLocation: {
+              lat: payload.new.pickup_lat,
+              lng: payload.new.pickup_lng,
+              address: payload.new.pickup_address
+            },
+            riderName: payload.new.rider_name,
+            riderPhone: payload.new.rider_phone
+          });
+        }
+      )
+      .subscribe();
 
+    // Cleanup subscription on unmount
     return () => {
-      controller?.abort();
-      clearInterval(intervalId);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      supabase.removeChannel(channel);
     };
   }, [activeRide, isLoaded, isSignedIn, user]);
 
-  // 2. Handle Accept
+  // --- 2. Handle Accept ---
   const handleAccept = async () => {
     if (!incomingRide) return;
 
@@ -70,7 +86,10 @@ export default function IncomingRideAlert() {
       const res = await fetch(`/api/bookings/${incomingRide._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "accepted" }),
+        body: JSON.stringify({ 
+          status: "accepted",
+          driverId: user?.id 
+        }),
       });
 
       const data = await res.json();
@@ -89,6 +108,7 @@ export default function IncomingRideAlert() {
     }
   };
 
+  // --- 3. Handle Complete Ride ---
   const handleCompleteRide = async () => {
     if (!activeRide) return;
 
@@ -105,11 +125,12 @@ export default function IncomingRideAlert() {
     }
   };
 
-  // 3. Handle Decline (Just hides it locally so another driver can grab it)
+  // --- 4. Handle Decline ---
   const handleDecline = () => {
     setIncomingRide(null);
   };
 
+  // --- 5. Active Ride Realtime Refresh ---
   useEffect(() => {
     if (!activeRide?._id) return undefined;
 
@@ -152,17 +173,21 @@ export default function IncomingRideAlert() {
   }, [activeRide?._id]);
 
   const getMapsHref = (ride) => {
-    const lat = ride?.pickupLocation?.lat;
-    const lng = ride?.pickupLocation?.lng;
+    // Handle both nested object format and flat format
+    const lat = ride?.pickupLocation?.lat || ride?.pickup_lat;
+    const lng = ride?.pickupLocation?.lng || ride?.pickup_lng;
 
     if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) return null;
 
-    return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    return `http://maps.google.com/maps?q=${lat},${lng}`;
   };
 
   // --- UI: ACTIVE RIDE (Driver Accepted) ---
   if (activeRide) {
     const mapsHref = getMapsHref(activeRide);
+    const pickupAddress = activeRide?.pickupLocation?.address || activeRide?.pickup_address;
+    const riderName = activeRide?.riderName || activeRide?.rider_name;
+    const riderPhone = activeRide?.riderPhone || activeRide?.rider_phone;
 
     return (
       <div className="fixed bottom-24 inset-x-4 md:inset-x-auto md:right-8 md:bottom-8 md:w-96 bg-white border-2 border-[#0F766E] rounded-3xl p-6 shadow-2xl z-50 animate-in slide-in-from-bottom-5">
@@ -177,8 +202,8 @@ export default function IncomingRideAlert() {
         </div>
         
         <div className="bg-slate-50 rounded-2xl p-4 mb-4">
-          <p className="text-sm font-bold text-slate-900 mb-1">{activeRide.riderName}</p>
-          <p className="text-xs text-slate-500 mb-3 line-clamp-1">{activeRide.pickupLocation.address}</p>
+          <p className="text-sm font-bold text-slate-900 mb-1">{riderName}</p>
+          <p className="text-xs text-slate-500 mb-3 line-clamp-1">{pickupAddress}</p>
           {mapsHref && (
             <a
               href={mapsHref}
@@ -191,9 +216,9 @@ export default function IncomingRideAlert() {
             </a>
           )}
           
-          {activeRide.riderPhone ? (
+          {riderPhone ? (
             <a
-              href={`tel:${activeRide.riderPhone}`}
+              href={`tel:${riderPhone}`}
               className="w-full bg-[#0F766E] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#0d625b] transition"
             >
               <Phone size={16} />
@@ -223,13 +248,15 @@ export default function IncomingRideAlert() {
 
   // --- UI: INCOMING RIDE ALERT (Pending) ---
   if (incomingRide) {
+    const pickupAddress = incomingRide?.pickupLocation?.address || incomingRide?.pickup_address;
+    
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
         <div className="bg-white w-full max-w-sm rounded-4xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
           
           {/* Header with pulsing indicator */}
           <div className="bg-slate-900 p-6 text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-emerald-400 via-teal-500 to-emerald-400 animate-pulse"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-400 animate-pulse"></div>
             <h2 className="text-white font-black text-2xl tracking-tight mb-1">Incoming Request</h2>
             <div className="flex items-center justify-center gap-1.5 text-emerald-400 text-xs font-bold uppercase tracking-wider">
               <Clock size={14} className="animate-pulse" /> Just now
@@ -255,7 +282,7 @@ export default function IncomingRideAlert() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-400">Pickup</p>
-                  <p className="text-sm font-semibold text-slate-900">{incomingRide.pickupLocation.address}</p>
+                  <p className="text-sm font-semibold text-slate-900">{pickupAddress}</p>
                 </div>
               </div>
               <div className="flex gap-4 relative z-10">
