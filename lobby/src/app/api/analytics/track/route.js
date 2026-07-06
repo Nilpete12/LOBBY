@@ -5,6 +5,8 @@ import connectDB from '@/lib/mongodb';
 import Analytics from '@/models/Analytics';
 import { rateLimit } from '@/lib/rateLimit';
 
+const ALLOWED_EVENT_TYPES = new Set(['profile_view', 'call_click', 'whatsapp_click']);
+
 export async function POST(request) {
   const limited = rateLimit(request, {
     keyPrefix: 'analytics-track',
@@ -18,7 +20,7 @@ export async function POST(request) {
     const { userId } = await auth();
     const body = await request.json();
 
-    if (body.type !== 'call_click') {
+    if (!ALLOWED_EVENT_TYPES.has(body.type)) {
       return NextResponse.json(
         { success: false, message: 'Unsupported analytics event' },
         { status: 400 }
@@ -35,7 +37,7 @@ export async function POST(request) {
     await connectDB();
 
     await Analytics.create({
-      type: 'call_click',
+      type: body.type,
       driverId: body.driverId,
       riderId: userId || undefined,
     });

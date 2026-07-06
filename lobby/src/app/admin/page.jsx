@@ -12,13 +12,18 @@ import {
   Car,
   CheckCircle2,
   Clock,
+  CreditCard,
+  Eye,
+  Flag,
   Menu,
+  MessageCircle,
   Phone,
   RefreshCw,
   RotateCcw,
   Save,
   ShieldCheck,
   TrendingUp,
+  ToggleRight,
   Users,
   X,
   XCircle,
@@ -38,7 +43,11 @@ const EMPTY_STATS = {
   pendingVerificationRequests: 0,
   pendingComplaints: 0,
   suspendedUsers: 0,
+  paidSubscriptions: 0,
+  activeDriverReports: 0,
   totalCalls: 0,
+  totalProfileViews: 0,
+  totalWhatsAppClicks: 0,
   bookingStatus: {},
   topDestinations: [],
   recentActivity: [],
@@ -369,6 +378,46 @@ export default function AdminPage() {
     }
   };
 
+  const setDriverAvailability = async (isAvailable) => {
+    if (!selectedUserDetail?.user?._id) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/user/${selectedUserDetail.user._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'set_availability', isAvailable }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Availability update failed');
+      setSelectedUserDetail((current) => ({ ...current, user: data.user }));
+      showNotice('success', isAvailable ? 'Driver marked online.' : 'Driver marked offline.');
+      await Promise.all([loadStats(), loadActivity()]);
+    } catch (error) {
+      console.error('Failed to update driver availability', error);
+      showNotice('error', error.message || 'Could not update driver availability.');
+    }
+  };
+
+  const setDriverSubscription = async (action) => {
+    if (!selectedUserDetail?.user?._id) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/user/${selectedUserDetail.user._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, months: 1 }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Subscription update failed');
+      setSelectedUserDetail((current) => ({ ...current, user: data.user }));
+      showNotice('success', action === 'mark_subscription_paid' ? 'Subscription marked paid.' : 'Subscription marked unpaid.');
+      await Promise.all([loadStats(), loadActivity()]);
+    } catch (error) {
+      console.error('Failed to update driver subscription', error);
+      showNotice('error', error.message || 'Could not update subscription.');
+    }
+  };
+
   const handleVerificationAction = async (id, action, reason = '') => {
     if (action === 'approve' && !window.confirm('Approve this driver verification?')) return;
 
@@ -488,6 +537,8 @@ export default function AdminPage() {
         <StatsCard title="Drivers" value={stats.totalDrivers} icon={Car} color="indigo" />
         <StatsCard title="Pending" value={stats.pendingVerificationRequests} icon={ShieldCheck} trend="Review" color="orange" />
         <StatsCard title="Calls" value={stats.totalCalls} icon={Phone} trend="Leads" color="green" />
+        <StatsCard title="Reports" value={stats.activeDriverReports} icon={Flag} trend="Active" color="orange" />
+        <StatsCard title="Paid" value={stats.paidSubscriptions} icon={CreditCard} trend="Drivers" color="blue" />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">
@@ -513,6 +564,8 @@ export default function AdminPage() {
           <SectionHeader title="Operations" subtitle={`${stats.activeDrivers} drivers online`} />
           <div className="grid gap-3">
             <QuickAction icon={BookOpenCheck} label={`${stats.bookingStatus?.pending || 0} pending bookings`} onClick={() => setActiveTab('bookings')} />
+            <QuickAction icon={Flag} label={`${stats.activeDriverReports || 0} active driver reports`} onClick={() => setActiveTab('complaints')} />
+            <QuickAction icon={CreditCard} label={`${stats.paidSubscriptions || 0} paid subscriptions`} onClick={() => setActiveTab('drivers')} />
             <QuickAction icon={Ban} label={`${stats.suspendedUsers || 0} suspended users`} onClick={() => setActiveTab('riders')} />
             <QuickAction icon={Activity} label="View activity log" onClick={() => setActiveTab('activity')} />
           </div>
@@ -571,6 +624,13 @@ export default function AdminPage() {
 
   const renderAnalytics = () => (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-6">
+        <StatsCard title="Profile Views" value={stats.totalProfileViews || 0} icon={Eye} color="blue" />
+        <StatsCard title="Call Clicks" value={stats.totalCalls || 0} icon={Phone} color="green" />
+        <StatsCard title="WhatsApp" value={stats.totalWhatsAppClicks || 0} icon={MessageCircle} color="indigo" />
+        <StatsCard title="Reports" value={stats.activeDriverReports || 0} icon={Flag} color="orange" />
+      </div>
+
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-6">
         <StatsCard title="Pending" value={stats.bookingStatus?.pending || 0} icon={Clock} color="orange" />
         <StatsCard title="Accepted" value={stats.bookingStatus?.accepted || 0} icon={BookOpenCheck} color="blue" />
@@ -801,6 +861,8 @@ export default function AdminPage() {
           onSave={saveUserDetail}
           onSuspend={() => setUserSuspension('suspend')}
           onUnsuspend={() => setUserSuspension('unsuspend')}
+          onAvailabilityChange={setDriverAvailability}
+          onSubscriptionChange={setDriverSubscription}
         />
       )}
     </div>
@@ -1040,8 +1102,17 @@ function SupportTicket({ complaint, onUpdate }) {
             <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black uppercase text-slate-500">
               {complaint.role}
             </span>
+            {complaint.reportType === 'driver_report' && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-black uppercase text-red-600 ring-1 ring-red-100">
+                <Flag size={12} />
+                Driver report
+              </span>
+            )}
           </div>
           <p className="mt-1 break-all text-xs font-semibold text-slate-500">{complaint.email || 'No email'}</p>
+          {complaint.driverName && (
+            <p className="mt-1 text-xs font-black text-red-500">Reported driver: {complaint.driverName}</p>
+          )}
         </div>
         <select
           value={complaint.status}
@@ -1091,9 +1162,21 @@ function ActivityFeed({ logs, loading }) {
   );
 }
 
-function UserDetailDrawer({ detail, form, setForm, loading, onClose, onSave, onSuspend, onUnsuspend }) {
+function UserDetailDrawer({
+  detail,
+  form,
+  setForm,
+  loading,
+  onClose,
+  onSave,
+  onSuspend,
+  onUnsuspend,
+  onAvailabilityChange,
+  onSubscriptionChange,
+}) {
   const user = detail.user;
   const isSuspended = user.accountStatus === 'suspended';
+  const subscriptionStatus = user.subscriptionStatus || 'unpaid';
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-3 sm:items-center sm:p-4" onClick={onClose}>
@@ -1139,6 +1222,52 @@ function UserDetailDrawer({ detail, form, setForm, loading, onClose, onSave, onS
                 Save Changes
               </button>
             </section>
+
+            {user.role === 'driver' && (
+              <section className="rounded-3xl border border-slate-200 p-4">
+                <h3 className="font-black text-slate-900">Driver Operations</h3>
+                <p className="mt-1 text-sm font-semibold text-slate-500">
+                  Control marketplace visibility and subscription payment state.
+                </p>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <InfoBlock label="Availability" value={user.isAvailable ? 'Online' : 'Offline'} />
+                  <InfoBlock
+                    label="Subscription"
+                    value={
+                      subscriptionStatus === 'paid'
+                        ? `Paid until ${formatDate(user.subscriptionPaidUntil)}`
+                        : subscriptionStatus
+                    }
+                  />
+                </div>
+
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  <button
+                    onClick={() => onAvailabilityChange(!user.isAvailable)}
+                    disabled={isSuspended}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0F766E] px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+                  >
+                    <ToggleRight size={16} />
+                    {user.isAvailable ? 'Mark Offline' : 'Mark Online'}
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      onSubscriptionChange(
+                        subscriptionStatus === 'paid'
+                          ? 'mark_subscription_unpaid'
+                          : 'mark_subscription_paid'
+                      )
+                    }
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-black text-white"
+                  >
+                    <CreditCard size={16} />
+                    {subscriptionStatus === 'paid' ? 'Mark Unpaid' : 'Mark Paid'}
+                  </button>
+                </div>
+              </section>
+            )}
 
             <section className="rounded-3xl border border-red-100 bg-red-50 p-4">
               <h3 className="font-black text-red-800">Account Control</h3>

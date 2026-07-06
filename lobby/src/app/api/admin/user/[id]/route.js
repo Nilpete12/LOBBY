@@ -28,7 +28,16 @@ function serializeUser(user) {
     ...user,
     accountStatus: user.accountStatus || 'active',
     suspensionReason: user.suspensionReason || '',
+    subscriptionStatus: user.subscriptionStatus || 'unpaid',
+    subscriptionPaidAt: user.subscriptionPaidAt || null,
+    subscriptionPaidUntil: user.subscriptionPaidUntil || null,
   };
+}
+
+function addMonths(date, months) {
+  const next = new Date(date);
+  next.setMonth(next.getMonth() + months);
+  return next;
 }
 
 export async function GET(request, context) {
@@ -139,6 +148,46 @@ export async function PATCH(request, context) {
       updates.accountStatus = 'active';
       updates.suspendedAt = null;
       updates.suspensionReason = '';
+    } else if (action === 'set_availability') {
+      if (user.role !== 'driver') {
+        return NextResponse.json(
+          { success: false, message: 'Only driver availability can be changed' },
+          { status: 400 }
+        );
+      }
+
+      if (user.accountStatus === 'suspended') {
+        return NextResponse.json(
+          { success: false, message: 'Suspended drivers cannot be made available' },
+          { status: 400 }
+        );
+      }
+
+      updates.isAvailable = Boolean(body.isAvailable);
+    } else if (action === 'mark_subscription_paid') {
+      if (user.role !== 'driver') {
+        return NextResponse.json(
+          { success: false, message: 'Only driver subscriptions can be changed' },
+          { status: 400 }
+        );
+      }
+
+      const months = Math.min(12, Math.max(1, Number(body.months) || 1));
+      const paidAt = new Date();
+      updates.subscriptionStatus = 'paid';
+      updates.subscriptionPaidAt = paidAt;
+      updates.subscriptionPaidUntil = addMonths(paidAt, months);
+    } else if (action === 'mark_subscription_unpaid') {
+      if (user.role !== 'driver') {
+        return NextResponse.json(
+          { success: false, message: 'Only driver subscriptions can be changed' },
+          { status: 400 }
+        );
+      }
+
+      updates.subscriptionStatus = 'unpaid';
+      updates.subscriptionPaidAt = null;
+      updates.subscriptionPaidUntil = null;
     } else {
       if (typeof body.fullName === 'string') updates.fullName = cleanString(body.fullName, 160);
       if (typeof body.phone === 'string') updates.phone = cleanString(body.phone, 40);
@@ -166,7 +215,13 @@ export async function PATCH(request, context) {
           ? `Suspended ${user.fullName}`
           : action === 'unsuspend'
             ? `Unsuspended ${user.fullName}`
-            : `Updated ${user.fullName}`,
+            : action === 'set_availability'
+              ? `${updates.isAvailable ? 'Enabled' : 'Disabled'} availability for ${user.fullName}`
+              : action === 'mark_subscription_paid'
+                ? `Marked subscription paid for ${user.fullName}`
+                : action === 'mark_subscription_unpaid'
+                  ? `Marked subscription unpaid for ${user.fullName}`
+                  : `Updated ${user.fullName}`,
       metadata: updates,
     });
 

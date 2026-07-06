@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Complaint from '@/models/Complaint';
@@ -5,6 +6,7 @@ import { getPlatformSettings } from '@/lib/platformSettings';
 import { rateLimit } from '@/lib/rateLimit';
 
 const ALLOWED_ROLES = new Set(['rider', 'driver', 'guest']);
+const ALLOWED_REPORT_TYPES = new Set(['general', 'driver_report']);
 
 function cleanString(value, maxLength = 5000) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -26,10 +28,20 @@ export async function POST(request) {
     const topic = cleanString(body.topic, 160);
     const message = cleanString(body.message, 5000);
     const role = ALLOWED_ROLES.has(body.role) ? body.role : 'guest';
+    const reportType = ALLOWED_REPORT_TYPES.has(body.reportType) ? body.reportType : 'general';
+    const driverId = cleanString(body.driverId, 80);
+    const driverName = cleanString(body.driverName, 160);
 
     if (!name || !topic || !message) {
       return NextResponse.json(
         { success: false, message: 'Name, topic, and message are required' },
+        { status: 400 }
+      );
+    }
+
+    if (driverId && !mongoose.Types.ObjectId.isValid(driverId)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid driver id' },
         { status: 400 }
       );
     }
@@ -50,6 +62,9 @@ export async function POST(request) {
       role,
       topic,
       message,
+      reportType,
+      driverId: driverId || null,
+      driverName,
     });
 
     return NextResponse.json({ success: true, complaint }, { status: 201 });

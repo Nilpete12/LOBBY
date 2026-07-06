@@ -14,6 +14,10 @@ function startOfWeek(date) {
   return new Date(date.getFullYear(), date.getMonth(), diff);
 }
 
+function startOfMonth(date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
 export async function GET() {
   const { userId } = await auth();
 
@@ -36,15 +40,31 @@ export async function GET() {
     const now = new Date();
     const today = startOfDay(now);
     const week = startOfWeek(now);
+    const month = startOfMonth(now);
 
-    const [events, totalCalls, callsToday, callsThisWeek] = await Promise.all([
-      Analytics.find({ type: 'call_click', driverId: driver._id })
+    const [
+      events,
+      totalCalls,
+      totalProfileViews,
+      totalWhatsAppClicks,
+      callsToday,
+      callsThisWeek,
+      profileViewsThisMonth,
+      callClicksThisMonth,
+      whatsappClicksThisMonth,
+    ] = await Promise.all([
+      Analytics.find({ driverId: driver._id, type: { $in: ['call_click', 'whatsapp_click'] } })
         .sort({ timestamp: -1 })
         .limit(50)
         .lean(),
       Analytics.countDocuments({ type: 'call_click', driverId: driver._id }),
+      Analytics.countDocuments({ type: 'profile_view', driverId: driver._id }),
+      Analytics.countDocuments({ type: 'whatsapp_click', driverId: driver._id }),
       Analytics.countDocuments({ type: 'call_click', driverId: driver._id, timestamp: { $gte: today } }),
       Analytics.countDocuments({ type: 'call_click', driverId: driver._id, timestamp: { $gte: week } }),
+      Analytics.countDocuments({ type: 'profile_view', driverId: driver._id, timestamp: { $gte: month } }),
+      Analytics.countDocuments({ type: 'call_click', driverId: driver._id, timestamp: { $gte: month } }),
+      Analytics.countDocuments({ type: 'whatsapp_click', driverId: driver._id, timestamp: { $gte: month } }),
     ]);
 
     const riderIds = [...new Set(events.map((event) => event.riderId).filter(Boolean))];
@@ -53,6 +73,7 @@ export async function GET() {
 
     const history = events.map((event) => ({
       _id: String(event._id),
+      type: event.type,
       timestamp: event.timestamp,
       rider: event.riderId
         ? riderByClerkId.get(event.riderId) || { fullName: 'Rider', email: '' }
@@ -64,8 +85,13 @@ export async function GET() {
       driver,
       stats: {
         totalCalls,
+        totalProfileViews,
+        totalWhatsAppClicks,
         callsToday,
         callsThisWeek,
+        profileViewsThisMonth,
+        callClicksThisMonth,
+        whatsappClicksThisMonth,
       },
       history,
     });

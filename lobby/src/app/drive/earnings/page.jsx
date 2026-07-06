@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { ArrowRight, Banknote, CalendarDays, Loader2, PhoneCall, Wallet } from 'lucide-react';
+import { ArrowRight, Banknote, CalendarDays, Eye, Loader2, MessageCircle, PhoneCall, Wallet } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 export default function DriverEarningsPage() {
@@ -64,13 +64,13 @@ export default function DriverEarningsPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#0F766E]">
-                Driver Earnings
+                Driver Analytics
               </p>
               <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-                Your direct-ride activity
+                Your monthly rider interest
               </h1>
               <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-slate-500">
-                Fares are settled directly between you and the rider.
+                Track the profile views and contact clicks that show your visibility on The Lobby.
               </p>
             </div>
 
@@ -85,6 +85,12 @@ export default function DriverEarningsPage() {
         </section>
 
         <section className="grid gap-3 sm:grid-cols-3 sm:gap-4 font-[Sailors_Slant_Normal]">
+          <StatCard icon={Eye} label="Profile views this month" value={stats.profileViewsThisMonth || 0} />
+          <StatCard icon={PhoneCall} label="Call clicks this month" value={stats.callClicksThisMonth || 0} />
+          <StatCard icon={MessageCircle} label="WhatsApp clicks this month" value={stats.whatsappClicksThisMonth || 0} />
+        </section>
+
+        <section className="mt-4 grid gap-3 sm:grid-cols-3 sm:gap-4 font-[Sailors_Slant_Normal]">
           <StatCard icon={PhoneCall} label="Total rider calls" value={stats.totalCalls} />
           <StatCard icon={CalendarDays} label="Calls today" value={stats.callsToday} />
           <StatCard icon={Wallet} label="Calls this week" value={stats.callsThisWeek} />

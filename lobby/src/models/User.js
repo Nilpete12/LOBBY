@@ -17,6 +17,9 @@ const UserSchema = new mongoose.Schema({
   rating:      { type: Number, default: 5.0 },
   isAvailable: { type: Boolean, default: false }, // The Green Dot
   isVerified:  { type: Boolean, default: false },
+  subscriptionStatus: { type: String, enum: ['unpaid', 'paid', 'overdue'], default: 'unpaid' },
+  subscriptionPaidAt: { type: Date, default: null },
+  subscriptionPaidUntil: { type: Date, default: null },
   
   profilePic: { type: String, default: "" }, // URL from Cloudinary
   carPic:     { type: String, default: "" }, // URL from Cloudinary
@@ -29,6 +32,7 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.index({ role: 1, isAvailable: 1, isVerified: 1, accountStatus: 1 });
 UserSchema.index({ role: 1, createdAt: -1 });
+UserSchema.index({ role: 1, subscriptionStatus: 1, subscriptionPaidUntil: 1 });
 UserSchema.index({ routes: 1 });
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);

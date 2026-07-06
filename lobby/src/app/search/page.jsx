@@ -1,6 +1,6 @@
 "use client";
 import Image from 'next/image';
-import { Search, MapPin, Star, Phone, X, Car, Loader2 } from 'lucide-react';
+import { Search, MapPin, Star, Phone, X, Car, Loader2, Flag, MessageCircle } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
@@ -82,6 +82,7 @@ export default function SearchPage() {
   const [toast, setToast] = useState('');
   const activeFetchRef = useRef(0);
   const abortRef = useRef(null);
+  const riderId = user?.id || null;
 
   const visibleDrivers = useMemo(() => {
     if (activeFilter === 'Top Rated') {
@@ -158,9 +159,7 @@ export default function SearchPage() {
     fetchDrivers(query, { preferCache: true });
   };
 
-  const trackCall = async (driver) => {
-    setToast(`${driver.fullName || 'Driver'} added to recent contacts`);
-
+  const trackDriverEvent = useCallback(async (driver, type) => {
     if (!driver?._id) return;
 
     try {
@@ -168,14 +167,24 @@ export default function SearchPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'call_click',
+          type,
           driverId: driver._id,
-          riderId: user?.id || null
+          riderId
         })
       });
     } catch (err) {
       console.error("Tracking failed", err);
     }
+  }, [riderId]);
+
+  const trackCall = async (driver) => {
+    setToast(`${driver.fullName || 'Driver'} added to recent contacts`);
+    await trackDriverEvent(driver, 'call_click');
+  };
+
+  const trackWhatsApp = async (driver) => {
+    setToast(`Opening WhatsApp for ${driver.fullName || 'driver'}`);
+    await trackDriverEvent(driver, 'whatsapp_click');
   };
 
   useEffect(() => {
@@ -194,6 +203,11 @@ export default function SearchPage() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedDriver]);
+
+  useEffect(() => {
+    if (!selectedDriver?._id) return;
+    trackDriverEvent(selectedDriver, 'profile_view');
+  }, [selectedDriver, trackDriverEvent]);
 
   useEffect(() => {
     if (!toast) return;
@@ -318,8 +332,10 @@ export default function SearchPage() {
       {selectedDriver && (
         <DriverDetailsSheet
           driver={selectedDriver}
+          rider={user}
           onClose={() => setSelectedDriver(null)}
           onCall={() => trackCall(selectedDriver)}
+          onWhatsApp={() => trackWhatsApp(selectedDriver)}
         />
       )}
 
@@ -419,10 +435,62 @@ function DriverResultCard({ driver, onSelect }) {
   );
 }
 
-function DriverDetailsSheet({ driver, onClose, onCall }) {
+function getWhatsAppHref(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  return digits ? `https://wa.me/${digits}` : null;
+}
+
+function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
   const vehicle = driver.vehicle || 'Standard Taxi';
   const routes = getDriverRoutes(driver);
   const phoneHref = driver.phone ? `tel:${driver.phone}` : undefined;
+  const whatsappHref = getWhatsAppHref(driver.phone);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [reportText, setReportText] = useState('');
+  const [reportNotice, setReportNotice] = useState('');
+  const [isReporting, setIsReporting] = useState(false);
+
+  const submitDriverReport = async (event) => {
+    event.preventDefault();
+
+    const message = reportText.trim();
+    if (message.length < 10) {
+      setReportNotice('Please add a little more detail before submitting.');
+      return;
+    }
+
+    setIsReporting(true);
+    setReportNotice('');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/complaints`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: rider?.fullName || rider?.firstName || 'Rider',
+          email: rider?.primaryEmailAddress?.emailAddress || '',
+          userId: rider?.id || '',
+          role: 'rider',
+          topic: `Driver report: ${driver.fullName || 'Driver'}`,
+          message,
+          reportType: 'driver_report',
+          driverId: driver._id,
+          driverName: driver.fullName || 'Driver',
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) throw new Error(data.message || 'Report failed');
+
+      setReportText('');
+      setReportNotice('Report submitted. Admin will review this driver.');
+      window.setTimeout(() => setIsReportOpen(false), 900);
+    } catch (error) {
+      setReportNotice(error.message || 'Could not submit report. Please try again.');
+    } finally {
+      setIsReporting(false);
+    }
+  };
 
   return (
     <div
@@ -509,7 +577,39 @@ function DriverDetailsSheet({ driver, onClose, onCall }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-[0.85fr_1.15fr] gap-3">
+        <div className="mb-4 rounded-3xl border border-slate-200 bg-slate-50 p-3">
+          <button
+            type="button"
+            onClick={() => setIsReportOpen((current) => !current)}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-red-500 ring-1 ring-slate-200 transition hover:ring-red-100"
+          >
+            <Flag size={17} />
+            Report Driver
+          </button>
+
+          {isReportOpen && (
+            <form onSubmit={submitDriverReport} className="mt-3 space-y-3">
+              <textarea
+                value={reportText}
+                onChange={(event) => setReportText(event.target.value)}
+                className="h-24 w-full resize-none rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 outline-none focus:border-red-300"
+                placeholder="What happened?"
+              />
+              {reportNotice && (
+                <p className="text-center text-xs font-bold text-slate-500">{reportNotice}</p>
+              )}
+              <button
+                type="submit"
+                disabled={isReporting || reportText.trim().length < 10}
+                className="w-full rounded-2xl bg-red-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isReporting ? 'Submitting...' : 'Submit Report'}
+              </button>
+            </form>
+          )}
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
           <button
             type="button"
             onClick={onClose}
@@ -517,6 +617,27 @@ function DriverDetailsSheet({ driver, onClose, onCall }) {
           >
             Close
           </button>
+
+          {whatsappHref ? (
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onWhatsApp}
+              className="flex items-center justify-center gap-2 rounded-2xl bg-green-50 px-4 py-4 text-sm font-bold text-green-700 ring-1 ring-green-100 transition hover:bg-green-100"
+            >
+              <MessageCircle size={18} />
+              WhatsApp
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-bold text-slate-400"
+            >
+              WhatsApp
+            </button>
+          )}
 
           {phoneHref ? (
             <a
