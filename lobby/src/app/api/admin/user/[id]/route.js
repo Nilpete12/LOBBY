@@ -31,15 +31,24 @@ function addMonths(date, months) {
   return next;
 }
 
-async function getUser(id) {
-  const { data, error } = await supabase
+async function getUser(identifier) {
+  const byClerk = await supabase
     .from('users')
     .select('*')
-    .eq('id', id)
+    .eq('clerk_id', identifier)
     .maybeSingle();
 
-  if (error) throw error;
-  return data;
+  if (byClerk.error) throw byClerk.error;
+  if (byClerk.data) return byClerk.data;
+
+  const byId = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', identifier)
+    .maybeSingle();
+
+  if (byId.error) throw byId.error;
+  return byId.data;
 }
 
 export async function GET(request, context) {
@@ -92,7 +101,7 @@ export async function GET(request, context) {
   } catch (error) {
     console.error('Failed to load user:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to load user' },
+      { success: false, message: 'Error fetching user' },
       { status: 500 }
     );
   }
@@ -197,7 +206,7 @@ export async function PATCH(request, context) {
     const { data: updatedUser, error } = await supabase
       .from('users')
       .update(userUpdatesToRow(updates))
-      .eq('id', id)
+      .eq('id', user.id)
       .select()
       .single();
 
@@ -206,7 +215,7 @@ export async function PATCH(request, context) {
     await logAdminActivity({
       action: `user.${action}`,
       targetType: 'user',
-      targetId: id,
+      targetId: user.id,
       targetLabel: user.full_name,
       summary:
         action === 'suspend'
@@ -256,8 +265,8 @@ export async function DELETE(request, context) {
     }
 
     await Promise.all([
-      supabase.from('users').delete().eq('id', id),
-      supabase.from('verification_requests').delete().eq('driver_id', id),
+      supabase.from('users').delete().eq('id', user.id),
+      supabase.from('verification_requests').delete().eq('driver_id', user.id),
       user.clerk_id
         ? supabase.from('verification_requests').delete().eq('clerk_id', user.clerk_id)
         : Promise.resolve({ error: null }),
@@ -266,7 +275,7 @@ export async function DELETE(request, context) {
     await logAdminActivity({
       action: 'user.delete',
       targetType: 'user',
-      targetId: id,
+      targetId: user.id,
       targetLabel: user.full_name,
       summary: `Deleted ${user.full_name}`,
       metadata: { role: user.role, email: user.email },

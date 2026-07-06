@@ -4,7 +4,10 @@ import { getPlatformSettings, serializePlatformSettings } from '@/lib/platformSe
 export async function GET() {
   try {
     const settings = await getPlatformSettings();
-    const response = NextResponse.json({ success: true, settings: serializePlatformSettings(settings) });
+    const response = NextResponse.json({
+      success: true,
+      settings: serializePlatformSettings(settings),
+    });
     response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
     return response;
   } catch (error) {
@@ -17,6 +20,9 @@ export async function GET() {
         bookingOpen: true,
         supportOpen: true,
         notice: '',
+        baseFare: 50,
+        perKmRate: 20,
+        serviceFeePercentage: 5,
       },
     });
     response.headers.set('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=60');

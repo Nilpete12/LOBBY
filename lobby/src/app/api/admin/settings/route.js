@@ -11,6 +11,11 @@ function cleanString(value, maxLength = 500) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
 }
 
+function cleanNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : fallback;
+}
+
 export async function GET() {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
@@ -19,10 +24,7 @@ export async function GET() {
     return NextResponse.json({ success: true, settings: serializePlatformSettings(settings) });
   } catch (error) {
     console.error('Failed to load settings:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to load settings' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }
 
@@ -45,6 +47,11 @@ export async function PATCH(request) {
   }
 
   if (typeof body.notice === 'string') updates.notice = cleanString(body.notice, 300);
+  if (body.baseFare !== undefined) updates.baseFare = cleanNumber(body.baseFare, 50);
+  if (body.perKmRate !== undefined) updates.perKmRate = cleanNumber(body.perKmRate, 20);
+  if (body.serviceFeePercentage !== undefined) {
+    updates.serviceFeePercentage = cleanNumber(body.serviceFeePercentage, 5);
+  }
 
   try {
     const settings = await updatePlatformSettings(updates);
@@ -67,3 +74,5 @@ export async function PATCH(request) {
     );
   }
 }
+
+export const POST = PATCH;
