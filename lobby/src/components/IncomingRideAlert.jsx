@@ -35,7 +35,7 @@ export default function IncomingRideAlert() {
 
       if (!error && data && data.length > 0) {
         // Map DB 'id' to '_id' for frontend compatibility
-        setIncomingRide({ ...data[0], _id: data[0].id }); 
+        setIncomingRide({ ...data[0], _id: data[0].id });
       }
     };
 
@@ -46,11 +46,11 @@ export default function IncomingRideAlert() {
       .channel('public:bookings')
       .on(
         'postgres_changes',
-        { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'bookings', 
-          filter: "status=eq.pending" 
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'bookings',
+          filter: "status=eq.pending"
         },
         (payload) => {
           // Instantly show the new ride when it hits the database
@@ -86,9 +86,9 @@ export default function IncomingRideAlert() {
       const res = await fetch(`/api/bookings/${incomingRide._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           status: "accepted",
-          driverId: user?.id 
+          driverId: user?.id
         }),
       });
 
@@ -200,7 +200,7 @@ export default function IncomingRideAlert() {
             <p className="text-xs font-semibold text-emerald-600">Pick up the passenger</p>
           </div>
         </div>
-        
+
         <div className="bg-slate-50 rounded-2xl p-4 mb-4">
           <p className="text-sm font-bold text-slate-900 mb-1">{riderName}</p>
           <p className="text-xs text-slate-500 mb-3 line-clamp-1">{pickupAddress}</p>
@@ -215,7 +215,7 @@ export default function IncomingRideAlert() {
               Open Live Pickup
             </a>
           )}
-          
+
           {riderPhone ? (
             <a
               href={`tel:${riderPhone}`}
@@ -235,8 +235,8 @@ export default function IncomingRideAlert() {
             </button>
           )}
         </div>
-        
-        <button 
+
+        <button
           onClick={handleCompleteRide}
           className="w-full text-xs font-bold text-slate-400 hover:text-slate-600 transition"
         >
@@ -249,11 +249,11 @@ export default function IncomingRideAlert() {
   // --- UI: INCOMING RIDE ALERT (Pending) ---
   if (incomingRide) {
     const pickupAddress = incomingRide?.pickupLocation?.address || incomingRide?.pickup_address;
-    
+
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
         <div className="bg-white w-full max-w-sm rounded-4xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-          
+
           {/* Header with pulsing indicator */}
           <div className="bg-slate-900 p-6 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-400 animate-pulse"></div>
@@ -303,7 +303,7 @@ export default function IncomingRideAlert() {
               </p>
             )}
             <div className="grid grid-cols-2 gap-3">
-              <button 
+              <button
                 onClick={handleDecline}
                 disabled={isAccepting}
                 className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
@@ -311,7 +311,7 @@ export default function IncomingRideAlert() {
                 <XCircle size={18} />
                 Decline
               </button>
-              <button 
+              <button
                 onClick={handleAccept}
                 disabled={isAccepting}
                 className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm bg-[#0F766E] text-white shadow-lg shadow-teal-100 hover:bg-[#0d625b] transition disabled:cursor-not-allowed disabled:opacity-60"

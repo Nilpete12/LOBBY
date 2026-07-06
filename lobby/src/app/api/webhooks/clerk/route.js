@@ -42,8 +42,8 @@ export async function POST(req) {
     const { error } = await supabase
       .from('users')
       .insert([
-        { 
-          clerk_id: id, 
+        {
+          clerk_id: id,
           full_name: fullName,
           role: 'rider', // default
           is_verified: false,

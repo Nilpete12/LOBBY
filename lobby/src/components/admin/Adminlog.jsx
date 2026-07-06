@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function AdminLogin({ onLogin }) {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); 
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -77,7 +77,7 @@ export default function AdminLogin({ onLogin }) {
                 value={email}
                 disabled={isLoading}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#031a37] border border-slate-700 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#031a37_inset] px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"                
+                className="w-full bg-[#031a37] border border-slate-700 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#031a37_inset] px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
                 placeholder="admin@lobby.com"
               />
             </div>

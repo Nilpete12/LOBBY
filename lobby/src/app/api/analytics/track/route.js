@@ -1,34 +1,40 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { rateLimit } from '@/lib/rateLimit';
 
-export async function POST(req) {
+const ALLOWED_EVENT_TYPES = new Set(['profile_view', 'call_click', 'whatsapp_click']);
+
+export async function POST(request) {
+  const limited = rateLimit(request, {
+    keyPrefix: 'analytics-track',
+    limit: 30,
+    windowMs: 60 * 1000,
+  });
+
+  if (limited) return limited;
+
   try {
-    const body = await req.json();
-    const { type, driverId, riderId } = body;
+    const body = await request.json();
+    const type = typeof body.type === 'string' ? body.type : '';
 
-    if (!type) {
-      return NextResponse.json({ success: false, message: 'Event type is required' }, { status: 400 });
+    if (!ALLOWED_EVENT_TYPES.has(type)) {
+      return NextResponse.json(
+        { success: false, message: 'Unsupported analytics event' },
+        { status: 400 }
+      );
     }
 
-    // Insert the analytics event into Postgres
-    const { error } = await supabase
-      .from('analytics')
-      .insert([
-        {
-          event_type: type,
-          driver_id: driverId || null,
-          rider_id: riderId || null
-        }
-      ]);
+    const { error } = await supabase.from('analytics').insert({
+      event_type: type,
+      driver_id: body.driverId || null,
+      rider_id: body.riderId || null,
+    });
 
     if (error) throw error;
 
-    // We don't need to return the data, just a success flag since this happens in the background
-    return NextResponse.json({ success: true });
-    
+    return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
-    console.error("Analytics Tracking Error:", error);
-    // Even if tracking fails, we return a 200 so we don't break the user's UI
+    console.error('Analytics Tracking Error:', error);
     return NextResponse.json({ success: false, message: 'Failed to track event' }, { status: 200 });
   }
 }

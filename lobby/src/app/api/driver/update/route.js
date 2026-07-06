@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { formatUser } from '@/lib/supabaseFormat';
 
 export async function POST(req) {
   try {
@@ -9,11 +10,11 @@ export async function POST(req) {
     // Update the row in Supabase
     const { data, error } = await supabase
       .from('users')
-      .update({ 
-        vehicle, 
-        phone, 
-        routes, 
-        is_available: isAvailable 
+      .update({
+        vehicle,
+        phone,
+        routes,
+        is_available: isAvailable
       })
       .eq('clerk_id', clerkId)
       .select()
@@ -21,15 +22,8 @@ export async function POST(req) {
 
     if (error) throw error;
 
-    // Format for frontend
-    const formattedDriver = {
-      ...data,
-      isAvailable: data.is_available,
-      isVerified: data.is_verified
-    };
+    return NextResponse.json({ success: true, driver: formatUser(data) });
 
-    return NextResponse.json({ success: true, driver: formattedDriver });
-    
   } catch (error) {
     console.error("Update failed:", error);
     return NextResponse.json({ success: false, message: 'Update failed' }, { status: 500 });

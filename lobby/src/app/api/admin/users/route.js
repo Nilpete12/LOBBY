@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { isAdminAuthenticated, adminUnauthorized } from '@/lib/adminAuth';
+import { formatUser } from '@/lib/supabaseFormat';
 
 export async function GET(req) {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
@@ -22,16 +23,7 @@ export async function GET(req) {
     if (error) throw error;
 
     // Map DB snake_case back to camelCase for the frontend UserTable
-    const formattedUsers = users.map(u => ({
-      ...u,
-      _id: u.id,
-      clerkId: u.clerk_id,
-      fullName: u.full_name,
-      isVerified: u.is_verified,
-      verificationStatus: u.verification_status || (u.is_verified ? 'Approved' : 'Pending'),
-      carPic: u.car_pic,
-      licenseUrl: u.license_url
-    }));
+    const formattedUsers = users.map(formatUser);
 
     return NextResponse.json({ success: true, users: formattedUsers });
   } catch (error) {

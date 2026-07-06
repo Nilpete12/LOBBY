@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { logAdminActivity } from '@/lib/adminActivity';
+import { formatUser, formatVerificationRequest } from '@/lib/supabaseFormat';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 const ALLOWED_STATUSES = new Set(['pending', 'approved', 'rejected', 'superseded']);
@@ -10,42 +11,27 @@ function cleanString(value, maxLength = 500) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
 }
 
-function serializeRequest(request) {
-  return {
-    _id: request._id,
-    driverId: request.driverId,
-    clerkId: request.clerkId,
-    driverName: request.driverName,
-    email: request.email || '',
-    phone: request.phone || '',
-    vehicle: request.vehicle || '',
-    licenseUrl: request.licenseUrl,
-    status: request.status,
-    notes: request.notes || '',
-    reviewNotes: request.reviewNotes || '',
-    reviewedAt: request.reviewedAt,
-    createdAt: request.createdAt,
-    updatedAt: request.updatedAt,
-  };
-}
-
 export async function GET(request) {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
-  const query = ALLOWED_STATUSES.has(status) ? { status } : {};
 
   try {
-    await connectDB();
-    const requests = await VerificationRequest.find(query)
-      .sort({ createdAt: -1 })
-      .limit(100)
-      .lean();
+    let query = supabase
+      .from('verification_requests')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (ALLOWED_STATUSES.has(status)) query = query.eq('status', status);
+
+    const { data, error } = await query;
+    if (error) throw error;
 
     return NextResponse.json({
       success: true,
-      requests: requests.map(serializeRequest),
+      requests: (data || []).map(formatVerificationRequest),
     });
   } catch (error) {
     console.error('Failed to load verification requests:', error);
@@ -69,11 +55,11 @@ export async function PATCH(request) {
     );
   }
 
-  const id = cleanString(body.id, 80);
+  const id = cleanString(body.id, 120);
   const action = cleanString(body.action, 20);
   const reviewNotes = cleanString(body.notes, 500);
 
-  if (!mongoose.Types.ObjectId.isValid(id) || !ALLOWED_ACTIONS.has(action)) {
+  if (!id || !ALLOWED_ACTIONS.has(action)) {
     return NextResponse.json(
       { success: false, message: 'Invalid verification action' },
       { status: 400 }
@@ -81,10 +67,14 @@ export async function PATCH(request) {
   }
 
   try {
-    await connectDB();
+    const { data: requestRow, error: requestError } = await supabase
+      .from('verification_requests')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
 
-    const verificationRequest = await VerificationRequest.findById(id);
-    if (!verificationRequest) {
+    if (requestError) throw requestError;
+    if (!requestRow) {
       return NextResponse.json(
         { success: false, message: 'Verification request not found' },
         { status: 404 }
@@ -95,47 +85,50 @@ export async function PATCH(request) {
     const nextStatus = approved ? 'approved' : 'rejected';
     const nextNote = reviewNotes || (approved ? 'Approved by admin' : 'Rejected by admin');
     const driverUpdates = {
-      isVerified: approved,
-      verificationStatus: approved ? 'Approved' : 'Rejected',
-      aiNotes: nextNote,
-      licenseUrl: verificationRequest.licenseUrl,
+      is_verified: approved,
+      verification_status: approved ? 'Approved' : 'Rejected',
+      ai_notes: nextNote,
+      license_url: requestRow.license_url,
     };
 
-    if (!approved) {
-      driverUpdates.isAvailable = false;
-    }
+    if (!approved) driverUpdates.is_available = false;
 
-    const driver = await User.findOneAndUpdate(
-      { _id: verificationRequest.driverId, role: 'driver' },
-      { $set: driverUpdates },
-      { new: true }
-    ).select('-password');
+    const { data: driverRow, error: driverError } = await supabase
+      .from('users')
+      .update(driverUpdates)
+      .eq('id', requestRow.driver_id)
+      .eq('role', 'driver')
+      .select()
+      .single();
 
-    if (!driver) {
-      return NextResponse.json(
-        { success: false, message: 'Driver profile not found' },
-        { status: 404 }
-      );
-    }
+    if (driverError) throw driverError;
 
-    verificationRequest.status = nextStatus;
-    verificationRequest.reviewNotes = nextNote;
-    verificationRequest.reviewedAt = new Date();
-    await verificationRequest.save();
+    const { data: updatedRequest, error: updateError } = await supabase
+      .from('verification_requests')
+      .update({
+        status: nextStatus,
+        review_notes: nextNote,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
 
     await logAdminActivity({
       action: approved ? 'verification.approve' : 'verification.reject',
       targetType: 'verification_request',
-      targetId: String(verificationRequest._id),
-      targetLabel: verificationRequest.driverName,
-      summary: `${approved ? 'Approved' : 'Rejected'} verification for ${verificationRequest.driverName}`,
-      metadata: { driverId: String(verificationRequest.driverId), reviewNotes: nextNote },
+      targetId: String(updatedRequest.id),
+      targetLabel: updatedRequest.driver_name,
+      summary: `${approved ? 'Approved' : 'Rejected'} verification for ${updatedRequest.driver_name}`,
+      metadata: { driverId: String(updatedRequest.driver_id), reviewNotes: nextNote },
     });
 
     return NextResponse.json({
       success: true,
-      request: serializeRequest(verificationRequest.toObject()),
-      driver,
+      request: formatVerificationRequest(updatedRequest),
+      driver: formatUser(driverRow),
     });
   } catch (error) {
     console.error('Failed to update verification request:', error);

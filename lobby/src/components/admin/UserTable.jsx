@@ -182,6 +182,9 @@ export default function UserTable({ role, limit, onChanged, onSelectUser }) {
             {user.role === 'driver' && (
               <div className="rounded-2xl bg-slate-50 p-3 text-xs font-semibold text-slate-600">
                 <div>{user.vehicle || 'No vehicle added'}</div>
+                <div className="mt-1 font-black text-slate-500">
+                  {user.isAvailable ? 'Online' : 'Offline'} - {user.subscriptionStatus || 'unpaid'}
+                </div>
                 {user.licenseUrl && (
                   <a href={user.licenseUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex text-blue-600">
                     View uploaded license
@@ -255,6 +258,9 @@ export default function UserTable({ role, limit, onChanged, onSelectUser }) {
                   {user.role === 'driver' ? (
                     <div>
                       <div className="font-semibold text-slate-700">{user.vehicle || 'No vehicle'}</div>
+                      <div className="text-xs font-black text-slate-500">
+                        {user.isAvailable ? 'Online' : 'Offline'} - {user.subscriptionStatus || 'unpaid'}
+                      </div>
                       {user.licenseUrl && (
                         <a href={user.licenseUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-black text-blue-600">
                           View license

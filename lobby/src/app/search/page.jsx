@@ -1,6 +1,6 @@
 "use client";
 import Image from 'next/image';
-import { Search, MapPin, Star, Phone, X, Car, Loader2 } from 'lucide-react';
+import { Search, MapPin, Star, Phone, X, Car, Loader2, Flag, MessageCircle } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
@@ -82,6 +82,7 @@ export default function SearchPage() {
   const [toast, setToast] = useState('');
   const activeFetchRef = useRef(0);
   const abortRef = useRef(null);
+  const riderId = user?.id || null;
 
   const visibleDrivers = useMemo(() => {
     if (activeFilter === 'Top Rated') {
@@ -151,7 +152,7 @@ export default function SearchPage() {
       try {
         // Fetch quietly in the background without triggering loading skeletons
         const updatedDrivers = await requestDrivers(searchQuery);
-        
+
         // Instantly update UI. If a driver went offline, they are removed.
         setDrivers(updatedDrivers);
         writeCachedDrivers(searchQuery, updatedDrivers); // Keep cache fresh
@@ -176,9 +177,7 @@ export default function SearchPage() {
     fetchDrivers(query, { preferCache: true });
   };
 
-  const trackCall = async (driver) => {
-    setToast(`${driver.fullName || 'Driver'} added to recent contacts`);
-
+  const trackDriverEvent = useCallback(async (driver, type) => {
     if (!driver?._id) return;
 
     try {
@@ -186,14 +185,24 @@ export default function SearchPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'call_click',
+          type,
           driverId: driver._id,
-          riderId: user?.id || null
+          riderId
         })
       });
     } catch (err) {
       console.error("Tracking failed", err);
     }
+  }, [riderId]);
+
+  const trackCall = async (driver) => {
+    setToast(`${driver.fullName || 'Driver'} added to recent contacts`);
+    await trackDriverEvent(driver, 'call_click');
+  };
+
+  const trackWhatsApp = async (driver) => {
+    setToast(`Opening WhatsApp for ${driver.fullName || 'driver'}`);
+    await trackDriverEvent(driver, 'whatsapp_click');
   };
 
   useEffect(() => {
@@ -214,6 +223,11 @@ export default function SearchPage() {
   }, [selectedDriver]);
 
   useEffect(() => {
+    if (!selectedDriver?._id) return;
+    trackDriverEvent(selectedDriver, 'profile_view');
+  }, [selectedDriver, trackDriverEvent]);
+
+  useEffect(() => {
     if (!toast) return;
 
     const timer = window.setTimeout(() => setToast(''), 2600);
@@ -223,17 +237,17 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-slate-50 px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-3xl">
-        
+
         {/* Search Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="mb-2 text-3xl font-bold text-slate-900">Find a Ride</h1>
           <form action="/search" onSubmit={handleSearch} className="relative flex items-center">
             <MapPin className="absolute left-4 text-slate-400" size={20} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               name="q"
               aria-label="Destination"
-              placeholder="Where do you want to go? (e.g. Dawki)" 
+              placeholder="Where do you want to go? (e.g. Dawki)"
               className="w-full rounded-2xl border border-slate-200 py-4 pl-12 pr-14 text-base font-medium shadow-sm outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 sm:text-lg"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -277,7 +291,7 @@ export default function SearchPage() {
           </div>
           <InstantBook destination={searchQuery || "Kohima"} />
         </div>
-        
+
         {/* Divider before manual results */}
         <div className="flex items-center gap-4 mb-6">
           <div className="h-px bg-slate-200 flex-1"></div>
@@ -335,8 +349,10 @@ export default function SearchPage() {
       {selectedDriver && (
         <DriverDetailsSheet
           driver={selectedDriver}
+          rider={user}
           onClose={() => setSelectedDriver(null)}
           onCall={() => trackCall(selectedDriver)}
+          onWhatsApp={() => trackWhatsApp(selectedDriver)}
         />
       )}
 
@@ -399,7 +415,7 @@ function DriverResultCard({ driver, onSelect }) {
               <h3 className="truncate text-lg font-bold text-slate-900 transition group-hover:text-[#0F766E]">
                 {driver.fullName || 'Driver'}
               </h3>
-              
+
               <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-500">
                 <span className="flex items-center gap-1 font-bold text-slate-900">
                   <Star size={14} className="text-yellow-400 fill-yellow-400" />
@@ -436,10 +452,62 @@ function DriverResultCard({ driver, onSelect }) {
   );
 }
 
-function DriverDetailsSheet({ driver, onClose, onCall }) {
+function getWhatsAppHref(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  return digits ? `https://wa.me/${digits}` : null;
+}
+
+function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
   const vehicle = driver.vehicle || 'Standard Taxi';
   const routes = getDriverRoutes(driver);
   const phoneHref = driver.phone ? `tel:${driver.phone}` : undefined;
+  const whatsappHref = getWhatsAppHref(driver.phone);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [reportText, setReportText] = useState('');
+  const [reportNotice, setReportNotice] = useState('');
+  const [isReporting, setIsReporting] = useState(false);
+
+  const submitDriverReport = async (event) => {
+    event.preventDefault();
+
+    const message = reportText.trim();
+    if (message.length < 10) {
+      setReportNotice('Please add a little more detail before submitting.');
+      return;
+    }
+
+    setIsReporting(true);
+    setReportNotice('');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/complaints`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: rider?.fullName || rider?.firstName || 'Rider',
+          email: rider?.primaryEmailAddress?.emailAddress || '',
+          userId: rider?.id || '',
+          role: 'rider',
+          topic: `Driver report: ${driver.fullName || 'Driver'}`,
+          message,
+          reportType: 'driver_report',
+          driverId: driver._id,
+          driverName: driver.fullName || 'Driver',
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) throw new Error(data.message || 'Report failed');
+
+      setReportText('');
+      setReportNotice('Report submitted. Admin will review this driver.');
+      window.setTimeout(() => setIsReportOpen(false), 900);
+    } catch (error) {
+      setReportNotice(error.message || 'Could not submit report. Please try again.');
+    } finally {
+      setIsReporting(false);
+    }
+  };
 
   return (
     <div
@@ -526,7 +594,39 @@ function DriverDetailsSheet({ driver, onClose, onCall }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-[0.85fr_1.15fr] gap-3">
+        <div className="mb-4 rounded-3xl border border-slate-200 bg-slate-50 p-3">
+          <button
+            type="button"
+            onClick={() => setIsReportOpen((current) => !current)}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-red-500 ring-1 ring-slate-200 transition hover:ring-red-100"
+          >
+            <Flag size={17} />
+            Report Driver
+          </button>
+
+          {isReportOpen && (
+            <form onSubmit={submitDriverReport} className="mt-3 space-y-3">
+              <textarea
+                value={reportText}
+                onChange={(event) => setReportText(event.target.value)}
+                className="h-24 w-full resize-none rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 outline-none focus:border-red-300"
+                placeholder="What happened?"
+              />
+              {reportNotice && (
+                <p className="text-center text-xs font-bold text-slate-500">{reportNotice}</p>
+              )}
+              <button
+                type="submit"
+                disabled={isReporting || reportText.trim().length < 10}
+                className="w-full rounded-2xl bg-red-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isReporting ? 'Submitting...' : 'Submit Report'}
+              </button>
+            </form>
+          )}
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
           <button
             type="button"
             onClick={onClose}
@@ -534,6 +634,27 @@ function DriverDetailsSheet({ driver, onClose, onCall }) {
           >
             Close
           </button>
+
+          {whatsappHref ? (
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onWhatsApp}
+              className="flex items-center justify-center gap-2 rounded-2xl bg-green-50 px-4 py-4 text-sm font-bold text-green-700 ring-1 ring-green-100 transition hover:bg-green-100"
+            >
+              <MessageCircle size={18} />
+              WhatsApp
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-bold text-slate-400"
+            >
+              WhatsApp
+            </button>
+          )}
 
           {phoneHref ? (
             <a

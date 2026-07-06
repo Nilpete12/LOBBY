@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { ArrowRight, Clock3, Loader2, PhoneCall, Route } from 'lucide-react';
+import { ArrowRight, Clock3, Loader2, MessageCircle, PhoneCall, Route } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 export default function DriverTripHistoryPage() {
@@ -102,28 +102,37 @@ export default function DriverTripHistoryPage() {
           <section className="rounded-3xl border border-slate-200 bg-white/85 p-4 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-6">
             <div className="space-y-3">
               {history.map((event) => (
-                <article
-                  key={event._id}
-                  className="flex items-center gap-4 rounded-3xl border border-slate-100 bg-white p-4"
-                >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#DCFCE7] text-[#0F766E]">
-                    <PhoneCall size={21} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h2 className="truncate font-bold tracking-tight text-slate-900">
-                      {event.rider?.fullName || 'Rider'}
-                    </h2>
-                    <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-slate-500">
-                      <Clock3 size={13} />
-                      {new Date(event.timestamp).toLocaleString()}
-                    </p>
-                  </div>
-                </article>
+                <HistoryItem key={event._id} event={event} />
               ))}
             </div>
           </section>
         )}
       </div>
     </main>
+  );
+}
+
+function HistoryItem({ event }) {
+  const isWhatsApp = event.type === 'whatsapp_click';
+  const Icon = isWhatsApp ? MessageCircle : PhoneCall;
+
+  return (
+    <article className="flex items-center gap-4 rounded-3xl border border-slate-100 bg-white p-4">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#DCFCE7] text-[#0F766E]">
+        <Icon size={21} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <h2 className="truncate font-bold tracking-tight text-slate-900">
+          {event.rider?.fullName || 'Rider'}
+        </h2>
+        <p className="mt-1 text-xs font-bold text-[#0F766E]">
+          {isWhatsApp ? 'WhatsApp click' : 'Call click'}
+        </p>
+        <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-slate-500">
+          <Clock3 size={13} />
+          {new Date(event.timestamp).toLocaleString()}
+        </p>
+      </div>
+    </article>
   );
 }

@@ -15,7 +15,7 @@ export async function POST(req) {
     // 1. Convert file to buffer for Supabase Storage
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    
+
     // Create a unique file name (e.g., driver_123_car_16843920.jpg)
     const fileExt = file.name.split('.').pop();
     const fileName = `${clerkId}_${type}_${Date.now()}.${fileExt}`;
@@ -44,7 +44,7 @@ export async function POST(req) {
     if (type === 'profile') updatePayload.profile_pic = publicUrl; // Assuming you add this column
 
     // For licenses, you might want to automatically set them to pending
-    if (type === 'license') updatePayload.verification_status = 'Pending'; 
+    if (type === 'license') updatePayload.verification_status = 'Pending';
 
     const { data: updatedUser, error: dbError } = await supabase
       .from('users')

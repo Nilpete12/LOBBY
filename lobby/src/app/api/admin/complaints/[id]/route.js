@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { logAdminActivity } from '@/lib/adminActivity';
+import { formatComplaint } from '@/lib/supabaseFormat';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 const ALLOWED_STATUSES = new Set(['pending', 'in_review', 'waiting_for_user', 'resolved']);
@@ -9,12 +10,41 @@ function cleanString(value, maxLength = 500) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
 }
 
+async function updateComplaint(id, status, note = '') {
+  const { data: existing, error: fetchError } = await supabase
+    .from('complaints')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (fetchError) throw fetchError;
+  if (!existing) return null;
+
+  const updates = { status };
+  if (note) {
+    updates.internal_notes = [
+      ...(Array.isArray(existing.internal_notes) ? existing.internal_notes : []),
+      { note, createdAt: new Date().toISOString() },
+    ];
+  }
+
+  const { data, error } = await supabase
+    .from('complaints')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return formatComplaint(data);
+}
+
 export async function PUT(request, context) {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
   const { id } = await context.params;
 
-  if (!supabase.auth.user() || !id) {
+  if (!id) {
     return NextResponse.json(
       { success: false, message: 'Invalid complaint id' },
       { status: 400 }
@@ -22,12 +52,7 @@ export async function PUT(request, context) {
   }
 
   try {
-    await connectDB();
-    const complaint = await Complaint.findByIdAndUpdate(
-      id,
-      { $set: { status: 'resolved' } },
-      { new: true }
-    );
+    const complaint = await updateComplaint(id, 'resolved');
 
     if (!complaint) {
       return NextResponse.json(
@@ -59,13 +84,6 @@ export async function PATCH(request, context) {
 
   const { id } = await context.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid complaint id' },
-      { status: 400 }
-    );
-  }
-
   let body;
   try {
     body = await request.json();
@@ -87,14 +105,7 @@ export async function PATCH(request, context) {
   }
 
   try {
-    await connectDB();
-
-    const update = { $set: { status: nextStatus } };
-    if (note) {
-      update.$push = { internalNotes: { note, createdAt: new Date() } };
-    }
-
-    const complaint = await Complaint.findByIdAndUpdate(id, update, { new: true }).lean();
+    const complaint = await updateComplaint(id, nextStatus, note);
 
     if (!complaint) {
       return NextResponse.json(

@@ -33,7 +33,7 @@ export async function POST(req) {
     });
 
     return NextResponse.json({ success: true, message: `Successfully registered as ${role}` });
-    
+
   } catch (error) {
     console.error("Onboarding Error:", error);
     return NextResponse.json({ error: 'Failed to complete onboarding' }, { status: 500 });

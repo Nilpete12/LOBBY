@@ -14,14 +14,14 @@ export default async function HomePage() {
 
   // 2. THE DRIVER VIEW
   if (userRole === "driver") {
-    // Fetch the driver's document from Supabase
-    const { data: driverDoc, error } = await supabase
+    const { data: driverDoc } = await supabase
       .from('users')
-      .select('is_verified, is_available')
+      .select('is_verified,is_available,account_status')
       .eq('clerk_id', user.id)
-      .single();
+      .eq('role', 'driver')
+      .maybeSingle();
 
-    // Default to false if error or not found
+    // 2. Extract their current status
     const isVerified = driverDoc?.is_verified || false;
     const isOnline = driverDoc?.is_available || false;
 

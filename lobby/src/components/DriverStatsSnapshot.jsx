@@ -1,17 +1,37 @@
 "use client";
 
-import { Wallet, Route, Star, TrendingUp, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Eye, MessageCircle, PhoneCall, TrendingUp, Clock } from "lucide-react";
+import API_BASE_URL from '@/config';
 
 export default function DriverStatsSnapshot() {
-  // DUMMY DATA: You will eventually fetch this from your MongoDB database
-  // via a Server Component or a `useEffect` fetch to an API route.
-  const stats = {
-    earnings: "₹ 1,250",
-    ridesCompleted: 8,
-    rating: 4.9,
-    hoursOnline: "4.5h",
-    earningsTrend: "+12% from yesterday"
-  };
+  const [stats, setStats] = useState({
+    profileViewsThisMonth: 0,
+    callClicksThisMonth: 0,
+    whatsappClicksThisMonth: 0,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadStats() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/driver/history`, { cache: 'no-store' });
+        const data = await res.json();
+        if (isMounted && data.success) {
+          setStats((current) => ({ ...current, ...data.stats }));
+        }
+      } catch (error) {
+        console.error('Failed to load driver analytics snapshot', error);
+      }
+    }
+
+    loadStats();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <section className="relative pb-16 bg-[#F8FAFC] -mt-8 z-20">
@@ -21,62 +41,58 @@ export default function DriverStatsSnapshot() {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-slate-900">Today&apos;s Overview</h2>
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Clock size={14} /> Auto-updating
+            <Clock size={14} /> This month
           </span>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
           
-          {/* CARD 1: Earnings */}
           <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow group">
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-[#0F766E] group-hover:bg-[#0F766E] group-hover:text-white transition-colors">
-                <Wallet size={24} />
+                <Eye size={24} />
               </div>
               <div className="flex items-center gap-1 text-xs font-[Proxima_Nova_Extrabold] text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
                 <TrendingUp size={12} />
-                {stats.earningsTrend}
+                Visibility
               </div>
             </div>
-            <p className="text-sm font-semibold text-slate-500 mb-1">Total Earnings</p>
+            <p className="text-sm font-semibold text-slate-500 mb-1">Profile Views</p>
             <h3 className="text-3xl font-[Sailors_Slant_Normal] text-slate-900 tracking-tight">
-              {stats.earnings}
+              {stats.profileViewsThisMonth || 0}
             </h3>
           </div>
 
-          {/* CARD 2: Rides Completed */}
           <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow group">
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                <Route size={24} />
+                <PhoneCall size={24} />
               </div>
               <div className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
-                {stats.hoursOnline} Online
+                Leads
               </div>
             </div>
-            <p className="text-sm font-semibold text-slate-500 mb-1">Rides Completed</p>
+            <p className="text-sm font-semibold text-slate-500 mb-1">Call Clicks</p>
             <h3 className="text-3xl font-[Sailors_Slant_Normal] text-slate-900 tracking-tight">
-              {stats.ridesCompleted}
+              {stats.callClicksThisMonth || 0}
             </h3>
           </div>
 
-          {/* CARD 3: Rating */}
           <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow group sm:col-span-2 md:col-span-1">
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                <Star size={24} fill="currentColor" />
+                <MessageCircle size={24} />
               </div>
               <div className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full">
-                Top 10% Driver
+                WhatsApp
               </div>
             </div>
-            <p className="text-sm font-semibold text-slate-500 mb-1">Current Rating</p>
+            <p className="text-sm font-semibold text-slate-500 mb-1">WhatsApp Clicks</p>
             <div className="flex items-end gap-2">
               <h3 className="text-3xl font-[Sailors_Slant_Normal] text-slate-900 tracking-tight">
-                {stats.rating}
+                {stats.whatsappClicksThisMonth || 0}
               </h3>
-              <span className="text-sm font-[Sailors_Slant_Normal] text-slate-400 mb-1.5">/ 5.0</span>
             </div>
           </div>
 

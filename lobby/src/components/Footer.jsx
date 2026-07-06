@@ -56,7 +56,7 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-[#F08991] mt-0.5" />
                 <span>
-                  In your Neighbourhood ,<br />
+                  In Your Neighbourhood,<br />
                   Kohima, Nagaland<br />
                   797001
                 </span>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase'; // 1. Correct named import!
+import { supabase } from '@/lib/supabase';
+import { formatActivityLog } from '@/lib/supabaseFormat';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 export async function GET(req) {
@@ -8,10 +9,10 @@ export async function GET(req) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const limit = parseInt(searchParams.get('limit') || '50', 10);
+    const requestedLimit = parseInt(searchParams.get('limit') || '100', 10);
+    const limit = Math.min(100, Math.max(1, Number.isFinite(requestedLimit) ? requestedLimit : 100));
 
-    // Fetch the logs from your new Postgres table
-    const { data: logs, error } = await supabase
+    const { data, error } = await supabase
       .from('admin_activity_logs')
       .select('*')
       .order('created_at', { ascending: false })
@@ -19,22 +20,11 @@ export async function GET(req) {
 
     if (error) throw error;
 
-    // Convert Postgres snake_case back into the camelCase your frontend expects
-    const formattedLogs = logs.map(log => ({
-      ...log,
-      _id: log.id, 
-      targetType: log.target_type,
-      targetId: log.target_id,
-      targetLabel: log.target_label,
-      createdAt: log.created_at
-    }));
-
-    return NextResponse.json({ success: true, logs: formattedLogs });
-
+    return NextResponse.json({ success: true, logs: (data || []).map(formatActivityLog) });
   } catch (error) {
     console.error('Failed to fetch admin activity logs:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch logs' }, 
+      { success: false, message: 'Failed to fetch logs' },
       { status: 500 }
     );
   }
