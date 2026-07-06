@@ -1,73 +1,68 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getPlatformSettings, serializePlatformSettings } from '@/lib/platformSettings';
-import { logAdminActivity } from '@/lib/adminActivity';
-import PlatformSettings from '@/models/PlatformSettings';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
-
-function cleanString(value, maxLength = 500) {
-  return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
-}
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
   try {
-    await connectDB();
-    const settings = await getPlatformSettings();
-    return NextResponse.json({ success: true, settings: serializePlatformSettings(settings) });
+    const { data, error } = await supabase
+      .from('platform_settings')
+      .select('*')
+      .limit(1)
+      .single();
+
+    if (error || !data) {
+       return NextResponse.json({
+        success: true,
+        settings: { baseFare: 50, perKmRate: 20, serviceFeePercentage: 5 }
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      settings: {
+        baseFare: data.base_fare,
+        perKmRate: data.per_km_rate,
+        serviceFeePercentage: data.service_fee_percentage,
+      },
+    });
   } catch (error) {
-    console.error('Failed to load settings:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to load settings' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }
 
-export async function PATCH(request) {
+export async function POST(req) {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
-  let body;
   try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { success: false, message: 'Invalid request body' },
-      { status: 400 }
-    );
-  }
+    const body = await req.json();
+    const { baseFare, perKmRate, serviceFeePercentage } = body;
 
-  const updates = {};
-  for (const key of ['maintenanceMode', 'registrationOpen', 'bookingOpen', 'supportOpen']) {
-    if (typeof body[key] === 'boolean') updates[key] = body[key];
-  }
+    // Delete existing settings and insert new ones
+    await supabase.from('platform_settings').delete().neq('base_fare', -1); 
+    
+    const { data, error } = await supabase
+      .from('platform_settings')
+      .insert([{ 
+        base_fare: baseFare, 
+        per_km_rate: perKmRate, 
+        service_fee_percentage: serviceFeePercentage 
+      }])
+      .select()
+      .single();
 
-  if (typeof body.notice === 'string') updates.notice = cleanString(body.notice, 300);
+    if (error) throw error;
 
-  try {
-    await connectDB();
-    const settings = await PlatformSettings.findOneAndUpdate(
-      { key: 'global' },
-      { $set: updates, $setOnInsert: { key: 'global' } },
-      { new: true, upsert: true }
-    ).lean();
-
-    await logAdminActivity({
-      action: 'settings.update',
-      targetType: 'platform',
-      targetId: 'global',
-      targetLabel: 'Platform settings',
-      summary: 'Updated platform settings',
-      metadata: updates,
+    return NextResponse.json({
+      success: true,
+      settings: {
+        baseFare: data.base_fare,
+        perKmRate: data.per_km_rate,
+        serviceFeePercentage: data.service_fee_percentage,
+      },
     });
-
-    return NextResponse.json({ success: true, settings: serializePlatformSettings(settings) });
   } catch (error) {
-    console.error('Failed to update settings:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to update settings' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: 'Failed to update settings' }, { status: 500 });
   }
 }

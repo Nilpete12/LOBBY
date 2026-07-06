@@ -1,30 +1,24 @@
-import PlatformSettings from '@/models/PlatformSettings';
-
-const DEFAULT_SETTINGS = {
-  maintenanceMode: false,
-  registrationOpen: true,
-  bookingOpen: true,
-  supportOpen: true,
-  notice: '',
-};
+import { supabase } from '@/lib/supabase';
 
 export async function getPlatformSettings() {
-  const settings = await PlatformSettings.findOneAndUpdate(
-    { key: 'global' },
-    { $setOnInsert: { key: 'global', ...DEFAULT_SETTINGS } },
-    { new: true, upsert: true }
-  ).lean();
+  try {
+    const { data, error } = await supabase
+      .from('platform_settings')
+      .select('*')
+      .limit(1)
+      .single();
 
-  return { ...DEFAULT_SETTINGS, ...settings };
-}
+    if (error || !data) {
+      return { baseFare: 50, perKmRate: 20, serviceFeePercentage: 5 };
+    }
 
-export function serializePlatformSettings(settings) {
-  return {
-    maintenanceMode: Boolean(settings.maintenanceMode),
-    registrationOpen: settings.registrationOpen !== false,
-    bookingOpen: settings.bookingOpen !== false,
-    supportOpen: settings.supportOpen !== false,
-    notice: typeof settings.notice === 'string' ? settings.notice : '',
-    updatedAt: settings.updatedAt,
-  };
+    return {
+      baseFare: data.base_fare,
+      perKmRate: data.per_km_rate,
+      serviceFeePercentage: data.service_fee_percentage,
+    };
+  } catch (error) {
+    console.error('Error fetching platform settings:', error);
+    return { baseFare: 50, perKmRate: 20, serviceFeePercentage: 5 };
+  }
 }
