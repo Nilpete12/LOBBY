@@ -7,6 +7,7 @@ import HowItWorks from '@/components/Howitwork';
 import TaxiStands from '@/components/TaxiStands';
 import DriverHero from '@/components/DriverHero';
 import DriverStatsSnapshot from '@/components/DriverStatsSnapshot';
+import IncomingRideAlert from '@/components/IncomingRideAlert';
 
 export default async function HomePage() {
   const user = await currentUser();
@@ -25,6 +26,7 @@ export default async function HomePage() {
 
     return (
       <main className="min-h-screen bg-[#F8FAFC]">
+        <IncomingRideAlert />
         {/* A custom Hero with an Online/Offline toggle instead of a search bar */}
         <DriverHero 
           userName={user?.firstName || "Driver"} 
