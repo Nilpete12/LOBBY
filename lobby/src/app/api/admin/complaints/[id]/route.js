@@ -44,6 +44,13 @@ export async function PUT(request, context) {
 
   const { id } = await context.params;
 
+  if (!id) {
+    return NextResponse.json(
+      { success: false, message: 'Invalid complaint id' },
+      { status: 400 }
+    );
+  }
+
   try {
     const complaint = await updateComplaint(id, 'resolved');
 
