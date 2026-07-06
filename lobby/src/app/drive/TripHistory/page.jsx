@@ -62,7 +62,7 @@ export default function DriverTripHistoryPage() {
   return (
     <main className="min-h-screen bg-[#F8FAFC] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-5xl">
-        <section className="mb-6 rounded-[1.5rem] border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-[2rem] sm:p-8">
+        <section className="mb-6 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#0F766E]">
@@ -87,7 +87,7 @@ export default function DriverTripHistoryPage() {
         </section>
 
         {history.length === 0 ? (
-          <section className="rounded-[1.5rem] border border-slate-200 bg-white/85 px-5 py-14 text-center shadow-sm backdrop-blur-sm sm:rounded-[2rem]">
+          <section className="rounded-3xl border border-slate-200 bg-white/85 px-5 py-14 text-center shadow-sm backdrop-blur-sm sm:rounded-4xl">
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
               <Route size={30} />
             </div>
@@ -99,7 +99,7 @@ export default function DriverTripHistoryPage() {
             </p>
           </section>
         ) : (
-          <section className="rounded-[1.5rem] border border-slate-200 bg-white/85 p-4 shadow-sm backdrop-blur-sm sm:rounded-[2rem] sm:p-6">
+          <section className="rounded-3xl border border-slate-200 bg-white/85 p-4 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-6">
             <div className="space-y-3">
               {history.map((event) => (
                 <HistoryItem key={event._id} event={event} />

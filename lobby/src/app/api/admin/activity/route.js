@@ -1,19 +1,21 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import AdminActivityLog from '@/models/AdminActivityLog';
+import { supabase } from '@/lib/supabase';
+import { formatActivityLog } from '@/lib/supabaseFormat';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
   try {
-    await connectDB();
-    const logs = await AdminActivityLog.find({})
-      .sort({ createdAt: -1 })
-      .limit(100)
-      .lean();
+    const { data, error } = await supabase
+      .from('admin_activity_logs')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
 
-    return NextResponse.json({ success: true, logs });
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, logs: (data || []).map(formatActivityLog) });
   } catch (error) {
     console.error('Failed to load admin activity:', error);
     return NextResponse.json(

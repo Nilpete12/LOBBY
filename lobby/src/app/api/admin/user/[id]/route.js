@@ -1,10 +1,12 @@
-import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Booking from '@/models/Bookings';
-import User from '@/models/User';
-import VerificationRequest from '@/models/VerificationRequest';
+import { supabase } from '@/lib/supabase';
 import { logAdminActivity } from '@/lib/adminActivity';
+import {
+  formatBooking,
+  formatUser,
+  formatVerificationRequest,
+  userUpdatesToRow,
+} from '@/lib/supabaseFormat';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 function cleanString(value, maxLength = 500) {
@@ -23,21 +25,21 @@ function cleanRoutes(value) {
   return [];
 }
 
-function serializeUser(user) {
-  return {
-    ...user,
-    accountStatus: user.accountStatus || 'active',
-    suspensionReason: user.suspensionReason || '',
-    subscriptionStatus: user.subscriptionStatus || 'unpaid',
-    subscriptionPaidAt: user.subscriptionPaidAt || null,
-    subscriptionPaidUntil: user.subscriptionPaidUntil || null,
-  };
-}
-
 function addMonths(date, months) {
   const next = new Date(date);
   next.setMonth(next.getMonth() + months);
   return next;
+}
+
+async function getUser(id) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
 }
 
 export async function GET(request, context) {
@@ -45,16 +47,8 @@ export async function GET(request, context) {
 
   const { id } = await context.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid user id' },
-      { status: 400 }
-    );
-  }
-
   try {
-    await connectDB();
-    const user = await User.findById(id).select('-password').lean();
+    const user = await getUser(id);
 
     if (!user) {
       return NextResponse.json(
@@ -63,28 +57,37 @@ export async function GET(request, context) {
       );
     }
 
-    const [verificationRequests, bookings] = await Promise.all([
-      VerificationRequest.find({
-        $or: [{ driverId: user._id }, ...(user.clerkId ? [{ clerkId: user.clerkId }] : [])],
-      })
-        .sort({ createdAt: -1 })
-        .limit(20)
-        .lean(),
-      user.clerkId
-        ? Booking.find({
-            $or: [{ riderId: user.clerkId }, { driverId: user.clerkId }],
-          })
-            .sort({ createdAt: -1 })
-            .limit(20)
-            .lean()
-        : [],
+    const verificationFilter = user.clerk_id
+      ? `driver_id.eq.${user.id},clerk_id.eq.${user.clerk_id}`
+      : `driver_id.eq.${user.id}`;
+
+    const verificationQuery = supabase
+      .from('verification_requests')
+      .select('*')
+      .or(verificationFilter)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    const bookingsQuery = supabase
+      .from('bookings')
+      .select('*')
+      .or(`rider_id.eq.${user.clerk_id},driver_id.eq.${user.clerk_id}`)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    const [verificationResult, bookingsResult] = await Promise.all([
+      verificationQuery,
+      user.clerk_id ? bookingsQuery : { data: [], error: null },
     ]);
+
+    if (verificationResult.error) throw verificationResult.error;
+    if (bookingsResult.error) throw bookingsResult.error;
 
     return NextResponse.json({
       success: true,
-      user: serializeUser(user),
-      verificationRequests,
-      bookings,
+      user: formatUser(user),
+      verificationRequests: (verificationResult.data || []).map(formatVerificationRequest),
+      bookings: (bookingsResult.data || []).map((booking) => formatBooking(booking)),
     });
   } catch (error) {
     console.error('Failed to load user:', error);
@@ -100,13 +103,6 @@ export async function PATCH(request, context) {
 
   const { id } = await context.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid user id' },
-      { status: 400 }
-    );
-  }
-
   let body;
   try {
     body = await request.json();
@@ -120,8 +116,7 @@ export async function PATCH(request, context) {
   const action = cleanString(body.action, 40) || 'update';
 
   try {
-    await connectDB();
-    const user = await User.findById(id);
+    const user = await getUser(id);
 
     if (!user) {
       return NextResponse.json(
@@ -142,7 +137,7 @@ export async function PATCH(request, context) {
     if (action === 'suspend') {
       updates.accountStatus = 'suspended';
       updates.isAvailable = false;
-      updates.suspendedAt = new Date();
+      updates.suspendedAt = new Date().toISOString();
       updates.suspensionReason = cleanString(body.reason, 500) || 'Suspended by admin';
     } else if (action === 'unsuspend') {
       updates.accountStatus = 'active';
@@ -156,7 +151,7 @@ export async function PATCH(request, context) {
         );
       }
 
-      if (user.accountStatus === 'suspended') {
+      if (user.account_status === 'suspended') {
         return NextResponse.json(
           { success: false, message: 'Suspended drivers cannot be made available' },
           { status: 400 }
@@ -175,8 +170,8 @@ export async function PATCH(request, context) {
       const months = Math.min(12, Math.max(1, Number(body.months) || 1));
       const paidAt = new Date();
       updates.subscriptionStatus = 'paid';
-      updates.subscriptionPaidAt = paidAt;
-      updates.subscriptionPaidUntil = addMonths(paidAt, months);
+      updates.subscriptionPaidAt = paidAt.toISOString();
+      updates.subscriptionPaidUntil = addMonths(paidAt, months).toISOString();
     } else if (action === 'mark_subscription_unpaid') {
       if (user.role !== 'driver') {
         return NextResponse.json(
@@ -199,33 +194,36 @@ export async function PATCH(request, context) {
       if (typeof body.aiNotes === 'string') updates.aiNotes = cleanString(body.aiNotes, 500);
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { $set: updates },
-      { new: true }
-    ).select('-password').lean();
+    const { data: updatedUser, error } = await supabase
+      .from('users')
+      .update(userUpdatesToRow(updates))
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
 
     await logAdminActivity({
       action: `user.${action}`,
       targetType: 'user',
       targetId: id,
-      targetLabel: user.fullName,
+      targetLabel: user.full_name,
       summary:
         action === 'suspend'
-          ? `Suspended ${user.fullName}`
+          ? `Suspended ${user.full_name}`
           : action === 'unsuspend'
-            ? `Unsuspended ${user.fullName}`
+            ? `Unsuspended ${user.full_name}`
             : action === 'set_availability'
-              ? `${updates.isAvailable ? 'Enabled' : 'Disabled'} availability for ${user.fullName}`
+              ? `${updates.isAvailable ? 'Enabled' : 'Disabled'} availability for ${user.full_name}`
               : action === 'mark_subscription_paid'
-                ? `Marked subscription paid for ${user.fullName}`
+                ? `Marked subscription paid for ${user.full_name}`
                 : action === 'mark_subscription_unpaid'
-                  ? `Marked subscription unpaid for ${user.fullName}`
-                  : `Updated ${user.fullName}`,
+                  ? `Marked subscription unpaid for ${user.full_name}`
+                  : `Updated ${user.full_name}`,
       metadata: updates,
     });
 
-    return NextResponse.json({ success: true, user: serializeUser(updatedUser) });
+    return NextResponse.json({ success: true, user: formatUser(updatedUser) });
   } catch (error) {
     console.error('Failed to update user:', error);
     return NextResponse.json(
@@ -240,16 +238,8 @@ export async function DELETE(request, context) {
 
   const { id } = await context.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid user id' },
-      { status: 400 }
-    );
-  }
-
   try {
-    await connectDB();
-    const user = await User.findById(id);
+    const user = await getUser(id);
 
     if (!user) {
       return NextResponse.json(
@@ -265,22 +255,20 @@ export async function DELETE(request, context) {
       );
     }
 
-    const verificationCleanupQuery = [{ driverId: user._id }];
-    if (user.clerkId) verificationCleanupQuery.push({ clerkId: user.clerkId });
-
     await Promise.all([
-      User.deleteOne({ _id: id }),
-      VerificationRequest.deleteMany({
-        $or: verificationCleanupQuery,
-      }),
+      supabase.from('users').delete().eq('id', id),
+      supabase.from('verification_requests').delete().eq('driver_id', id),
+      user.clerk_id
+        ? supabase.from('verification_requests').delete().eq('clerk_id', user.clerk_id)
+        : Promise.resolve({ error: null }),
     ]);
 
     await logAdminActivity({
       action: 'user.delete',
       targetType: 'user',
       targetId: id,
-      targetLabel: user.fullName,
-      summary: `Deleted ${user.fullName}`,
+      targetLabel: user.full_name,
+      summary: `Deleted ${user.full_name}`,
       metadata: { role: user.role, email: user.email },
     });
 

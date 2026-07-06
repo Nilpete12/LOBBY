@@ -1,36 +1,52 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Analytics from '@/models/Analytics';
-import User from '@/models/User';
+import { supabase } from '@/lib/supabase';
+import { formatUser } from '@/lib/supabaseFormat';
 
 function startOfDay(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
 }
 
 function startOfWeek(date) {
   const day = date.getDay();
   const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-  return new Date(date.getFullYear(), date.getMonth(), diff);
+  return new Date(date.getFullYear(), date.getMonth(), diff).toISOString();
 }
 
 function startOfMonth(date) {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
+  return new Date(date.getFullYear(), date.getMonth(), 1).toISOString();
+}
+
+async function countAnalytics(driverId, eventType, since) {
+  let query = supabase
+    .from('analytics')
+    .select('*', { count: 'exact', head: true })
+    .eq('driver_id', driverId)
+    .eq('event_type', eventType);
+
+  if (since) query = query.gte('created_at', since);
+
+  const { count, error } = await query;
+  if (error) throw error;
+  return count || 0;
 }
 
 export async function GET() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
-    await connectDB();
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
 
-    const driver = await User.findOne({ clerkId: userId, role: 'driver' }).select('-password').lean();
+    const { data: driverRow, error: driverError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('clerk_id', userId)
+      .eq('role', 'driver')
+      .maybeSingle();
 
-    if (!driver) {
+    if (driverError) throw driverError;
+    if (!driverRow) {
       return NextResponse.json(
         { success: false, message: 'Driver profile not found' },
         { status: 404 }
@@ -41,9 +57,10 @@ export async function GET() {
     const today = startOfDay(now);
     const week = startOfWeek(now);
     const month = startOfMonth(now);
+    const driverId = driverRow.id;
 
     const [
-      events,
+      eventsResult,
       totalCalls,
       totalProfileViews,
       totalWhatsAppClicks,
@@ -53,36 +70,49 @@ export async function GET() {
       callClicksThisMonth,
       whatsappClicksThisMonth,
     ] = await Promise.all([
-      Analytics.find({ driverId: driver._id, type: { $in: ['call_click', 'whatsapp_click'] } })
-        .sort({ timestamp: -1 })
-        .limit(50)
-        .lean(),
-      Analytics.countDocuments({ type: 'call_click', driverId: driver._id }),
-      Analytics.countDocuments({ type: 'profile_view', driverId: driver._id }),
-      Analytics.countDocuments({ type: 'whatsapp_click', driverId: driver._id }),
-      Analytics.countDocuments({ type: 'call_click', driverId: driver._id, timestamp: { $gte: today } }),
-      Analytics.countDocuments({ type: 'call_click', driverId: driver._id, timestamp: { $gte: week } }),
-      Analytics.countDocuments({ type: 'profile_view', driverId: driver._id, timestamp: { $gte: month } }),
-      Analytics.countDocuments({ type: 'call_click', driverId: driver._id, timestamp: { $gte: month } }),
-      Analytics.countDocuments({ type: 'whatsapp_click', driverId: driver._id, timestamp: { $gte: month } }),
+      supabase
+        .from('analytics')
+        .select('*')
+        .eq('driver_id', driverId)
+        .in('event_type', ['call_click', 'whatsapp_click'])
+        .order('created_at', { ascending: false })
+        .limit(50),
+      countAnalytics(driverId, 'call_click'),
+      countAnalytics(driverId, 'profile_view'),
+      countAnalytics(driverId, 'whatsapp_click'),
+      countAnalytics(driverId, 'call_click', today),
+      countAnalytics(driverId, 'call_click', week),
+      countAnalytics(driverId, 'profile_view', month),
+      countAnalytics(driverId, 'call_click', month),
+      countAnalytics(driverId, 'whatsapp_click', month),
     ]);
 
-    const riderIds = [...new Set(events.map((event) => event.riderId).filter(Boolean))];
-    const riders = await User.find({ clerkId: { $in: riderIds } }).select('clerkId fullName email').lean();
-    const riderByClerkId = new Map(riders.map((rider) => [rider.clerkId, rider]));
+    if (eventsResult.error) throw eventsResult.error;
 
-    const history = events.map((event) => ({
-      _id: String(event._id),
-      type: event.type,
-      timestamp: event.timestamp,
-      rider: event.riderId
-        ? riderByClerkId.get(event.riderId) || { fullName: 'Rider', email: '' }
-        : { fullName: 'Guest rider', email: '' },
-    }));
+    const events = eventsResult.data || [];
+    const riderIds = [...new Set(events.map((event) => event.rider_id).filter(Boolean))];
+    const ridersResult = riderIds.length
+      ? await supabase.from('users').select('clerk_id,full_name,email').in('clerk_id', riderIds)
+      : { data: [], error: null };
+
+    if (ridersResult.error) throw ridersResult.error;
+
+    const riderByClerkId = new Map((ridersResult.data || []).map((rider) => [rider.clerk_id, rider]));
+    const history = events.map((event) => {
+      const rider = event.rider_id ? riderByClerkId.get(event.rider_id) : null;
+      return {
+        _id: event.id,
+        type: event.event_type,
+        timestamp: event.created_at,
+        rider: rider
+          ? { fullName: rider.full_name || 'Rider', email: rider.email || '' }
+          : { fullName: event.rider_id ? 'Rider' : 'Guest rider', email: '' },
+      };
+    });
 
     return NextResponse.json({
       success: true,
-      driver,
+      driver: formatUser(driverRow),
       stats: {
         totalCalls,
         totalProfileViews,
@@ -96,10 +126,7 @@ export async function GET() {
       history,
     });
   } catch (error) {
-    console.error('Failed to load driver history:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to load driver history' },
-      { status: 500 }
-    );
+    console.error('History fetch error:', error);
+    return NextResponse.json({ success: false, message: 'Failed to fetch history' }, { status: 500 });
   }
 }

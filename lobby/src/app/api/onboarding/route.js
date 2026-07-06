@@ -1,82 +1,41 @@
 import { NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
-import connectDB from '@/lib/mongodb';
-import { getPlatformSettings } from '@/lib/platformSettings';
-import User from '@/models/User';
+import { supabase } from '@/lib/supabase';
 
-export async function POST(request) {
+export async function POST(req) {
   try {
-    const { userId } = await auth();
-    
+    const { userId } = auth();
     if (!userId) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { role } = await request.json();
-    if (role !== 'rider' && role !== 'driver') {
-      return NextResponse.json({ success: false, message: "Invalid role" }, { status: 400 });
+    const body = await req.json();
+    const { role } = body; // 'rider' or 'driver'
+
+    if (!['rider', 'driver'].includes(role)) {
+      return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
     }
 
-    await connectDB();
-    const [settings, existingUser] = await Promise.all([
-      getPlatformSettings(),
-      User.findOne({ clerkId: userId }).select('_id accountStatus').lean(),
-    ]);
+    // 1. Update Supabase
+    const { error: supabaseError } = await supabase
+      .from('users')
+      .update({ role: role })
+      .eq('clerk_id', userId);
 
-    if (settings.maintenanceMode) {
-      return NextResponse.json(
-        { success: false, message: "The platform is temporarily in maintenance mode" },
-        { status: 503 }
-      );
-    }
+    if (supabaseError) throw supabaseError;
 
-    if (!settings.registrationOpen && !existingUser) {
-      return NextResponse.json(
-        { success: false, message: "New registrations are currently closed" },
-        { status: 403 }
-      );
-    }
-
-    if (existingUser?.accountStatus === 'suspended') {
-      return NextResponse.json(
-        { success: false, message: "This account is suspended" },
-        { status: 403 }
-      );
-    }
-
-    // 1. Fetch user details from Clerk so MongoDB doesn't crash from missing fields!
-    const client = await clerkClient();
-    const clerkUser = await client.users.getUser(userId);
-    
-    const email = clerkUser.emailAddresses[0]?.emailAddress || '';
-    const fullName = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'New User';
-
-    // 3. Upsert with ALL required Mongoose fields
-    await User.findOneAndUpdate(
-      { clerkId: userId },
-      { 
-        $set: { 
-          clerkId: userId,
-          role: role,
-          email: email,
-          fullName: fullName
-        }
-      },
-      { new: true, upsert: true } // Now it has all the data it needs to create the doc!
-    );
-
-    // 4. Update Clerk's internal Metadata
-    await client.users.updateUserMetadata(userId, {
-      publicMetadata: { role: role }
+    // 2. Update Clerk publicMetadata so the frontend knows their role
+    await clerkClient.users.updateUserMetadata(userId, {
+      publicMetadata: {
+        role: role,
+        onboardingComplete: true
+      }
     });
 
-    return NextResponse.json({ success: true, message: "Role updated successfully" });
+    return NextResponse.json({ success: true, message: `Successfully registered as ${role}` });
 
   } catch (error) {
     console.error("Onboarding Error:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to update profile" }, 
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to complete onboarding' }, { status: 500 });
   }
 }

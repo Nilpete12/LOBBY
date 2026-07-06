@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Analytics from '@/models/Analytics';
+import { supabase } from '@/lib/supabase';
 import { logAdminActivity } from '@/lib/adminActivity';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
@@ -8,20 +7,24 @@ export async function DELETE() {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
   try {
-    await connectDB();
-    const result = await Analytics.deleteMany({});
+    const { count, error } = await supabase
+      .from('analytics')
+      .delete({ count: 'exact' })
+      .not('id', 'is', null);
+
+    if (error) throw error;
 
     await logAdminActivity({
       action: 'analytics.reset',
       targetType: 'analytics',
       targetId: 'all',
       targetLabel: 'Analytics',
-      summary: `Reset analytics data (${result.deletedCount || 0} records)`,
+      summary: `Reset analytics data (${count || 0} records)`,
     });
 
     return NextResponse.json({
       success: true,
-      deletedCount: result.deletedCount || 0,
+      deletedCount: count || 0,
     });
   } catch (error) {
     console.error('Failed to reset analytics:', error);

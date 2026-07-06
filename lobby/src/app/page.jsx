@@ -1,12 +1,12 @@
 import { currentUser } from '@clerk/nextjs/server';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
-import connectDB from '@/lib/mongodb'; // NEW: Import DB
-import User from '@/models/User'; // NEW: Import User Model
+import { supabase } from '@/lib/supabase';
 import HowItWorks from '@/components/Howitwork';
 import TaxiStands from '@/components/TaxiStands';
 import DriverHero from '@/components/DriverHero';
 import DriverStatsSnapshot from '@/components/DriverStatsSnapshot';
+import IncomingRideAlert from '@/components/IncomingRideAlert';
 
 export default async function HomePage() {
   const user = await currentUser();
@@ -14,17 +14,20 @@ export default async function HomePage() {
 
   // 2. THE DRIVER VIEW
   if (userRole === "driver") {
-    await connectDB();
-    const driverDoc = await User.findOne({ clerkId: user.id })
-      .select('isVerified isAvailable accountStatus')
-      .lean();
+    const { data: driverDoc } = await supabase
+      .from('users')
+      .select('is_verified,is_available,account_status')
+      .eq('clerk_id', user.id)
+      .eq('role', 'driver')
+      .maybeSingle();
 
     // 2. Extract their current status
-    const isVerified = driverDoc?.isVerified || false;
-    const isOnline = driverDoc?.isAvailable || false;
+    const isVerified = driverDoc?.is_verified || false;
+    const isOnline = driverDoc?.is_available || false;
 
     return (
       <main className="min-h-screen bg-[#F8FAFC]">
+        <IncomingRideAlert />
         {/* A custom Hero with an Online/Offline toggle instead of a search bar */}
         <DriverHero 
           userName={user?.firstName || "Driver"} 

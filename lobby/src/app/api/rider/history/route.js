@@ -1,56 +1,45 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Analytics from '@/models/Analytics';
-import User from '@/models/User';
+import { supabase } from '@/lib/supabase';
+import { auth } from '@clerk/nextjs/server';
 
-const RIDER_HISTORY_DRIVER_FIELDS = 'fullName phone vehicle profilePic carPic rating';
-
-export async function GET() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return NextResponse.json(
-      { success: false, message: 'Unauthorized' },
-      { status: 401 }
-    );
-  }
-
+export async function GET(req) {
   try {
-    await connectDB();
-
-    const events = await Analytics.find({ type: 'call_click', riderId: userId })
-      .sort({ timestamp: -1 })
-      .limit(50)
-      .lean();
-
-    const latestByDriver = new Map();
-    for (const event of events) {
-      const driverKey = String(event.driverId);
-      if (!latestByDriver.has(driverKey)) {
-        latestByDriver.set(driverKey, event.timestamp);
-      }
+    // 1. Securely get the logged-in driver's ID from Clerk
+    const { userId } = auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const driverIds = Array.from(latestByDriver.keys());
-    const drivers = await User.find({ _id: { $in: driverIds } })
-      .select(RIDER_HISTORY_DRIVER_FIELDS)
-      .lean();
-    const driverById = new Map(drivers.map((driver) => [String(driver._id), driver]));
+    // 2. Fetch all bookings assigned to this driver, newest first
+    const { data: history, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('rider_id', userId)
+      .order('created_at', { ascending: false });
 
-    const history = driverIds
-      .map((driverId) => {
-        const driver = driverById.get(driverId);
-        return driver ? { ...driver, lastCalled: latestByDriver.get(driverId) } : null;
-      })
-      .filter(Boolean);
+    if (error) throw error;
 
-    return NextResponse.json({ success: true, history });
+    // 3. Format the Postgres flat rows back into the nested JSON your React frontend expects
+    const formattedHistory = history.map(ride => ({
+      ...ride,
+      _id: ride.id,
+      riderId: ride.rider_id,
+      driverId: ride.driver_id,
+      riderName: ride.rider_name,
+      riderPhone: ride.rider_phone,
+      // Re-pack the coordinates into the object structure your frontend uses
+      pickupLocation: {
+        lat: ride.pickup_lat,
+        lng: ride.pickup_lng,
+        address: ride.pickup_address
+      },
+      createdAt: ride.created_at
+    }));
+
+    return NextResponse.json({ success: true, history: formattedHistory });
+
   } catch (error) {
-    console.error('Failed to load rider history:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to load history' },
-      { status: 500 }
-    );
+    console.error("History fetch error:", error);
+    return NextResponse.json({ success: false, message: 'Failed to fetch history' }, { status: 500 });
   }
 }

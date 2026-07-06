@@ -1,16 +1,20 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Complaint from '@/models/Complaint';
+import { supabase } from '@/lib/supabase';
+import { formatComplaint } from '@/lib/supabaseFormat';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
   try {
-    await connectDB();
-    const complaints = await Complaint.find({}).sort({ createdAt: -1 }).lean();
+    const { data, error } = await supabase
+      .from('complaints')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    return NextResponse.json({ success: true, complaints });
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, complaints: (data || []).map(formatComplaint) });
   } catch (error) {
     console.error('Failed to load complaints:', error);
     return NextResponse.json(

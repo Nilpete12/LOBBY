@@ -1,19 +1,35 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import AdminActivityLog from '@/models/AdminActivityLog';
-import Analytics from '@/models/Analytics';
-import Booking from '@/models/Bookings';
-import Complaint from '@/models/Complaint';
-import User from '@/models/User';
-import VerificationRequest from '@/models/VerificationRequest';
+import { supabase } from '@/lib/supabase';
+import { formatActivityLog } from '@/lib/supabaseFormat';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
+
+async function countRows(table, apply = (query) => query) {
+  const query = apply(supabase.from(table).select('*', { count: 'exact', head: true }));
+  const { count, error } = await query;
+  if (error) throw error;
+  return count || 0;
+}
+
+function countByKey(rows = [], key) {
+  return rows.reduce((acc, row) => {
+    const value = row[key] || 'unknown';
+    acc[value] = (acc[value] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+function topDestinations(rows = []) {
+  const counts = countByKey(rows, 'destination');
+  return Object.entries(counts)
+    .map(([destination, count]) => ({ destination, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+}
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
   try {
-    await connectDB();
-
     const [
       totalUsers,
       totalDrivers,
@@ -27,43 +43,35 @@ export async function GET() {
       totalCalls,
       totalProfileViews,
       totalWhatsAppClicks,
-      bookingStatusRows,
-      topDestinationRows,
-      recentActivity,
+      bookingsResult,
+      recentActivityResult,
     ] = await Promise.all([
-      User.countDocuments({}),
-      User.countDocuments({ role: 'driver' }),
-      User.countDocuments({ role: 'driver', isAvailable: true }),
-      User.countDocuments({ role: 'driver', isVerified: false, licenseUrl: { $exists: true, $ne: '' } }),
-      VerificationRequest.countDocuments({ status: 'pending' }),
-      Complaint.countDocuments({ status: { $ne: 'resolved' } }),
-      User.countDocuments({ accountStatus: 'suspended' }),
-      User.countDocuments({ role: 'driver', subscriptionStatus: 'paid' }),
-      Complaint.countDocuments({ reportType: 'driver_report', status: { $ne: 'resolved' } }),
-      Analytics.countDocuments({ type: 'call_click' }),
-      Analytics.countDocuments({ type: 'profile_view' }),
-      Analytics.countDocuments({ type: 'whatsapp_click' }),
-      Booking.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Booking.aggregate([
-        { $group: { _id: '$destination', count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-        { $limit: 5 },
-      ]),
-      AdminActivityLog.find({}).sort({ createdAt: -1 }).limit(5).lean(),
+      countRows('users'),
+      countRows('users', (query) => query.eq('role', 'driver')),
+      countRows('users', (query) => query.eq('role', 'driver').eq('is_available', true)),
+      countRows('users', (query) => query.eq('role', 'driver').eq('verification_status', 'Pending')),
+      countRows('verification_requests', (query) => query.eq('status', 'pending')),
+      countRows('complaints', (query) => query.neq('status', 'resolved')),
+      countRows('users', (query) => query.eq('account_status', 'suspended')),
+      countRows('users', (query) => query.eq('role', 'driver').eq('subscription_status', 'paid')),
+      countRows('complaints', (query) => query.eq('report_type', 'driver_report').neq('status', 'resolved')),
+      countRows('analytics', (query) => query.eq('event_type', 'call_click')),
+      countRows('analytics', (query) => query.eq('event_type', 'profile_view')),
+      countRows('analytics', (query) => query.eq('event_type', 'whatsapp_click')),
+      supabase.from('bookings').select('status,destination'),
+      supabase.from('admin_activity_logs').select('*').order('created_at', { ascending: false }).limit(5),
     ]);
-    const bookingStatus = bookingStatusRows.reduce(
-      (acc, row) => ({ ...acc, [row._id || 'unknown']: row.count }),
-      {}
-    );
-    const topDestinations = topDestinationRows.map((row) => ({
-      destination: row._id || 'Unknown',
-      count: row.count,
-    }));
+
+    if (bookingsResult.error) throw bookingsResult.error;
+    if (recentActivityResult.error) throw recentActivityResult.error;
+
+    const bookings = bookingsResult.data || [];
 
     return NextResponse.json({
       success: true,
       stats: {
         totalUsers,
+        totalRiders: Math.max(0, totalUsers - totalDrivers),
         totalDrivers,
         activeDrivers,
         pendingDrivers,
@@ -75,16 +83,15 @@ export async function GET() {
         totalCalls,
         totalProfileViews,
         totalWhatsAppClicks,
-        bookingStatus,
-        topDestinations,
-        recentActivity,
+        totalBookings: bookings.length,
+        activeRides: bookings.filter((booking) => booking.status === 'accepted').length,
+        bookingStatus: countByKey(bookings, 'status'),
+        topDestinations: topDestinations(bookings),
+        recentActivity: (recentActivityResult.data || []).map(formatActivityLog),
       },
     });
   } catch (error) {
-    console.error('Failed to load admin stats:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to load stats' },
-      { status: 500 }
-    );
+    console.error('Admin Stats Error:', error);
+    return NextResponse.json({ success: false, message: 'Failed to fetch admin stats' }, { status: 500 });
   }
 }

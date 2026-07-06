@@ -1,181 +1,64 @@
-import { auth } from '@clerk/nextjs/server';
-import { v2 as cloudinary } from 'cloudinary';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
-import VerificationRequest from '@/models/VerificationRequest';
-import { rateLimit } from '@/lib/rateLimit';
+import { supabase } from '@/lib/supabase';
 
-export const runtime = 'nodejs';
-
-const ALLOWED_TYPES = new Set(['profile', 'car', 'license']);
-const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-
-function isCloudinaryConfigured() {
-  return Boolean(
-    process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
-  );
-}
-
-async function uploadToCloudinary(file, folder) {
-  const buffer = Buffer.from(await file.arrayBuffer());
-
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder,
-        resource_type: 'image',
-        transformation: [{ quality: 'auto', fetch_format: 'auto' }],
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    );
-
-    stream.end(buffer);
-  });
-}
-
-export async function POST(request) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-  }
-
-  const limited = rateLimit(request, {
-    keyPrefix: `driver-upload:${userId}`,
-    limit: 10,
-    windowMs: 10 * 60 * 1000,
-  });
-
-  if (limited) return limited;
-
-  if (!isCloudinaryConfigured()) {
-    return NextResponse.json(
-      { success: false, message: 'Image upload is not configured' },
-      { status: 500 }
-    );
-  }
-
+export async function POST(req) {
   try {
-    const formData = await request.formData();
+    const formData = await req.formData();
     const file = formData.get('image');
     const clerkId = formData.get('clerkId');
-    const type = formData.get('type');
+    const type = formData.get('type'); // 'car', 'license', or 'profile'
 
-    if (clerkId !== userId) {
-      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
+    if (!file || !clerkId) {
+      return NextResponse.json({ success: false, message: 'Missing file or user ID' }, { status: 400 });
     }
 
-    if (!file || typeof file.arrayBuffer !== 'function') {
-      return NextResponse.json(
-        { success: false, message: 'Image file is required' },
-        { status: 400 }
-      );
-    }
+    // 1. Convert file to buffer for Supabase Storage
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
-      return NextResponse.json(
-        { success: false, message: 'Please upload a JPG, PNG, or WebP image' },
-        { status: 400 }
-      );
-    }
+    // Create a unique file name (e.g., driver_123_car_16843920.jpg)
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${clerkId}_${type}_${Date.now()}.${fileExt}`;
 
-    if (typeof file.size !== 'number' || file.size <= 0 || file.size > MAX_IMAGE_BYTES) {
-      return NextResponse.json(
-        { success: false, message: 'Image must be smaller than 5 MB' },
-        { status: 413 }
-      );
-    }
-
-    if (!ALLOWED_TYPES.has(type)) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid upload type' },
-        { status: 400 }
-      );
-    }
-
-    const result = await uploadToCloudinary(file, `lobby/drivers/${type}`);
-    const imageUrl = result.secure_url;
-
-    const updateByType = {
-      profile: { profilePic: imageUrl },
-      car: { carPic: imageUrl },
-      license: {
-        licenseUrl: imageUrl,
-        verificationStatus: 'Pending',
-        aiNotes: 'Uploaded for admin review',
-        isVerified: false,
-      },
-    };
-
-    await connectDB();
-    const existingDriver = await User.findOne({ clerkId: userId, role: 'driver' })
-      .select('accountStatus')
-      .lean();
-
-    if (!existingDriver) {
-      return NextResponse.json(
-        { success: false, message: 'Driver profile not found' },
-        { status: 404 }
-      );
-    }
-
-    if (existingDriver.accountStatus === 'suspended') {
-      return NextResponse.json(
-        { success: false, message: 'This driver account is suspended' },
-        { status: 403 }
-      );
-    }
-
-    const driver = await User.findOneAndUpdate(
-      { clerkId: userId, role: 'driver' },
-      { $set: updateByType[type] },
-      { new: true }
-    ).select('-password');
-
-    if (type === 'license') {
-      await VerificationRequest.updateMany(
-        { clerkId: userId, status: 'pending' },
-        {
-          $set: {
-            status: 'superseded',
-            reviewNotes: 'Superseded by a newer license upload',
-            reviewedAt: new Date(),
-          },
-        }
-      );
-
-      await VerificationRequest.create({
-        driverId: driver._id,
-        clerkId: userId,
-        driverName: driver.fullName,
-        email: driver.email,
-        phone: driver.phone,
-        vehicle: driver.vehicle,
-        licenseUrl: imageUrl,
-        status: 'pending',
-        notes: 'Uploaded for admin review',
+    // 2. Upload to Supabase Storage bucket named 'driver-documents'
+    const { data: uploadData, error: uploadError } = await supabase
+      .storage
+      .from('driver-documents')
+      .upload(fileName, buffer, {
+        contentType: file.type,
+        upsert: true
       });
-    }
 
-    return NextResponse.json({ success: true, driver });
+    if (uploadError) throw uploadError;
+
+    // 3. Get the public URL for the uploaded image
+    const { data: { publicUrl } } = supabase
+      .storage
+      .from('driver-documents')
+      .getPublicUrl(fileName);
+
+    // 4. Update the appropriate column in the users table
+    const updatePayload = {};
+    if (type === 'car') updatePayload.car_pic = publicUrl;
+    if (type === 'license') updatePayload.license_url = publicUrl; // Assuming you add this column
+    if (type === 'profile') updatePayload.profile_pic = publicUrl; // Assuming you add this column
+
+    // For licenses, you might want to automatically set them to pending
+    if (type === 'license') updatePayload.verification_status = 'Pending';
+
+    const { data: updatedUser, error: dbError } = await supabase
+      .from('users')
+      .update(updatePayload)
+      .eq('clerk_id', clerkId)
+      .select()
+      .single();
+
+    if (dbError) throw dbError;
+
+    return NextResponse.json({ success: true, driver: updatedUser });
+
   } catch (error) {
-    console.error('Failed to upload driver image:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to upload image' },
-      { status: 500 }
-    );
+    console.error("Upload Error:", error);
+    return NextResponse.json({ success: false, message: 'Upload failed' }, { status: 500 });
   }
 }

@@ -1,131 +1,41 @@
 import { NextResponse } from 'next/server';
-import connectMongo from '@/lib/mongodb';
-import Booking from '@/models/Bookings';
-import User from '@/models/User';
-import { auth, currentUser } from '@clerk/nextjs/server';
-import { getPlatformSettings } from '@/lib/platformSettings';
-import { rateLimit } from '@/lib/rateLimit';
-
-function cleanString(value, maxLength = 500) {
-  return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
-}
-
-function cleanPhone(value) {
-  return cleanString(value, 32).replace(/[^\d+\s-]/g, '');
-}
-
-function getValidPickupLocation(value) {
-  const lat = Number(value?.lat);
-  const lng = Number(value?.lng);
-
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
-
-  return {
-    lat,
-    lng,
-    address: cleanString(value?.address, 180) || 'Current Location',
-  };
-}
+import { supabase } from '@/lib/supabase';
+import { auth } from '@clerk/nextjs/server';
 
 export async function POST(req) {
-  const limited = rateLimit(req, {
-    keyPrefix: 'bookings-create',
-    limit: 5,
-    windowMs: 10 * 60 * 1000,
-  });
-
-  if (limited) return limited;
-
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    await connectMongo();
-
-    const [settings, clerkUser, riderProfile] = await Promise.all([
-      getPlatformSettings(),
-      currentUser(),
-      User.findOne({ clerkId: userId }).select('fullName phone role accountStatus').lean(),
-    ]);
-
-    if (settings.maintenanceMode || !settings.bookingOpen) {
-      return NextResponse.json(
-        { success: false, message: 'Bookings are temporarily closed' },
-        { status: 503 }
-      );
-    }
-
-    if (riderProfile?.accountStatus === 'suspended') {
-      return NextResponse.json(
-        { success: false, message: 'This account is suspended' },
-        { status: 403 }
-      );
-    }
-
-    if (riderProfile?.role === 'driver') {
-      return NextResponse.json(
-        { success: false, message: 'Driver accounts cannot create rider bookings' },
-        { status: 403 }
-      );
-    }
+    const { userId } = auth();
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const pickupLocation = getValidPickupLocation(body.pickupLocation);
-    const destination = cleanString(body.destination, 160);
-    const riderPhone = cleanPhone(
-      riderProfile?.phone ||
-      clerkUser?.primaryPhoneNumber?.phoneNumber ||
-      body.riderPhone
-    );
+    const { pickupLocation, destination, riderName, riderPhone } = body;
 
-    if (!pickupLocation) {
-      return NextResponse.json(
-        { success: false, message: 'A valid pickup location is required' },
-        { status: 400 }
-      );
-    }
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .insert([
+        {
+          rider_id: userId,
+          rider_name: riderName,
+          rider_phone: riderPhone,
+          pickup_lat: pickupLocation.lat,
+          pickup_lng: pickupLocation.lng,
+          pickup_address: pickupLocation.address || 'Kohima Area',
+          destination: destination,
+          status: 'pending'
+        }
+      ])
+      .select()
+      .single();
 
-    if (!destination) {
-      return NextResponse.json(
-        { success: false, message: 'Destination is required' },
-        { status: 400 }
-      );
-    }
+    if (error) throw error;
 
-    if (riderPhone.replace(/\D/g, '').length < 7) {
-      return NextResponse.json(
-        { success: false, message: 'A valid phone number is required for instant booking' },
-        { status: 400 }
-      );
-    }
+    // Convert snake_case back to camelCase for the frontend
+    const formattedBooking = { ...booking, _id: booking.id, driverId: booking.driver_id };
 
-    const newBooking = await Booking.create({
-      riderId: userId,
-      riderName:
-        riderProfile?.fullName ||
-        clerkUser?.fullName ||
-        clerkUser?.firstName ||
-        'Rider',
-      riderPhone,
-      pickupLocation,
-      destination,
-      status: 'pending',
-    });
-
-    return NextResponse.json({ success: true, booking: newBooking });
+    return NextResponse.json({ success: true, booking: formattedBooking });
     
   } catch (error) {
     console.error("Booking Creation Error:", error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to create booking' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
   }
 }

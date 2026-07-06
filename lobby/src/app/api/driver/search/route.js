@@ -1,45 +1,34 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb'; 
-import User from '@/models/User'; // Make sure you move your models to src/models/
+import { supabase } from '@/lib/supabase';
+import { formatUser } from '@/lib/supabaseFormat';
 
-const PUBLIC_DRIVER_FIELDS = 'fullName phone vehicle routes rating profilePic carPic';
-
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-export async function GET(request) {
+export async function GET(req) {
   try {
-    await connectDB();
+    const { searchParams } = new URL(req.url);
+    const query = searchParams.get('destination')?.toLowerCase();
 
-    const { searchParams } = new URL(request.url);
-    const destination = searchParams.get('destination')?.trim().slice(0, 80);
+    // Fetch all available drivers
+    let { data: drivers, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('role', 'driver')
+      .eq('is_available', true)
+      .eq('is_verified', true)
+      .or('account_status.is.null,account_status.neq.suspended');
 
-    let query = {
-      role: 'driver',
-      isAvailable: true,
-      isVerified: true,
-      accountStatus: { $ne: 'suspended' },
-    };
+    if (error) throw error;
 
-    if (destination) {
-      query.routes = { $regex: escapeRegex(destination), $options: 'i' };
+    // Optional: Filter by route if the rider typed a destination
+    if (query && drivers) {
+      drivers = drivers.filter(driver =>
+        driver.routes && driver.routes.some(route => route.toLowerCase().includes(query))
+      );
     }
 
-    const drivers = await User.find(query)
-      .select(PUBLIC_DRIVER_FIELDS)
-      .limit(50)
-      .lean();
+    return NextResponse.json({ success: true, drivers: (drivers || []).map(formatUser) });
 
-    const response = NextResponse.json({ success: true, drivers });
-    response.headers.set('Cache-Control', 'private, max-age=15, stale-while-revalidate=30');
-    return response;
-    
   } catch (error) {
-    console.error("Search API Error:", error);
-    return NextResponse.json(
-      { success: false, message: "Search failed" }, 
-      { status: 500 }
-    );
+    console.error("Driver Search Error:", error);
+    return NextResponse.json({ success: false, message: "Search failed" }, { status: 500 });
   }
 }

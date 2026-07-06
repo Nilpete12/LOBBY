@@ -1,4 +1,4 @@
-import AdminActivityLog from '@/models/AdminActivityLog';
+import { supabase } from '@/lib/supabase';
 
 export async function logAdminActivity({
   action,
@@ -9,12 +9,12 @@ export async function logAdminActivity({
   metadata = {},
 }) {
   try {
-    await AdminActivityLog.create({
+    await supabase.from('admin_activity_logs').insert({
       actor: process.env.ADMIN_EMAIL || 'admin',
       action,
-      targetType,
-      targetId,
-      targetLabel,
+      target_type: targetType,
+      target_id: targetId,
+      target_label: targetLabel,
       summary,
       metadata,
     });

@@ -5,7 +5,7 @@
   --foreground: #171717;
 }
 
-@theme inline {
+:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -83,5 +83,19 @@ body {
   font-weight: normal;
   font-style: normal;
   font-display: swap;
+}
+
+/* Fix browser autofill styling for dark inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    /* Matches your dark blue input background */
+    -webkit-box-shadow: 0 0 0 30px #031a37 inset !important;
+
+    /* Forces the text to stay white */
+    -webkit-text-fill-color: white !important;
+
+    transition: background-color 5000s ease-in-out 0s;
 }
 

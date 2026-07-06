@@ -146,6 +146,24 @@ export default function SearchPage() {
     };
   }, [fetchDrivers]);
 
+  // --- NEW: 2. Silent Live Polling (Fix for Issue 5) ---
+  useEffect(() => {
+    const intervalId = setInterval(async () => {
+      try {
+        // Fetch quietly in the background without triggering loading skeletons
+        const updatedDrivers = await requestDrivers(searchQuery);
+
+        // Instantly update UI. If a driver went offline, they are removed.
+        setDrivers(updatedDrivers);
+        writeCachedDrivers(searchQuery, updatedDrivers); // Keep cache fresh
+      } catch (err) {
+        console.error("Live update failed silently:", err);
+      }
+    }, 10000); // Polls every 10 seconds
+
+    return () => clearInterval(intervalId);
+  }, [searchQuery]);
+
   const handleSearch = (e) => {
     e.preventDefault();
     const query = searchQuery.trim();
@@ -219,17 +237,17 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-slate-50 px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-3xl">
-        
+
         {/* Search Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="mb-2 text-3xl font-bold text-slate-900">Find a Ride</h1>
           <form action="/search" onSubmit={handleSearch} className="relative flex items-center">
             <MapPin className="absolute left-4 text-slate-400" size={20} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               name="q"
               aria-label="Destination"
-              placeholder="Where do you want to go? (e.g. Dawki)" 
+              placeholder="Where do you want to go? (e.g. Dawki)"
               className="w-full rounded-2xl border border-slate-200 py-4 pl-12 pr-14 text-base font-medium shadow-sm outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 sm:text-lg"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -263,7 +281,7 @@ export default function SearchPage() {
           ))}
         </div>
 
-        {/* --- NEW: INSTANT BOOK QUICK ACTION --- */}
+        {/* --- INSTANT BOOK QUICK ACTION --- */}
         <div className="mb-10 rounded-4xl bg-linear-to-br from-teal-50 to-emerald-50/30 p-1 sm:p-2 border border-teal-100/50 shadow-sm">
           <div className="px-4 pt-6 pb-2 text-center sm:px-6">
             <h2 className="text-xl font-[Sailors_Slant_Normal] text-slate-900 tracking-tight">In a hurry?</h2>
@@ -271,16 +289,15 @@ export default function SearchPage() {
               Skip the manual search. Let us find the nearest available driver for you.
             </p>
           </div>
-          {/* Divider before manual results */}
-        {/* ------------------------------------- */}
-          {/* We pass the current searchQuery as the destination so they don't have to type it twice! */}
           <InstantBook destination={searchQuery || "Kohima"} />
         </div>
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-px bg-slate-200 flex-1"></div>
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Or choose manually</span>
-            <div className="h-px bg-slate-200 flex-1"></div>
-          </div>
+
+        {/* Divider before manual results */}
+        <div className="flex items-center gap-4 mb-6">
+          <div className="h-px bg-slate-200 flex-1"></div>
+          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Or choose manually</span>
+          <div className="h-px bg-slate-200 flex-1"></div>
+        </div>
 
         {/* Results Area */}
         {loading ? (
@@ -398,7 +415,7 @@ function DriverResultCard({ driver, onSelect }) {
               <h3 className="truncate text-lg font-bold text-slate-900 transition group-hover:text-[#0F766E]">
                 {driver.fullName || 'Driver'}
               </h3>
-              
+
               <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-500">
                 <span className="flex items-center gap-1 font-bold text-slate-900">
                   <Star size={14} className="text-yellow-400 fill-yellow-400" />

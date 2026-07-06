@@ -1,9 +1,7 @@
-import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Booking from '@/models/Bookings';
-import User from '@/models/User';
+import { supabase } from '@/lib/supabase';
 import { logAdminActivity } from '@/lib/adminActivity';
+import { formatBooking, formatUser } from '@/lib/supabaseFormat';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 const ALLOWED_STATUSES = new Set(['pending', 'accepted', 'completed', 'cancelled']);
@@ -12,77 +10,49 @@ function cleanString(value, maxLength = 500) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
 }
 
-function serializeDriver(driver) {
-  if (!driver) return null;
-  return {
-    _id: driver._id,
-    clerkId: driver.clerkId,
-    fullName: driver.fullName,
-    phone: driver.phone || '',
-    vehicle: driver.vehicle || '',
-    isAvailable: Boolean(driver.isAvailable),
-    isVerified: Boolean(driver.isVerified),
-    accountStatus: driver.accountStatus || 'active',
-  };
-}
-
-function serializeBooking(booking, driverByClerkId = new Map()) {
-  const driver = booking.driverId ? driverByClerkId.get(booking.driverId) : null;
-  return {
-    _id: booking._id,
-    riderId: booking.riderId,
-    riderName: booking.riderName,
-    riderPhone: booking.riderPhone,
-    driverId: booking.driverId,
-    driver: serializeDriver(driver),
-    pickupLocation: booking.pickupLocation,
-    destination: booking.destination,
-    status: booking.status,
-    acceptedAt: booking.acceptedAt,
-    createdAt: booking.createdAt,
-    updatedAt: booking.updatedAt,
-  };
-}
-
 export async function GET(request) {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
   const { searchParams } = new URL(request.url);
   const status = cleanString(searchParams.get('status'), 40);
-  const query = ALLOWED_STATUSES.has(status) ? { status } : {};
 
   try {
-    await connectDB();
+    let bookingsQuery = supabase
+      .from('bookings')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
 
-    const bookings = await Booking.find(query)
-      .sort({ createdAt: -1 })
-      .limit(100)
-      .lean();
+    if (ALLOWED_STATUSES.has(status)) bookingsQuery = bookingsQuery.eq('status', status);
 
-    const driverIds = [...new Set(bookings.map((booking) => booking.driverId).filter(Boolean))];
-    const [drivers, availableDrivers] = await Promise.all([
-      driverIds.length
-        ? User.find({ clerkId: { $in: driverIds } })
-            .select('clerkId fullName phone vehicle isAvailable isVerified accountStatus')
-            .lean()
-        : [],
-      User.find({
-        role: 'driver',
-        isVerified: true,
-        accountStatus: { $ne: 'suspended' },
-      })
-        .sort({ isAvailable: -1, fullName: 1 })
-        .select('clerkId fullName phone vehicle isAvailable isVerified accountStatus')
-        .limit(100)
-        .lean(),
-    ]);
+    const { data: bookings = [], error: bookingsError } = await bookingsQuery;
+    if (bookingsError) throw bookingsError;
 
-    const driverByClerkId = new Map(drivers.map((driver) => [driver.clerkId, driver]));
+    const driverClerkIds = [...new Set(bookings.map((booking) => booking.driver_id).filter(Boolean))];
+    const driversResult = driverClerkIds.length
+      ? await supabase.from('users').select('*').in('clerk_id', driverClerkIds)
+      : { data: [], error: null };
+
+    if (driversResult.error) throw driversResult.error;
+
+    const { data: availableDriverRows = [], error: availableError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('role', 'driver')
+      .eq('is_verified', true)
+      .or('account_status.is.null,account_status.neq.suspended')
+      .order('is_available', { ascending: false })
+      .order('full_name', { ascending: true })
+      .limit(100);
+
+    if (availableError) throw availableError;
+
+    const driverByClerkId = new Map((driversResult.data || []).map((driver) => [driver.clerk_id, formatUser(driver)]));
 
     return NextResponse.json({
       success: true,
-      bookings: bookings.map((booking) => serializeBooking(booking, driverByClerkId)),
-      availableDrivers: availableDrivers.map(serializeDriver),
+      bookings: bookings.map((booking) => formatBooking(booking, driverByClerkId.get(booking.driver_id))),
+      availableDrivers: availableDriverRows.map(formatUser),
     });
   } catch (error) {
     console.error('Failed to load admin bookings:', error);
@@ -106,11 +76,11 @@ export async function PATCH(request) {
     );
   }
 
-  const id = cleanString(body.id, 80);
+  const id = cleanString(body.id, 120);
   const status = cleanString(body.status, 40);
   const driverId = cleanString(body.driverId, 160);
 
-  if (!mongoose.Types.ObjectId.isValid(id) || !ALLOWED_STATUSES.has(status)) {
+  if (!id || !ALLOWED_STATUSES.has(status)) {
     return NextResponse.json(
       { success: false, message: 'Invalid booking update' },
       { status: 400 }
@@ -118,8 +88,6 @@ export async function PATCH(request) {
   }
 
   try {
-    await connectDB();
-
     const updates = { status };
     let assignedDriver = null;
 
@@ -131,67 +99,57 @@ export async function PATCH(request) {
         );
       }
 
-      assignedDriver = await User.findOne({
-        clerkId: driverId,
-        role: 'driver',
-        isVerified: true,
-        accountStatus: { $ne: 'suspended' },
-      }).select('clerkId fullName phone vehicle isAvailable isVerified accountStatus');
+      const { data: driver, error: driverError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('clerk_id', driverId)
+        .eq('role', 'driver')
+        .eq('is_verified', true)
+        .or('account_status.is.null,account_status.neq.suspended')
+        .maybeSingle();
 
-      if (!assignedDriver) {
+      if (driverError) throw driverError;
+      if (!driver) {
         return NextResponse.json(
           { success: false, message: 'Verified active driver not found' },
           { status: 404 }
         );
       }
 
-      updates.driverId = assignedDriver.clerkId;
-      updates.acceptedAt = new Date();
+      assignedDriver = formatUser(driver);
+      updates.driver_id = driver.clerk_id;
+      updates.accepted_at = new Date().toISOString();
     }
 
     if (status === 'pending') {
-      updates.driverId = null;
-      updates.acceptedAt = null;
+      updates.driver_id = null;
+      updates.accepted_at = null;
     }
 
-    const booking = await Booking.findByIdAndUpdate(
-      id,
-      { $set: updates },
-      { new: true }
-    ).lean();
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!booking) {
-      return NextResponse.json(
-        { success: false, message: 'Booking not found' },
-        { status: 404 }
-      );
-    }
+    if (error) throw error;
 
     await logAdminActivity({
       action: status === 'accepted' ? 'booking.assign' : 'booking.status',
       targetType: 'booking',
-      targetId: String(booking._id),
+      targetId: String(booking.id),
       targetLabel: booking.destination,
       summary:
         status === 'accepted'
           ? `Assigned booking to ${assignedDriver?.fullName || driverId}`
           : `Updated booking status to ${status}`,
-      metadata: { status, driverId: updates.driverId || null },
+      metadata: { status, driverId: updates.driver_id || null },
     });
-
-    const driverMap = new Map();
-    if (booking.driverId) {
-      const driver = assignedDriver?.toObject
-        ? assignedDriver.toObject()
-        : await User.findOne({ clerkId: booking.driverId })
-            .select('clerkId fullName phone vehicle isAvailable isVerified accountStatus')
-            .lean();
-      if (driver) driverMap.set(driver.clerkId, driver);
-    }
 
     return NextResponse.json({
       success: true,
-      booking: serializeBooking(booking, driverMap),
+      booking: formatBooking(booking, assignedDriver),
     });
   } catch (error) {
     console.error('Failed to update admin booking:', error);

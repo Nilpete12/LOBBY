@@ -381,7 +381,7 @@ export default function DriverDashboard() {
                 <label className="text-xs font-bold text-slate-400 uppercase ml-1">Routes</label>
                 <div className="flex items-center bg-slate-50 rounded-xl px-4 border border-slate-200">
                   <MapPin size={18} className="text-slate-400"/>
-                  <input className="bg-transparent w-full p-3 outline-none font-medium" placeholder="e.g. Shillong, Dawki" value={formData.routes} onChange={e => setFormData({...formData, routes: e.target.value})} />
+                  <input className="bg-transparent w-full p-3 outline-none font-medium" placeholder="e.g. BOC, Kohima" value={formData.routes} onChange={e => setFormData({...formData, routes: e.target.value})} />
                 </div>
               </div>
 

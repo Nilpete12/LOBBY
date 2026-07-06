@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import { getPlatformSettings, serializePlatformSettings } from '@/lib/platformSettings';
+import {
+  getPlatformSettings,
+  serializePlatformSettings,
+  updatePlatformSettings,
+} from '@/lib/platformSettings';
 import { logAdminActivity } from '@/lib/adminActivity';
-import PlatformSettings from '@/models/PlatformSettings';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
 function cleanString(value, maxLength = 500) {
@@ -13,7 +15,6 @@ export async function GET() {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
   try {
-    await connectDB();
     const settings = await getPlatformSettings();
     return NextResponse.json({ success: true, settings: serializePlatformSettings(settings) });
   } catch (error) {
@@ -46,12 +47,7 @@ export async function PATCH(request) {
   if (typeof body.notice === 'string') updates.notice = cleanString(body.notice, 300);
 
   try {
-    await connectDB();
-    const settings = await PlatformSettings.findOneAndUpdate(
-      { key: 'global' },
-      { $set: updates, $setOnInsert: { key: 'global' } },
-      { new: true, upsert: true }
-    ).lean();
+    const settings = await updatePlatformSettings(updates);
 
     await logAdminActivity({
       action: 'settings.update',
