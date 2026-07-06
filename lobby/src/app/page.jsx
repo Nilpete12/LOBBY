@@ -1,11 +1,11 @@
-import { currentUser } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server'; 
+import { supabase } from '@/lib/supabase'; // 1. Import Supabase client
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
-import { supabase } from '@/lib/supabase';
 import HowItWorks from '@/components/Howitwork';
 import TaxiStands from '@/components/TaxiStands';
-import DriverHero from '@/components/DriverHero';
-import DriverStatsSnapshot from '@/components/DriverStatsSnapshot';
+import DriverHero from '@/components/DriverHero'; 
+import DriverStatsSnapshot from '@/components/DriverStatsSnapshot'; 
 import IncomingRideAlert from '@/components/IncomingRideAlert';
 
 export default async function HomePage() {
@@ -14,30 +14,29 @@ export default async function HomePage() {
 
   // 2. THE DRIVER VIEW
   if (userRole === "driver") {
-    await connectDB();
-    const driverDoc = await User.findOne({ clerkId: user.id })
-      .select('isVerified isAvailable accountStatus')
-      .lean();
+    // Fetch the driver's document from Supabase
+    const { data: driverDoc, error } = await supabase
+      .from('users')
+      .select('is_verified, is_available')
+      .eq('clerk_id', user.id)
+      .single();
 
-    // 2. Extract their current status
-    const isVerified = driverDoc?.isVerified || false;
-    const isOnline = driverDoc?.isAvailable || false;
+    // Default to false if error or not found
+    const isVerified = driverDoc?.is_verified || false;
+    const isOnline = driverDoc?.is_available || false;
 
     return (
       <main className="min-h-screen bg-[#F8FAFC]">
         <IncomingRideAlert />
-        {/* A custom Hero with an Online/Offline toggle instead of a search bar */}
         <DriverHero 
           userName={user?.firstName || "Driver"} 
-          clerkId={user.id}           // Pass Clerk ID so we can update DB
-          initialIsOnline={isOnline}  // Pass current DB status
+          clerkId={user.id}           
+          initialIsOnline={isOnline}  
           isVerified={isVerified} 
-          />
+        />
         
-        {/* Quick stats for the day */}
         <DriverStatsSnapshot />
 
-        {/* Repurpose the stands as "Demand Zones" for drivers */}
         <div className="pt-10">
           <TaxiStands isDriverView={true} />
         </div>
@@ -45,6 +44,7 @@ export default async function HomePage() {
     );
   }
 
+  // 3. RIDER / GUEST VIEW
   return (
     <div className="bg-white">
       <Hero />      
