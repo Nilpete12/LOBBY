@@ -13,6 +13,36 @@ async function countRows(table, apply = (query) => query) {
   return count || 0;
 }
 
+async function safeCountRows(table, apply = (query) => query) {
+  try {
+    return await countRows(table, apply);
+  } catch (error) {
+    console.error(`Failed to count ${table}:`, error);
+    return 0;
+  }
+}
+
+async function countPendingDriverLicenses() {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('verification_status')
+      .eq('role', 'driver')
+      .eq('is_verified', false)
+      .not('license_url', 'is', null);
+
+    if (error) throw error;
+
+    return (data || []).filter((driver) => {
+      const status = String(driver.verification_status || 'pending').toLowerCase();
+      return !['approved', 'rejected'].includes(status);
+    }).length;
+  } catch (error) {
+    console.error('Failed to count pending driver licenses:', error);
+    return 0;
+  }
+}
+
 function countByKey(rows = [], key) {
   return rows.reduce((acc, row) => {
     const value = row[key] || 'unknown';
@@ -38,7 +68,8 @@ export async function GET() {
       totalDrivers,
       activeDrivers,
       pendingDrivers,
-      pendingVerificationRequests,
+      pendingVerificationRequestRows,
+      pendingDriverLicenseRows,
       pendingComplaints,
       suspendedUsers,
       paidSubscriptions,
@@ -53,7 +84,8 @@ export async function GET() {
       countRows('users', (query) => query.eq('role', 'driver')),
       countRows('users', (query) => query.eq('role', 'driver').eq('is_available', true)),
       countRows('users', (query) => query.eq('role', 'driver').eq('is_verified', false)),
-      countRows('verification_requests', (query) => query.eq('status', 'pending')),
+      safeCountRows('verification_requests', (query) => query.in('status', ['pending', 'Pending'])),
+      countPendingDriverLicenses(),
       countRows('complaints', (query) => query.neq('status', 'resolved')),
       countRows('users', (query) => query.eq('account_status', 'suspended')),
       countRows('users', (query) => query.eq('role', 'driver').eq('subscription_status', 'paid')),
@@ -78,7 +110,7 @@ export async function GET() {
         totalDrivers,
         activeDrivers,
         pendingDrivers,
-        pendingVerificationRequests,
+        pendingVerificationRequests: Math.max(pendingVerificationRequestRows, pendingDriverLicenseRows),
         pendingComplaints,
         suspendedUsers,
         paidSubscriptions,

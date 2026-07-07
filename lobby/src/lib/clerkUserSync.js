@@ -1,5 +1,6 @@
 import { clerkClient } from '@clerk/nextjs/server';
 import { supabase } from '@/lib/supabase';
+import { writeWithColumnFallback } from '@/lib/supabaseColumnFallback';
 
 const ALLOWED_ROLES = new Set(['rider', 'driver']);
 const OPTIONAL_USER_COLUMNS = new Set([
@@ -37,32 +38,6 @@ function getFullName(user = {}) {
     cleanString(user.fullName || user.full_name, 160) ||
     cleanString(`${user.firstName || user.first_name || ''} ${user.lastName || user.last_name || ''}`, 160)
   );
-}
-
-function missingColumnName(error = {}) {
-  const text = [error.message, error.details, error.hint].filter(Boolean).join(' ');
-  const quotedColumn = text.match(/'([^']+)'\s+column/i);
-  const sqlColumn = text.match(/column\s+(?:(?:public\.)?\w+\.)?"?([a-zA-Z_][a-zA-Z0-9_]*)"?\s+does not exist/i);
-
-  return quotedColumn?.[1] || sqlColumn?.[1] || '';
-}
-
-async function writeUserRowWithColumnFallback(row, write) {
-  const nextRow = { ...row };
-
-  for (let attempts = 0; attempts <= OPTIONAL_USER_COLUMNS.size; attempts += 1) {
-    const { data, error } = await write(nextRow);
-    if (!error) return data;
-
-    const missingColumn = missingColumnName(error);
-    if (!missingColumn || !OPTIONAL_USER_COLUMNS.has(missingColumn) || !(missingColumn in nextRow)) {
-      throw error;
-    }
-
-    delete nextRow[missingColumn];
-  }
-
-  throw new Error('Unable to sync user after removing unsupported optional columns');
 }
 
 export function clerkUserToRow(user = {}, overrides = {}) {
@@ -109,7 +84,7 @@ export async function syncClerkUserToSupabase(user, overrides = {}) {
       role: baseRow.role || existing.role || 'rider',
     };
 
-    const data = await writeUserRowWithColumnFallback(updateRow, (row) =>
+    const data = await writeWithColumnFallback(updateRow, OPTIONAL_USER_COLUMNS, (row) =>
       supabase
         .from('users')
         .update(row)
@@ -132,7 +107,7 @@ export async function syncClerkUserToSupabase(user, overrides = {}) {
     subscription_status: role === 'driver' ? 'unpaid' : null,
   };
 
-  const data = await writeUserRowWithColumnFallback(insertRow, (row) =>
+  const data = await writeWithColumnFallback(insertRow, OPTIONAL_USER_COLUMNS, (row) =>
     supabase
       .from('users')
       .insert(row)
