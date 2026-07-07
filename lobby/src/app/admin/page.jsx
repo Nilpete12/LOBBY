@@ -133,7 +133,7 @@ export default function AdminPage() {
     window.setTimeout(() => setNotice(null), 4500);
   }, []);
 
-  const loadStats = useCallback(async () => {
+  const loadStats = useCallback(async (silent = false) => {
     try {
       const res = await fetch(`${API_BASE_URL}/admin/stats`);
       const data = await res.json();
@@ -143,18 +143,20 @@ export default function AdminPage() {
     }
   }, []);
 
-  const loadSettings = useCallback(async () => {
+  const loadSettings = useCallback(async (silent = false) => {
     try {
       const res = await fetch(`${API_BASE_URL}/admin/settings`);
       const data = await res.json();
-      if (data.success) setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
+      if (data.success) {
+        setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
+      }
     } catch (error) {
       console.error('Settings Error', error);
     }
   }, []);
 
-  const loadVerificationRequests = useCallback(async () => {
-    setLoading((current) => ({ ...current, requests: true }));
+  const loadVerificationRequests = useCallback(async (silent = false) => {
+    if (!silent) setLoading((current) => ({ ...current, requests: true }));
     try {
       const res = await fetch(`${API_BASE_URL}/admin/verification-requests`);
       const data = await res.json();
@@ -162,12 +164,12 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Verification requests error', error);
     } finally {
-      setLoading((current) => ({ ...current, requests: false }));
+      if (!silent) setLoading((current) => ({ ...current, requests: false }));
     }
   }, []);
 
-  const loadComplaints = useCallback(async () => {
-    setLoading((current) => ({ ...current, complaints: true }));
+  const loadComplaints = useCallback(async (silent = false) => {
+    if (!silent) setLoading((current) => ({ ...current, complaints: true }));
     try {
       const res = await fetch(`${API_BASE_URL}/admin/complaints`);
       const data = await res.json();
@@ -175,12 +177,12 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Complaints error', error);
     } finally {
-      setLoading((current) => ({ ...current, complaints: false }));
+      if (!silent) setLoading((current) => ({ ...current, complaints: false }));
     }
   }, []);
 
-  const loadBookings = useCallback(async () => {
-    setLoading((current) => ({ ...current, bookings: true }));
+  const loadBookings = useCallback(async (silent = false) => {
+    if (!silent) setLoading((current) => ({ ...current, bookings: true }));
     try {
       const res = await fetch(`${API_BASE_URL}/admin/bookings`);
       const data = await res.json();
@@ -191,12 +193,12 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Bookings error', error);
     } finally {
-      setLoading((current) => ({ ...current, bookings: false }));
+      if (!silent) setLoading((current) => ({ ...current, bookings: false }));
     }
   }, []);
 
-  const loadActivity = useCallback(async () => {
-    setLoading((current) => ({ ...current, activity: true }));
+  const loadActivity = useCallback(async (silent = false) => {
+    if (!silent) setLoading((current) => ({ ...current, activity: true }));
     try {
       const res = await fetch(`${API_BASE_URL}/admin/activity`);
       const data = await res.json();
@@ -204,12 +206,12 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Activity error', error);
     } finally {
-      setLoading((current) => ({ ...current, activity: false }));
+      if (!silent) setLoading((current) => ({ ...current, activity: false }));
     }
   }, []);
 
-  const refreshAdminData = useCallback(async () => {
-    await Promise.all([loadStats(), loadSettings(), loadVerificationRequests()]);
+  const refreshAdminData = useCallback(async (silent = false) => {
+    await Promise.all([loadStats(silent), loadSettings(), loadVerificationRequests(silent)]);
   }, [loadSettings, loadStats, loadVerificationRequests]);
 
   useEffect(() => {
@@ -227,6 +229,23 @@ export default function AdminPage() {
 
     checkAdminSession();
   }, []);
+
+  // REAL-TIME AUTO-SYNC BACKGROUND LOOP
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const syncInterval = setInterval(() => {
+      // Pass 'true' so the UI pulls fresh data silently without flashing the loading spinner
+      refreshAdminData(true);
+
+      // Only refresh the heavy lists if the admin is actively looking at that tab
+      if (activeTab === 'activity') loadActivity(true);
+      if (activeTab === 'complaints') loadComplaints(true);
+      if (activeTab === 'bookings') loadBookings(true);
+    }, 5000); // Scans the database every 5 seconds
+
+    return () => clearInterval(syncInterval);
+  }, [isAuthenticated, activeTab, refreshAdminData, loadActivity, loadComplaints, loadBookings]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
