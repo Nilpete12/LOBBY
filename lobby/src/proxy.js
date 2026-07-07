@@ -1,25 +1,27 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Define the routes that require authentication
+// 1. Only protect rider and driver routes
 const isProtectedRoute = createRouteMatcher([
   '/drive(.*)',
   '/account(.*)',
-  '/admin(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // 2. If the user hits a protected route, enforce login
   if (isProtectedRoute(req)) {
-    // 1. Await the async auth function to get session information
     const session = await auth();
-    
-    // 2. If no user is logged in, force a redirect to sign-in
     if (!session.userId) {
       return session.redirectToSignIn();
     }
   }
+  // 3. Admin routes will naturally bypass this and process normally
 });
 
 export const config = {
-  // Protects all routes except static assets and internal system files
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  // Standard, foolproof Next.js matcher
+  matcher: [
+    "/((?!.*\\..*|_next).*)", 
+    "/", 
+    "/(api|trpc)(.*)"
+  ],
 };

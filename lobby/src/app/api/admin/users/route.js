@@ -1,33 +1,44 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { isAdminAuthenticated, adminUnauthorized } from '@/lib/adminAuth';
-import { formatUser } from '@/lib/supabaseFormat';
 
-export async function GET(req) {
+export async function GET() {
   if (!(await isAdminAuthenticated())) return adminUnauthorized();
 
   try {
-    const { searchParams } = new URL(req.url);
-    const roleFilter = searchParams.get('role'); // optional: 'rider' or 'driver'
-
-    let query = supabase
+    // Fetch all users from Supabase
+    const { data: users, error } = await supabase
       .from('users')
       .select('*')
-      .order('id', { ascending: false });
+      .order('created_at', { ascending: false });
 
-    if (roleFilter) {
-      query = query.eq('role', roleFilter);
-    }
-
-    const { data: users, error } = await query;
     if (error) throw error;
 
-    // Map DB snake_case back to camelCase for the frontend UserTable
-    const formattedUsers = users.map(formatUser);
+    // Separate them into categories for your dashboard frontend
+    // Change field names back to camelCase here so your frontend UI components don't break!
+    const formattedUsers = users.map(u => ({
+      id: u.id,
+      clerkId: u.clerk_id,
+      fullName: u.full_name,
+      role: u.role,
+      isVerified: u.is_verified,
+      isAvailable: u.is_available,
+      createdAt: u.created_at
+    }));
 
-    return NextResponse.json({ success: true, users: formattedUsers });
+    // Filter logic for dashboard UI cards
+    const verificationQueue = formattedUsers.filter(u => u.role === 'driver' && !u.isVerified);
+    const recentUsers = formattedUsers.slice(0, 5); // top 5 recent signups
+
+    return NextResponse.json({
+      success: true,
+      verificationQueue,
+      recentUsers,
+      allUsers: formattedUsers
+    });
+
   } catch (error) {
-    console.error("Admin Users Fetch Error:", error);
-    return NextResponse.json({ success: false, message: 'Failed to fetch users' }, { status: 500 });
+    console.error("Admin user fetch error:", error);
+    return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
   }
 }
