@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { CheckCircle, Clock, Eye, Trash2, Search, ShieldCheck } from 'lucide-react';
+import { CheckCircle, Clock, Eye, Trash2, Search, ShieldCheck, RefreshCw } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 function getStatus(user) {
@@ -44,7 +44,7 @@ function Avatar({ user, size = 44 }) {
   );
 }
 
-export default function UserTable({ role, limit, onChanged, onSelectUser }) {
+export default function UserTable({ role, limit, refreshKey = 0, onChanged, onSelectUser }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,14 +52,23 @@ export default function UserTable({ role, limit, onChanged, onSelectUser }) {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/users`);
+      const params = new URLSearchParams();
+      if (role) params.set('role', role);
+      if (limit) params.set('limit', String(limit));
+      const queryString = params.toString() ? `?${params.toString()}` : '';
+
+      const res = await fetch(`${API_BASE_URL}/admin/users${queryString}`, {
+        cache: 'no-store',
+        credentials: 'same-origin',
+      });
       const data = await res.json();
       if (!data.success) return [];
-      return role ? data.users.filter((user) => user.role === role) : data.users;
+      return data.users;
     } catch (err) {
+      console.error('Failed to fetch admin users:', err);
       return [];
     }
-  }, [role]);
+  }, [limit, role]);
 
   const refreshUsers = useCallback(async () => {
     const nextUsers = await fetchUsers();
@@ -78,8 +87,11 @@ export default function UserTable({ role, limit, onChanged, onSelectUser }) {
       }
     }
     loadUsers();
-    return () => { isMounted = false; };
-  }, [fetchUsers]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchUsers, refreshKey]);
 
   const handleApprove = async (id) => {
     if (!window.confirm("Verify this driver?")) return;
@@ -122,14 +134,25 @@ export default function UserTable({ role, limit, onChanged, onSelectUser }) {
           <h3 className="text-lg font-black capitalize text-slate-900">{role ? `${role}s Directory` : 'Recent Users'}</h3>
           <p className="text-xs font-semibold text-slate-500">{displayUsers.length} shown</p>
         </div>
-        <div className="flex w-full items-center rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 sm:w-72">
-          <Search size={16} className="mr-2 text-slate-400" />
-          <input
-            className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
-            placeholder="Search name, email, phone"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <div className="flex w-full gap-2 sm:w-auto">
+          <div className="flex min-w-0 flex-1 items-center rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 sm:w-72">
+            <Search size={16} className="mr-2 text-slate-400" />
+            <input
+              className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+              placeholder="Search name, email, phone"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+          </div>
+
+          <button
+            onClick={refreshUsers}
+            disabled={loading}
+            className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-3 text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+            title="Refresh users"
+          >
+            <RefreshCw size={16} />
+          </button>
         </div>
       </div>
 

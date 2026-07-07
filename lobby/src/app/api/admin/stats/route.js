@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabase';
 import { formatActivityLog } from '@/lib/supabaseFormat';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function countRows(table, apply = (query) => query) {
   const query = apply(supabase.from(table).select('*', { count: 'exact', head: true }));
   const { count, error } = await query;
@@ -49,7 +52,7 @@ export async function GET() {
       countRows('users'),
       countRows('users', (query) => query.eq('role', 'driver')),
       countRows('users', (query) => query.eq('role', 'driver').eq('is_available', true)),
-      countRows('users', (query) => query.eq('role', 'driver').eq('verification_status', 'Pending')),
+      countRows('users', (query) => query.eq('role', 'driver').eq('is_verified', false)),
       countRows('verification_requests', (query) => query.eq('status', 'pending')),
       countRows('complaints', (query) => query.neq('status', 'resolved')),
       countRows('users', (query) => query.eq('account_status', 'suspended')),
@@ -67,7 +70,7 @@ export async function GET() {
 
     const bookings = bookingsResult.data || [];
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       stats: {
         totalUsers,
@@ -90,6 +93,9 @@ export async function GET() {
         recentActivity: (recentActivityResult.data || []).map(formatActivityLog),
       },
     });
+
+    response.headers.set('Cache-Control', 'no-store, max-age=0');
+    return response;
   } catch (error) {
     console.error('Admin Stats Error:', error);
     return NextResponse.json({ success: false, message: 'Failed to fetch admin stats' }, { status: 500 });

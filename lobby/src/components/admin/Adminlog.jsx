@@ -19,6 +19,8 @@ export default function AdminLogin({ onLogin }) {
     try {
       const response = await fetch("/api/admin/login", {
         method: "POST",
+        cache: "no-store",
+        credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
         },
@@ -28,12 +30,18 @@ export default function AdminLogin({ onLogin }) {
         }),
       });
 
-      if (!response.ok) {
-        setError("Invalid credentials. Access denied.");
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.success) {
+        setError(data.message || "Invalid credentials. Access denied.");
         return;
       }
 
-      onLogin?.();
+      const sessionVerified = await onLogin?.();
+
+      if (!sessionVerified) {
+        setError("Login succeeded, but the admin session could not be verified. Please try again.");
+      }
     } catch {
       setError("Unable to authenticate. Please try again.");
     } finally {

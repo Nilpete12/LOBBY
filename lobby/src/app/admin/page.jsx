@@ -40,6 +40,33 @@ const DEFAULT_SETTINGS = {
   notice: '',
 };
 
+const ADMIN_GET_OPTIONS = {
+  cache: 'no-store',
+  credentials: 'same-origin',
+};
+
+async function requestAdminSession(signal) {
+  const timeoutController = new AbortController();
+  const timeoutId = window.setTimeout(() => timeoutController.abort(), 10000);
+  const abortSessionRequest = () => timeoutController.abort();
+
+  signal?.addEventListener('abort', abortSessionRequest, { once: true });
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/session`, {
+      ...ADMIN_GET_OPTIONS,
+      signal: timeoutController.signal,
+    });
+    const data = await res.json();
+    return Boolean(res.ok && data.authenticated);
+  } catch {
+    return false;
+  } finally {
+    window.clearTimeout(timeoutId);
+    signal?.removeEventListener('abort', abortSessionRequest);
+  }
+}
+
 const MOBILE_TABS = [
   { id: 'dashboard', label: 'Home' },
   { id: 'verifications', label: 'Verify' },
@@ -106,6 +133,8 @@ export default function AdminPage() {
   const [activityLogs, setActivityLogs] = useState([]);
   const [notice, setNotice] = useState(null);
   const [resetState, setResetState] = useState({ status: 'idle', message: '' });
+  const [syncState, setSyncState] = useState({ status: 'idle', message: '' });
+  const [usersRefreshKey, setUsersRefreshKey] = useState(0);
   const [loading, setLoading] = useState({
     complaints: false,
     requests: false,
@@ -135,7 +164,7 @@ export default function AdminPage() {
 
   const loadStats = useCallback(async (silent = false) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/stats`);
+      const res = await fetch(`${API_BASE_URL}/admin/stats`, ADMIN_GET_OPTIONS);
       const data = await res.json();
       if (data.success) setStats({ ...EMPTY_STATS, ...data.stats });
     } catch (error) {
@@ -145,7 +174,7 @@ export default function AdminPage() {
 
   const loadSettings = useCallback(async (silent = false) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/settings`);
+      const res = await fetch(`${API_BASE_URL}/admin/settings`, ADMIN_GET_OPTIONS);
       const data = await res.json();
       if (data.success) {
         setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
@@ -158,7 +187,7 @@ export default function AdminPage() {
   const loadVerificationRequests = useCallback(async (silent = false) => {
     if (!silent) setLoading((current) => ({ ...current, requests: true }));
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/verification-requests`);
+      const res = await fetch(`${API_BASE_URL}/admin/verification-requests`, ADMIN_GET_OPTIONS);
       const data = await res.json();
       if (data.success) setVerificationRequests(data.requests);
     } catch (error) {
@@ -171,7 +200,7 @@ export default function AdminPage() {
   const loadComplaints = useCallback(async (silent = false) => {
     if (!silent) setLoading((current) => ({ ...current, complaints: true }));
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/complaints`);
+      const res = await fetch(`${API_BASE_URL}/admin/complaints`, ADMIN_GET_OPTIONS);
       const data = await res.json();
       if (data.success) setComplaints(data.complaints);
     } catch (error) {
@@ -184,7 +213,7 @@ export default function AdminPage() {
   const loadBookings = useCallback(async (silent = false) => {
     if (!silent) setLoading((current) => ({ ...current, bookings: true }));
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/bookings`);
+      const res = await fetch(`${API_BASE_URL}/admin/bookings`, ADMIN_GET_OPTIONS);
       const data = await res.json();
       if (data.success) {
         setBookings(data.bookings);
@@ -200,7 +229,7 @@ export default function AdminPage() {
   const loadActivity = useCallback(async (silent = false) => {
     if (!silent) setLoading((current) => ({ ...current, activity: true }));
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/activity`);
+      const res = await fetch(`${API_BASE_URL}/admin/activity`, ADMIN_GET_OPTIONS);
       const data = await res.json();
       if (data.success) setActivityLogs(data.logs);
     } catch (error) {
@@ -214,20 +243,61 @@ export default function AdminPage() {
     await Promise.all([loadStats(silent), loadSettings(), loadVerificationRequests(silent)]);
   }, [loadSettings, loadStats, loadVerificationRequests]);
 
-  useEffect(() => {
-    const checkAdminSession = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/admin/session`);
-        const data = await res.json();
-        setIsAuthenticated(Boolean(data.authenticated));
-      } catch {
-        setIsAuthenticated(false);
-      } finally {
-        setIsCheckingAuth(false);
-      }
-    };
+  const refreshUserTables = useCallback(() => {
+    setUsersRefreshKey((current) => current + 1);
+  }, []);
 
-    checkAdminSession();
+  const refreshAdminWorkspace = useCallback(async () => {
+    refreshUserTables();
+    await Promise.all([
+      refreshAdminData(),
+      loadActivity(),
+      loadComplaints(),
+      loadBookings(),
+    ]);
+  }, [loadActivity, loadBookings, loadComplaints, refreshAdminData, refreshUserTables]);
+
+  const syncClerkUsers = useCallback(async () => {
+    setSyncState({ status: 'loading', message: '' });
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/sync-clerk-users`, {
+        method: 'POST',
+        credentials: 'same-origin',
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) throw new Error(data.message || 'User sync failed');
+
+      setSyncState({
+        status: 'success',
+        message: `Synced ${data.total || 0} users (${data.created || 0} new).`,
+      });
+      showNotice('success', `Synced ${data.total || 0} Clerk users.`);
+      await refreshAdminWorkspace();
+    } catch (error) {
+      console.error('Failed to sync Clerk users', error);
+      setSyncState({ status: 'error', message: 'Could not sync Clerk users.' });
+      showNotice('error', 'Could not sync Clerk users. Check Clerk secret key and try again.');
+    }
+  }, [refreshAdminWorkspace, showNotice]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    requestAdminSession(controller.signal).then((authenticated) => {
+      if (controller.signal.aborted) return;
+      setIsAuthenticated(authenticated);
+      setIsCheckingAuth(false);
+    });
+
+    return () => controller.abort();
+  }, []);
+
+  const handleAdminLogin = useCallback(async () => {
+    const authenticated = await requestAdminSession();
+    setIsAuthenticated(authenticated);
+    return authenticated;
   }, []);
 
   // REAL-TIME AUTO-SYNC BACKGROUND LOOP
@@ -298,7 +368,7 @@ export default function AdminPage() {
   const openUserDetail = async (id) => {
     setLoading((current) => ({ ...current, detail: true }));
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/user/${id}`);
+      const res = await fetch(`${API_BASE_URL}/admin/user/${id}`, ADMIN_GET_OPTIONS);
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || 'User lookup failed');
       setSelectedUserDetail(data);
@@ -337,7 +407,8 @@ export default function AdminPage() {
       if (!res.ok || !data.success) throw new Error(data.message || 'Profile update failed');
       setSelectedUserDetail((current) => ({ ...current, user: data.user }));
       showNotice('success', 'Profile updated.');
-      await Promise.all([loadStats(), loadActivity()]);
+      refreshUserTables();
+      await Promise.all([refreshAdminData(), loadActivity()]);
     } catch (error) {
       console.error('Failed to save user detail', error);
       showNotice('error', 'Could not update profile.');
@@ -363,7 +434,8 @@ export default function AdminPage() {
       if (!res.ok || !data.success) throw new Error(data.message || 'Account update failed');
       setSelectedUserDetail((current) => ({ ...current, user: data.user }));
       showNotice('success', action === 'suspend' ? 'User suspended.' : 'User unsuspended.');
-      await Promise.all([loadStats(), loadActivity()]);
+      refreshUserTables();
+      await Promise.all([refreshAdminData(), loadActivity()]);
     } catch (error) {
       console.error('Failed to update suspension state', error);
       showNotice('error', 'Could not update account status.');
@@ -384,7 +456,8 @@ export default function AdminPage() {
       if (!res.ok || !data.success) throw new Error(data.message || 'Availability update failed');
       setSelectedUserDetail((current) => ({ ...current, user: data.user }));
       showNotice('success', isAvailable ? 'Driver marked online.' : 'Driver marked offline.');
-      await Promise.all([loadStats(), loadActivity()]);
+      refreshUserTables();
+      await Promise.all([refreshAdminData(), loadActivity()]);
     } catch (error) {
       console.error('Failed to update driver availability', error);
       showNotice('error', error.message || 'Could not update driver availability.');
@@ -405,10 +478,55 @@ export default function AdminPage() {
       if (!res.ok || !data.success) throw new Error(data.message || 'Subscription update failed');
       setSelectedUserDetail((current) => ({ ...current, user: data.user }));
       showNotice('success', action === 'mark_subscription_paid' ? 'Subscription marked paid.' : 'Subscription marked unpaid.');
-      await Promise.all([loadStats(), loadActivity()]);
+      refreshUserTables();
+      await Promise.all([refreshAdminData(), loadActivity()]);
     } catch (error) {
       console.error('Failed to update driver subscription', error);
       showNotice('error', error.message || 'Could not update subscription.');
+    }
+  };
+
+  const setUserRole = async (role) => {
+    if (!selectedUserDetail?.user?._id || selectedUserDetail.user.role === role) return;
+    if (!window.confirm(`Change this account to ${role}?`)) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/user/${selectedUserDetail.user._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'set_role', role }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Role update failed');
+      setSelectedUserDetail((current) => ({ ...current, user: data.user }));
+      showNotice('success', `Account changed to ${role}.`);
+      refreshUserTables();
+      await Promise.all([refreshAdminData(), loadActivity()]);
+    } catch (error) {
+      console.error('Failed to update user role', error);
+      showNotice('error', error.message || 'Could not update user role.');
+    }
+  };
+
+  const deleteSelectedUser = async () => {
+    if (!selectedUserDetail?.user?._id) return;
+    const user = selectedUserDetail.user;
+    if (!window.confirm(`Permanently delete ${user.fullName || 'this user'} from Clerk and the dashboard?`)) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/user/${user._id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) throw new Error(data.message || 'Delete failed');
+
+      setSelectedUserDetail(null);
+      showNotice('success', 'User deleted.');
+      refreshUserTables();
+      await Promise.all([refreshAdminData(), loadActivity()]);
+    } catch (error) {
+      console.error('Failed to delete user', error);
+      showNotice('error', error.message || 'Could not delete user.');
     }
   };
 
@@ -435,7 +553,8 @@ export default function AdminPage() {
         current.map((request) => (request.id === id ? data.request : request))
       );
       showNotice('success', action === 'approve' ? 'Driver verified.' : 'Verification rejected.');
-      await Promise.all([loadStats(), loadActivity()]);
+      refreshUserTables();
+      await Promise.all([refreshAdminData(), loadActivity()]);
     } catch (error) {
       console.error('Failed to review verification request', error);
       showNotice('error', 'Could not update verification request.');
@@ -461,7 +580,7 @@ export default function AdminPage() {
       setComplaints((current) =>
         current.map((complaint) => (complaint.id === id ? data.complaint : complaint))
       );
-      await Promise.all([loadStats(), loadActivity()]);
+      await Promise.all([refreshAdminData(), loadActivity()]);
       showNotice('success', 'Support ticket updated.');
     } catch (error) {
       console.error('Failed to update complaint', error);
@@ -491,7 +610,7 @@ export default function AdminPage() {
         current.map((item) => (item.id === booking.id ? data.booking : item))
       );
       showNotice('success', status === 'accepted' ? 'Booking assigned.' : 'Booking updated.');
-      await Promise.all([loadStats(), loadActivity()]);
+      await Promise.all([refreshAdminData(), loadActivity()]);
     } catch (error) {
       console.error('Failed to update booking', error);
       showNotice('error', error.message || 'Could not update booking.');
@@ -528,7 +647,7 @@ export default function AdminPage() {
     return <div className="flex min-h-screen items-center justify-center bg-slate-900 text-sm font-black text-slate-400">Checking access...</div>;
   }
 
-  if (!isAuthenticated) return <AdminLog onLogin={() => setIsAuthenticated(true)} />;
+  if (!isAuthenticated) return <AdminLog onLogin={handleAdminLogin} />;
 
   const renderDashboard = () => (
     <div className="space-y-6">
@@ -572,7 +691,7 @@ export default function AdminPage() {
         </section>
       </div>
 
-      <UserTable limit={5} onChanged={refreshAdminData} onSelectUser={openUserDetail} />
+      <UserTable limit={5} refreshKey={usersRefreshKey} onChanged={refreshAdminData} onSelectUser={openUserDetail} />
     </div>
   );
 
@@ -751,9 +870,9 @@ export default function AdminPage() {
   const renderContent = () => {
     switch (activeTab) {
       case 'riders':
-        return <UserTable role="rider" onChanged={refreshAdminData} onSelectUser={openUserDetail} />;
+        return <UserTable role="rider" refreshKey={usersRefreshKey} onChanged={refreshAdminData} onSelectUser={openUserDetail} />;
       case 'drivers':
-        return <UserTable role="driver" onChanged={refreshAdminData} onSelectUser={openUserDetail} />;
+        return <UserTable role="driver" refreshKey={usersRefreshKey} onChanged={refreshAdminData} onSelectUser={openUserDetail} />;
       case 'verifications':
         return renderVerifications();
       case 'bookings':
@@ -801,19 +920,36 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <button
-              onClick={() => setActiveTab('verifications')}
-              className="relative rounded-2xl border border-slate-200 bg-white p-3"
-              aria-label="Open verification notifications"
-            >
-              <Bell size={20} className="text-slate-700" />
-              {stats.pendingVerificationRequests > 0 && (
-                <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
-                  {stats.pendingVerificationRequests}
-                </span>
-              )}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={syncClerkUsers}
+                disabled={syncState.status === 'loading'}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+              >
+                <RefreshCw size={17} className={syncState.status === 'loading' ? 'animate-spin' : ''} />
+                <span className="hidden sm:inline">{syncState.status === 'loading' ? 'Syncing' : 'Sync Users'}</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('verifications')}
+                className="relative rounded-2xl border border-slate-200 bg-white p-3"
+                aria-label="Open verification notifications"
+              >
+                <Bell size={20} className="text-slate-700" />
+                {stats.pendingVerificationRequests > 0 && (
+                  <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
+                    {stats.pendingVerificationRequests}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
+
+          {syncState.message && (
+            <p className={`mt-2 text-xs font-black ${syncState.status === 'error' ? 'text-red-600' : 'text-slate-500'}`}>
+              {syncState.message}
+            </p>
+          )}
 
           <div className="mt-3 flex gap-2 overflow-x-auto pb-1 md:hidden">
             {MOBILE_TABS.map((tab) => (
@@ -863,6 +999,8 @@ export default function AdminPage() {
           onUnsuspend={() => setUserSuspension('unsuspend')}
           onAvailabilityChange={setDriverAvailability}
           onSubscriptionChange={setDriverSubscription}
+          onRoleChange={setUserRole}
+          onDelete={deleteSelectedUser}
         />
       )}
     </div>
@@ -1173,6 +1311,8 @@ function UserDetailDrawer({
   onUnsuspend,
   onAvailabilityChange,
   onSubscriptionChange,
+  onRoleChange,
+  onDelete,
 }) {
   const user = detail.user;
   const isSuspended = user.accountStatus === 'suspended';
@@ -1274,16 +1414,36 @@ function UserDetailDrawer({
               <p className="mt-1 text-sm font-semibold text-red-600">
                 Suspension hides drivers from search and blocks operational actions.
               </p>
+              <div className="mt-4 rounded-2xl bg-white p-3 ring-1 ring-red-100">
+                <label className="mb-1 block text-xs font-black uppercase text-slate-500">Account Type</label>
+                <select
+                  value={user.role}
+                  onChange={(event) => onRoleChange(event.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-black text-slate-800 outline-none"
+                >
+                  <option value="rider">Rider</option>
+                  <option value="driver">Driver</option>
+                </select>
+              </div>
               {isSuspended && user.suspensionReason && (
                 <p className="mt-3 rounded-2xl bg-white p-3 text-sm font-semibold text-red-700">{user.suspensionReason}</p>
               )}
-              <button
-                onClick={isSuspended ? onUnsuspend : onSuspend}
-                className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-red-600 ring-1 ring-red-200"
-              >
-                {isSuspended ? <RotateCcw size={16} /> : <Ban size={16} />}
-                {isSuspended ? 'Unsuspend User' : 'Suspend User'}
-              </button>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <button
+                  onClick={isSuspended ? onUnsuspend : onSuspend}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-red-600 ring-1 ring-red-200"
+                >
+                  {isSuspended ? <RotateCcw size={16} /> : <Ban size={16} />}
+                  {isSuspended ? 'Unsuspend User' : 'Suspend User'}
+                </button>
+                <button
+                  onClick={onDelete}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 text-sm font-black text-white"
+                >
+                  <XCircle size={16} />
+                  Delete User
+                </button>
+              </div>
             </section>
           </div>
 

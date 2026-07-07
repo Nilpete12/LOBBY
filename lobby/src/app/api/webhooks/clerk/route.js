@@ -1,13 +1,16 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
-import { supabase } from '@/lib/supabase'; // The file we created in Phase 3
 import { NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
+import { syncClerkUserToSupabase } from '@/lib/clerkUserSync';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req) {
   const WEBHOOK_SECRET = process.env.CLERK_SECRET;
   if (!WEBHOOK_SECRET) return new Response('Missing Secret', { status: 500 });
 
-  const headerPayload = headers();
+  const headerPayload = await headers();
   const svix_id = headerPayload.get("svix-id");
   const svix_timestamp = headerPayload.get("svix-timestamp");
   const svix_signature = headerPayload.get("svix-signature");
@@ -34,26 +37,26 @@ export async function POST(req) {
 
   const eventType = evt.type;
 
-  if (eventType === 'user.created') {
-    const { id, first_name, last_name } = evt.data;
-    const fullName = `${first_name || ''} ${last_name || ''}`.trim();
-
-    // SUPABASE INSERT
-    const { error } = await supabase
-      .from('users')
-      .insert([
-        {
-          clerk_id: id,
-          full_name: fullName,
-          role: 'rider', // default
-          is_verified: false,
-          is_available: false
-        }
-      ]);
-
-    if (error) {
-      console.error("Supabase Insert Error:", error);
+  if (eventType === 'user.created' || eventType === 'user.updated') {
+    try {
+      await syncClerkUserToSupabase(evt.data);
+    } catch (error) {
+      console.error("Supabase user sync error:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+  }
+
+  if (eventType === 'user.deleted') {
+    const deleteResults = await Promise.all([
+      supabase.from('users').delete().eq('clerk_id', evt.data.id),
+      supabase.from('verification_requests').delete().eq('clerk_id', evt.data.id),
+      supabase.from('bookings').delete().or(`rider_id.eq.${evt.data.id},driver_id.eq.${evt.data.id}`),
+    ]);
+
+    const deleteError = deleteResults.find((result) => result.error)?.error;
+    if (deleteError) {
+      console.error("Supabase user delete error:", deleteError);
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
     }
   }
 

@@ -2,9 +2,18 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { isAdminAuthenticated } from '@/lib/adminAuth';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+function adminJson(body, init = {}) {
+  const response = NextResponse.json(body, init);
+  response.headers.set('Cache-Control', 'no-store, max-age=0');
+  return response;
+}
+
 export async function GET(req) {
   if (!(await isAdminAuthenticated())) {
-    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    return adminJson({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
   try {
@@ -17,7 +26,7 @@ export async function GET(req) {
     let query = supabase
       .from('users')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false, nullsFirst: false })
       .limit(limit);
 
     // Apply role filter if the dashboard tab requires it
@@ -43,10 +52,9 @@ export async function GET(req) {
       createdAt: u.created_at
     }));
 
-    return NextResponse.json({ success: true, users: formattedUsers });
-
+    return adminJson({ success: true, users: formattedUsers });
   } catch (error) {
     console.error("User fetch error:", error);
-    return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
+    return adminJson({ success: false, error: 'Server error' }, { status: 500 });
   }
 }

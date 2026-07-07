@@ -70,10 +70,13 @@ export async function isAdminAuthenticated() {
 }
 
 export function adminUnauthorized() {
-  return NextResponse.json(
+  const response = NextResponse.json(
     { success: false, message: 'Admin authentication required' },
     { status: 401 }
   );
+
+  response.headers.set('Cache-Control', 'no-store, max-age=0');
+  return response;
 }
 
 export function createAdminSessionResponse() {
@@ -87,6 +90,7 @@ export function createAdminSessionResponse() {
     maxAge: ADMIN_SESSION_TTL_SECONDS,
   });
 
+  response.headers.set('Cache-Control', 'no-store, max-age=0');
   return response;
 }
 
@@ -100,5 +104,6 @@ export function clearAdminSessionResponse() {
     maxAge: 0,
   });
 
+  response.headers.set('Cache-Control', 'no-store, max-age=0');
   return response;
 }
