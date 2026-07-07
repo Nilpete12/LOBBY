@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
@@ -147,6 +147,8 @@ export default function AdminPage() {
   const [rejectionByRequest, setRejectionByRequest] = useState({});
   const [selectedUserDetail, setSelectedUserDetail] = useState(null);
   const [detailForm, setDetailForm] = useState({});
+  const [isExitPromptOpen, setExitPromptOpen] = useState(false);
+  const isLoggingOutRef = useRef(false);
 
   const badges = useMemo(
     () => ({
@@ -295,10 +297,75 @@ export default function AdminPage() {
   }, []);
 
   const handleAdminLogin = useCallback(async () => {
+    isLoggingOutRef.current = false;
     const authenticated = await requestAdminSession();
     setIsAuthenticated(authenticated);
     return authenticated;
   }, []);
+
+  const clearAdminSession = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/logout`, {
+        method: 'POST',
+        cache: 'no-store',
+        credentials: 'same-origin',
+        keepalive: true,
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Admin logout failed', error);
+      return false;
+    }
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    isLoggingOutRef.current = true;
+    const loggedOut = await clearAdminSession();
+    if (!loggedOut) {
+      isLoggingOutRef.current = false;
+      setExitPromptOpen(false);
+      showNotice('error', 'Could not log out. Please try again.');
+      return;
+    }
+
+    setExitPromptOpen(false);
+    setIsAuthenticated(false);
+    router.replace('/');
+  }, [clearAdminSession, router, showNotice]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const buildGuardState = () => ({
+      ...(window.history.state || {}),
+      lobbyAdminExitGuard: true,
+    });
+
+    window.history.pushState(buildGuardState(), '', window.location.href);
+
+    const handleAdminBackNavigation = () => {
+      if (isLoggingOutRef.current) return;
+      window.history.pushState(buildGuardState(), '', window.location.href);
+      setExitPromptOpen(true);
+    };
+
+    window.addEventListener('popstate', handleAdminBackNavigation);
+    return () => window.removeEventListener('popstate', handleAdminBackNavigation);
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const verifyRestoredAdminSession = async (event) => {
+      if (!event.persisted) return;
+      const authenticated = await requestAdminSession();
+      setIsAuthenticated(authenticated);
+      if (!authenticated) setExitPromptOpen(false);
+    };
+
+    window.addEventListener('pageshow', verifyRestoredAdminSession);
+    return () => window.removeEventListener('pageshow', verifyRestoredAdminSession);
+  }, [isAuthenticated]);
 
   // REAL-TIME AUTO-SYNC BACKGROUND LOOP
   useEffect(() => {
@@ -340,12 +407,6 @@ export default function AdminPage() {
 
     loadActiveTabData();
   }, [activeTab, isAuthenticated, loadActivity, loadBookings, loadComplaints, loadSettings, loadVerificationRequests]);
-
-  const handleLogout = async () => {
-    await fetch(`${API_BASE_URL}/admin/logout`, { method: 'POST' });
-    setIsAuthenticated(false);
-    router.push('/');
-  };
 
   const updateSettings = async (updates) => {
     try {
@@ -987,6 +1048,13 @@ export default function AdminPage() {
         </div>
       </main>
 
+      {isExitPromptOpen && (
+        <AdminExitPrompt
+          onCancel={() => setExitPromptOpen(false)}
+          onConfirm={handleLogout}
+        />
+      )}
+
       {selectedUserDetail && (
         <UserDetailDrawer
           detail={selectedUserDetail}
@@ -1003,6 +1071,41 @@ export default function AdminPage() {
           onDelete={deleteSelectedUser}
         />
       )}
+    </div>
+  );
+}
+
+function AdminExitPrompt({ onCancel, onConfirm }) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/60 p-3 sm:items-center sm:p-4">
+      <section className="w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+            <ShieldCheck size={22} />
+          </div>
+          <div>
+            <h2 className="text-lg font-black text-slate-950">Log out of admin?</h2>
+            <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
+              Leaving the admin page will end this admin session. You will need to sign in again to return.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-2">
+          <button
+            onClick={onCancel}
+            className="min-h-12 rounded-2xl bg-slate-100 px-4 text-sm font-black text-slate-700"
+          >
+            Stay Here
+          </button>
+          <button
+            onClick={onConfirm}
+            className="min-h-12 rounded-2xl bg-red-600 px-4 text-sm font-black text-white"
+          >
+            Log Out
+          </button>
+        </div>
+      </section>
     </div>
   );
 }
