@@ -7,7 +7,11 @@ import { syncClerkUserToSupabase } from '@/lib/clerkUserSync';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req) {
-  const WEBHOOK_SECRET = process.env.CLERK_SECRET;
+  const WEBHOOK_SECRET =
+    process.env.CLERK_WEBHOOK_SECRET ||
+    process.env.WEBHOOK_SECRET ||
+    process.env.CLERK_SECRET;
+
   if (!WEBHOOK_SECRET) return new Response('Missing Secret', { status: 500 });
 
   const headerPayload = await headers();

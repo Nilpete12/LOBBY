@@ -2,6 +2,13 @@ import { clerkClient } from '@clerk/nextjs/server';
 import { supabase } from '@/lib/supabase';
 
 const ALLOWED_ROLES = new Set(['rider', 'driver']);
+const OPTIONAL_USER_COLUMNS = new Set([
+  'email',
+  'image_url',
+  'account_status',
+  'verification_status',
+  'subscription_status',
+]);
 
 function cleanString(value, maxLength = 500) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -30,6 +37,32 @@ function getFullName(user = {}) {
     cleanString(user.fullName || user.full_name, 160) ||
     cleanString(`${user.firstName || user.first_name || ''} ${user.lastName || user.last_name || ''}`, 160)
   );
+}
+
+function missingColumnName(error = {}) {
+  const text = [error.message, error.details, error.hint].filter(Boolean).join(' ');
+  const quotedColumn = text.match(/'([^']+)'\s+column/i);
+  const sqlColumn = text.match(/column\s+(?:(?:public\.)?\w+\.)?"?([a-zA-Z_][a-zA-Z0-9_]*)"?\s+does not exist/i);
+
+  return quotedColumn?.[1] || sqlColumn?.[1] || '';
+}
+
+async function writeUserRowWithColumnFallback(row, write) {
+  const nextRow = { ...row };
+
+  for (let attempts = 0; attempts <= OPTIONAL_USER_COLUMNS.size; attempts += 1) {
+    const { data, error } = await write(nextRow);
+    if (!error) return data;
+
+    const missingColumn = missingColumnName(error);
+    if (!missingColumn || !OPTIONAL_USER_COLUMNS.has(missingColumn) || !(missingColumn in nextRow)) {
+      throw error;
+    }
+
+    delete nextRow[missingColumn];
+  }
+
+  throw new Error('Unable to sync user after removing unsupported optional columns');
 }
 
 export function clerkUserToRow(user = {}, overrides = {}) {
@@ -76,14 +109,15 @@ export async function syncClerkUserToSupabase(user, overrides = {}) {
       role: baseRow.role || existing.role || 'rider',
     };
 
-    const { data, error } = await supabase
-      .from('users')
-      .update(updateRow)
-      .eq('id', existing.id)
-      .select()
-      .single();
+    const data = await writeUserRowWithColumnFallback(updateRow, (row) =>
+      supabase
+        .from('users')
+        .update(row)
+        .eq('clerk_id', user.id)
+        .select()
+        .single()
+    );
 
-    if (error) throw error;
     return { user: data, created: false };
   }
 
@@ -98,13 +132,14 @@ export async function syncClerkUserToSupabase(user, overrides = {}) {
     subscription_status: role === 'driver' ? 'unpaid' : null,
   };
 
-  const { data, error } = await supabase
-    .from('users')
-    .insert(insertRow)
-    .select()
-    .single();
+  const data = await writeUserRowWithColumnFallback(insertRow, (row) =>
+    supabase
+      .from('users')
+      .insert(row)
+      .select()
+      .single()
+  );
 
-  if (error) throw error;
   return { user: data, created: true };
 }
 

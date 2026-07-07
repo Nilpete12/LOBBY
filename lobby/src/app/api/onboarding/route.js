@@ -3,18 +3,27 @@ import { auth, clerkClient } from '@clerk/nextjs/server';
 import { supabase } from '@/lib/supabase';
 import { syncClerkUserToSupabase } from '@/lib/clerkUserSync';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+function onboardingJson(body, init = {}) {
+  const response = NextResponse.json(body, init);
+  response.headers.set('Cache-Control', 'no-store, max-age=0');
+  return response;
+}
+
 export async function POST(req) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      return onboardingJson({ success: false, error: 'Please sign in again before choosing an account type.' }, { status: 401 });
     }
 
     const body = await req.json();
     const { role } = body;
 
     if (!['rider', 'driver'].includes(role)) {
-      return NextResponse.json({ success: false, error: 'Invalid role' }, { status: 400 });
+      return onboardingJson({ success: false, error: 'Choose rider or driver to continue.' }, { status: 400 });
     }
 
     const client = await clerkClient();
@@ -37,12 +46,15 @@ export async function POST(req) {
 
     if (supabaseError) throw supabaseError;
 
-    return NextResponse.json({
+    return onboardingJson({
       success: true,
       message: `Successfully registered ${user.full_name || 'user'} as a ${role}`,
     });
   } catch (error) {
     console.error("Onboarding Catch Error:", error);
-    return NextResponse.json({ success: false, error: 'Failed to complete onboarding' }, { status: 500 });
+    return onboardingJson(
+      { success: false, error: 'Failed to complete onboarding. Please try again.' },
+      { status: 500 }
+    );
   }
 }

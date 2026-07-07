@@ -9,39 +9,47 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // If the user already has a role, kick them out of this page
   useEffect(() => {
     if (isLoaded && user?.publicMetadata?.role) {
-      router.push('/');
+      router.replace('/');
+    } else if (isLoaded && !user) {
+      router.replace('/sign-in');
     }
   }, [isLoaded, user, router]);
 
   const handleContinue = async () => {
     if (!role) return;
     setLoading(true);
+    setError('');
 
     try {
       const res = await fetch('/api/onboarding', {
         method: 'POST',
+        cache: 'no-store',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role })
       });
 
-      const data = await res.json();
-      if (data.success) {
-        // Force Clerk to refresh its local data so the Navbar instantly knows the role
-        await user.reload(); 
-        
-        // Route to the correct dashboard
-        if (role === 'driver') router.push('/drive/dashboard');
-        else router.push('/account');
-      } else {
-        alert("Something went wrong. Please try again.");
-        setLoading(false);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || data.message || 'Something went wrong. Please try again.');
       }
+
+      // Force Clerk to refresh its local data so the Navbar instantly knows the role.
+      await user?.reload().catch((reloadError) => {
+        console.warn('Clerk user reload failed after onboarding:', reloadError);
+      });
+
+      // Route to the correct dashboard.
+      if (role === 'driver') router.replace('/drive/dashboard');
+      else router.replace('/account');
     } catch (error) {
       console.error(error);
+      setError(error.message || 'Something went wrong. Please try again.');
       setLoading(false);
     }
   };
@@ -81,6 +89,12 @@ export default function OnboardingPage() {
             <span className="font-bold">Driver</span>
           </div>
         </div>
+
+        {error && (
+          <div className="mb-4 rounded-2xl border border-red-100 bg-red-50 p-3 text-sm font-bold text-red-600">
+            {error}
+          </div>
+        )}
 
         <button
           onClick={handleContinue}
