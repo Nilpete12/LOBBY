@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser, useClerk } from '@clerk/nextjs'; 
-import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText, CheckCircle2, AlertCircle, X, ShieldCheck, Wallet, History, MessageCircle } from 'lucide-react';
+import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText, CheckCircle2, AlertCircle, X, ShieldCheck, Wallet, History, MessageCircle, Hash } from 'lucide-react';
 import API_BASE_URL from '@/config';
 import IncomingRideAlert from '@/components/IncomingRideAlert';
 
@@ -55,7 +55,7 @@ export default function DriverDashboard() {
   // 2. MONGODB DRIVER STATE (Vehicle, Routes, Verification, etc.)
   const [driverDbData, setDriverDbData] = useState(null);
   
-  const [formData, setFormData] = useState({ vehicle: '', phone: '', routes: '' });
+  const [formData, setFormData] = useState({ vehicle: '', vehiclePlate: '', phone: '', routes: '' });
   const [isOnline, setIsOnline] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingLicense, setUploadingLicense] = useState(false);
@@ -73,6 +73,7 @@ export default function DriverDashboard() {
 
     setFormData({
       vehicle: driver.vehicle || '',
+      vehiclePlate: driver.vehiclePlate || '',
       phone: driver.phone || '',
       routes,
     });
@@ -167,6 +168,7 @@ export default function DriverDashboard() {
         body: JSON.stringify({
           clerkId: clerkUser.id,
           vehicle: formData.vehicle,
+          vehiclePlate: formData.vehiclePlate,
           phone: formData.phone,
           routes: formData.routes.split(',').map(s => s.trim()).filter(Boolean),
           isAvailable: statusToSend
@@ -297,6 +299,11 @@ export default function DriverDashboard() {
       done: Boolean(driverDbData.carPic),
     },
     {
+      label: 'Number plate',
+      detail: formData.vehiclePlate ? formData.vehiclePlate : 'Add the vehicle registration number',
+      done: Boolean(formData.vehiclePlate),
+    },
+    {
       label: 'Driving license',
       detail: driverDbData.licenseUrl ? verificationStatus : 'Upload your license for review',
       done: Boolean(driverDbData.licenseUrl),
@@ -414,7 +421,7 @@ export default function DriverDashboard() {
           <div className="grid border-t border-white/10 sm:grid-cols-3">
             <MetricStrip label="Setup" value={`${completionPercent}%`} />
             <MetricStrip label="Routes" value={routeList.length || '0'} />
-            <MetricStrip label="Vehicle" value={formData.vehicle || 'Not set'} />
+            <MetricStrip label="Plate" value={formData.vehiclePlate || 'Not set'} />
           </div>
         </section>
 
@@ -463,6 +470,16 @@ export default function DriverDashboard() {
                 value={formData.vehicle}
                 placeholder="e.g. Maruti 800"
                 onChange={(value) => setFormData({ ...formData, vehicle: value })}
+              />
+
+              <LabeledInput
+                icon={Hash}
+                label="Number plate"
+                value={formData.vehiclePlate}
+                placeholder="e.g. NL01 AB 1234"
+                autoCapitalize="characters"
+                onChange={(value) => setFormData({ ...formData, vehiclePlate: formatVehiclePlateInput(value) })}
+                helper="This helps riders identify the right vehicle before calling or boarding."
               />
 
               <LabeledInput
@@ -719,7 +736,15 @@ function SetupItem({ item }) {
   );
 }
 
-function LabeledInput({ icon: Icon, label, value, placeholder, onChange, helper, inputMode = 'text' }) {
+function formatVehiclePlateInput(value) {
+  return String(value || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9 -]/g, '')
+    .replace(/\s+/g, ' ')
+    .slice(0, 40);
+}
+
+function LabeledInput({ icon: Icon, label, value, placeholder, onChange, helper, inputMode = 'text', autoCapitalize }) {
   return (
     <label className="block">
       <span className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">{label}</span>
@@ -730,6 +755,7 @@ function LabeledInput({ icon: Icon, label, value, placeholder, onChange, helper,
           value={value}
           placeholder={placeholder}
           inputMode={inputMode}
+          autoCapitalize={autoCapitalize}
           onChange={(event) => onChange(event.target.value)}
         />
       </span>

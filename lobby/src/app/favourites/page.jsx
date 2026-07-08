@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { Heart, MapPin, Phone, Search, Star, Trash2 } from 'lucide-react';
+import { Hash, Heart, MapPin, Phone, Search, Star, Trash2 } from 'lucide-react';
 
 const STORAGE_KEY = 'lobby:favourite-drivers';
 
@@ -138,6 +138,12 @@ export default function FavouritesPage() {
                             <span className="text-slate-300">•</span>
                             <span className="truncate">{driver.vehicle || 'Standard Taxi'}</span>
                           </p>
+                          {driver.vehiclePlate && (
+                            <p className="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-slate-700">
+                              <Hash size={11} />
+                              <span className="truncate">{driver.vehiclePlate}</span>
+                            </p>
+                          )}
                         </div>
 
                         <button

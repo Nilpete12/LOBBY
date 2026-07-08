@@ -1,4 +1,4 @@
-import { Star, Phone, ShieldCheck, MapPin } from 'lucide-react';
+import { Star, Phone, MapPin, Hash } from 'lucide-react';
 
 export default function RideCard({ driver }) {
   return (
@@ -27,9 +27,15 @@ export default function RideCard({ driver }) {
               </span>
             </div>
 
-            <p className="text-slate-500 font-medium text-sm mb-3">
-              {driver.vehicle} • {driver.seats} Seats
-            </p>
+            <div className="mb-3 flex flex-wrap items-center gap-2 text-sm font-medium text-slate-500">
+              <span>{driver.vehicle} • {driver.seats} Seats</span>
+              {driver.vehiclePlate && (
+                <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-slate-700">
+                  <Hash size={11} />
+                  <span className="truncate">{driver.vehiclePlate}</span>
+                </span>
+              )}
+            </div>
 
             {/* Route Tags */}
             <div className="flex flex-wrap gap-2">

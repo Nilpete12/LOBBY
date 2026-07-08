@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useUser, useClerk } from '@clerk/nextjs';
-import { Phone, Clock, LogOut, History, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Phone, Clock, LogOut, History, CheckCircle2, AlertCircle, X, Hash } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 export default function RiderDashboard() {
@@ -220,6 +220,15 @@ export default function RiderDashboard() {
 
                       <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
                         <span className="max-w-full truncate">{driver.vehicle}</span>
+                        {driver.vehiclePlate && (
+                          <>
+                            <span>•</span>
+                            <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-black uppercase tracking-wide text-slate-700">
+                              <Hash size={10} />
+                              <span className="truncate">{driver.vehiclePlate}</span>
+                            </span>
+                          </>
+                        )}
                         <span>•</span>
 
                         <span className="flex items-center gap-1">

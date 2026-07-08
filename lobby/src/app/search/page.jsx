@@ -1,6 +1,6 @@
 "use client";
 import Image from 'next/image';
-import { Search, MapPin, Star, Phone, X, Car, Loader2, Flag, MessageCircle } from 'lucide-react';
+import { Search, MapPin, Star, Phone, X, Car, Loader2, Flag, MessageCircle, Hash } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
@@ -398,6 +398,7 @@ function DriverAvatar({ driver, size = 64 }) {
 
 function DriverResultCard({ driver, onSelect }) {
   const vehicle = driver.vehicle || 'Standard Taxi';
+  const vehiclePlate = driver.vehiclePlate || '';
   const routes = getDriverRoutes(driver);
 
   return (
@@ -422,6 +423,12 @@ function DriverResultCard({ driver, onSelect }) {
                   {driver.rating || 5.0}
                 </span>
                 <span className="truncate">• {vehicle}</span>
+                {vehiclePlate && (
+                  <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-slate-700">
+                    <Hash size={11} />
+                    <span className="truncate">{vehiclePlate}</span>
+                  </span>
+                )}
               </div>
             </div>
 
@@ -459,6 +466,7 @@ function getWhatsAppHref(phone) {
 
 function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
   const vehicle = driver.vehicle || 'Standard Taxi';
+  const vehiclePlate = driver.vehiclePlate || '';
   const routes = getDriverRoutes(driver);
   const phoneHref = driver.phone ? `tel:${driver.phone}` : undefined;
   const whatsappHref = getWhatsAppHref(driver.phone);
@@ -577,6 +585,16 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
             <p className="text-xs font-bold uppercase text-slate-400">Phone</p>
             <p className="mt-1 truncate text-sm font-bold text-slate-900">{driver.phone || 'Unavailable'}</p>
           </div>
+
+          {vehiclePlate && (
+            <div className="rounded-2xl bg-slate-50 p-4">
+              <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#0F766E] shadow-sm">
+                <Hash size={18} />
+              </div>
+              <p className="text-xs font-bold uppercase text-slate-400">Number plate</p>
+              <p className="mt-1 truncate text-sm font-black uppercase tracking-wide text-slate-900">{vehiclePlate}</p>
+            </div>
+          )}
         </div>
 
         <div className="mb-6">
