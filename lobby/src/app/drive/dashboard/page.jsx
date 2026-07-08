@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser, useClerk } from '@clerk/nextjs'; 
-import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText, CheckCircle2, AlertCircle, X, ShieldCheck, Wallet, History, MessageCircle } from 'lucide-react';
 import API_BASE_URL from '@/config';
 import IncomingRideAlert from '@/components/IncomingRideAlert';
 
@@ -66,10 +67,12 @@ export default function DriverDashboard() {
 
   const applyDriverProfile = useCallback((driver) => {
     setDriverDbData(driver);
+    const routes = Array.isArray(driver.routes) ? driver.routes.join(', ') : driver.routes || '';
+
     setFormData({
       vehicle: driver.vehicle || '',
       phone: driver.phone || '',
-      routes: driver.routes ? driver.routes.join(', ') : ''
+      routes,
     });
     setIsOnline(driver.isAvailable || false);
   }, []);
@@ -268,138 +271,247 @@ export default function DriverDashboard() {
   if (!driverDbData) return <DriverDashboardSkeleton message="Loading your driver profile..." />;
   
   const isVerified = driverDbData.isVerified === true;
+  const verificationStatus = driverDbData.verificationStatus || (isVerified ? 'Approved' : 'Pending');
+  const driverName = clerkUser.fullName || driverDbData.fullName || 'Driver';
+  const driverEmail = clerkUser.primaryEmailAddress?.emailAddress || driverDbData.email || '';
+  const routeList = formData.routes.split(',').map(route => route.trim()).filter(Boolean);
+  const setupItems = [
+    {
+      label: 'Phone number',
+      detail: formData.phone ? 'Added' : 'Add a number riders can call',
+      done: Boolean(formData.phone),
+    },
+    {
+      label: 'Routes',
+      detail: routeList.length ? `${routeList.length} route${routeList.length === 1 ? '' : 's'} added` : 'Add pickup areas or common routes',
+      done: routeList.length > 0,
+    },
+    {
+      label: 'Vehicle photo',
+      detail: driverDbData.carPic ? 'Uploaded' : 'Upload a clear vehicle photo',
+      done: Boolean(driverDbData.carPic),
+    },
+    {
+      label: 'Driving license',
+      detail: driverDbData.licenseUrl ? verificationStatus : 'Upload your license for review',
+      done: Boolean(driverDbData.licenseUrl),
+    },
+  ];
+  const completedSetupCount = setupItems.filter(item => item.done).length;
+  const completionPercent = Math.round((completedSetupCount / setupItems.length) * 100);
+  const nextStep = isVerified
+    ? isOnline
+      ? 'You are visible to riders now.'
+      : 'Go online when you are ready to accept rides.'
+    : driverDbData.licenseUrl
+      ? 'Your documents are with admin for review.'
+      : 'Upload your license to request approval.';
 
   return (    
-    <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-slate-50 px-4 pb-28 pt-20 sm:px-6 lg:pt-24">
+      <div className="mx-auto max-w-5xl">
         {notice && (
           <DashboardNotice notice={notice} onDismiss={() => setNotice(null)} />
         )}
         <IncomingRideAlert />
-        
-        {/* Verification Warning */}
-        {!isVerified && (
-          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-xl mb-6 flex items-center gap-3 text-yellow-800 animate-in fade-in">
-            <div className="bg-yellow-100 p-2 rounded-full"><Clock size={20}/></div>
-            <div>
-              <h3 className="font-bold">Account Pending Verification</h3>
-              <p className="text-sm">You cannot go online until an Admin approves your documents.</p>
-            </div>
-          </div>
-        )}
 
-        {/* --- HEADER --- */}
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
-          <div className="flex items-center gap-6">
-            
-            {/* PROFILE PICTURE */}
-            <div className="relative group">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-slate-100 border-2 border-slate-200 flex items-center justify-center font-bold text-2xl text-slate-400">
-                {driverDbData.profilePic || clerkUser.imageUrl ? (
-                  <Image
-                    src={driverDbData.profilePic || clerkUser.imageUrl}
-                    alt="Profile"
-                    width={80}
-                    height={80}
-                    sizes="80px"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  clerkUser.fullName?.charAt(0) || "D"
-                )}
-              </div>
-              
-              <label className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 cursor-pointer transition">
-                <Camera size={24} />
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*"
-                  disabled={uploadingImageType === 'profile'}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    e.target.value = '';
-                    handleImageUpload(file, 'profile', clerkUser.id, setDriverDbData, showNotice, setUploadingImageType);
-                  }}
-                />
-              </label>
-            </div>
-
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">{clerkUser.fullName}</h1>
-              <p className="text-slate-500 text-sm flex items-center gap-2">
-                {isVerified ? <span className="text-green-600 font-bold">Verified Driver</span> : "Pending Approval"} 
-                • {clerkUser.primaryEmailAddress?.emailAddress}
-              </p>
-            </div>
+        <header className="mb-5 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-black uppercase tracking-wide text-slate-400">Driver workspace</p>
+            <h1 className="truncate text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Dashboard</h1>
           </div>
-          
-          <button onClick={handleLogout} className="p-3 text-red-400 hover:bg-red-50 rounded-xl transition flex items-center gap-2 text-sm font-bold">
-            <LogOut size={20}/> Logout
+
+          <button
+            onClick={handleLogout}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-red-100 bg-white px-3 text-sm font-black text-red-500 shadow-sm transition hover:bg-red-50"
+          >
+            <LogOut size={18}/>
+            <span className="hidden sm:inline">Logout</span>
           </button>
+        </header>
+
+        <section className="mb-4 overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 text-white shadow-sm">
+          <div className="p-5 sm:p-7">
+            <div className="flex items-start gap-4">
+              <div className="relative shrink-0">
+                <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/10 text-2xl font-black text-white">
+                  {driverDbData.profilePic || clerkUser.imageUrl ? (
+                    <Image
+                      src={driverDbData.profilePic || clerkUser.imageUrl}
+                      alt={`${driverName} profile`}
+                      width={64}
+                      height={64}
+                      sizes="64px"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    driverName.charAt(0) || 'D'
+                  )}
+                </div>
+
+                {uploadingImageType === 'profile' && (
+                  <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/55">
+                    <Loader2 size={22} className="animate-spin" />
+                  </div>
+                )}
+
+                <label className="absolute -bottom-2 -right-2 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-slate-950 bg-white text-slate-900 shadow-lg transition hover:bg-slate-100" aria-label="Update profile photo">
+                  <Camera size={17} />
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    disabled={uploadingImageType === 'profile'}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = '';
+                      handleImageUpload(file, 'profile', clerkUser.id, applyDriverProfile, showNotice, setUploadingImageType);
+                    }}
+                  />
+                </label>
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <h2 className="truncate text-xl font-black tracking-tight">{driverName}</h2>
+                  <DriverStatusPill isVerified={isVerified} isOnline={isOnline} status={verificationStatus} />
+                </div>
+                {driverEmail && <p className="truncate text-sm font-semibold text-white/55">{driverEmail}</p>}
+                <p className="mt-3 text-sm font-semibold leading-relaxed text-white/75">{nextStep}</p>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+              <div>
+                <p className="text-xs font-black uppercase tracking-wide text-white/40">Availability</p>
+                <p className="mt-1 text-3xl font-black tracking-tight">
+                  {!isVerified ? 'Locked' : isOnline ? 'Online' : 'Offline'}
+                </p>
+              </div>
+
+              <button
+                onClick={isVerified ? toggleStatus : undefined}
+                disabled={!isVerified || isSaving}
+                className={`inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl px-5 text-base font-black transition ${
+                  !isVerified
+                    ? 'cursor-not-allowed bg-white/10 text-white/45'
+                    : isOnline
+                      ? 'bg-white text-slate-950 hover:bg-slate-100'
+                      : 'bg-emerald-400 text-slate-950 hover:bg-emerald-300'
+                } disabled:opacity-70`}
+              >
+                {isSaving ? <Loader2 size={21} className="animate-spin" /> : !isVerified ? <Lock size={21} /> : <Power size={22} />}
+                {!isVerified ? 'Waiting for approval' : isOnline ? 'Go offline' : 'Go online'}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid border-t border-white/10 sm:grid-cols-3">
+            <MetricStrip label="Setup" value={`${completionPercent}%`} />
+            <MetricStrip label="Routes" value={routeList.length || '0'} />
+            <MetricStrip label="Vehicle" value={formData.vehicle || 'Not set'} />
+          </div>
+        </section>
+
+        <div className="mb-5 grid grid-cols-3 gap-2">
+          <QuickAction href="/drive/earnings" icon={Wallet} label="Analytics" detail="Views" />
+          <QuickAction href="/drive/TripHistory" icon={History} label="Trips" detail="History" />
+          <QuickAction href="/support" icon={MessageCircle} label="Support" detail="Help" />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          
-          {/* LEFT: Availability Control */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">Availability</h2>
-            <button 
-              onClick={isVerified ? toggleStatus : null}
-              disabled={!isVerified}
-              className={`w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl ${
-                !isVerified ? 'bg-slate-100 opacity-50 cursor-not-allowed' :
-                isOnline ? 'bg-green-500 shadow-green-200 scale-105' : 
-                'bg-slate-200 shadow-slate-200 grayscale'
-              }`}
-            >
-              {!isVerified ? <Lock size={32} className="text-slate-400"/> : <Power size={48} className="text-white" />}
-            </button>
-            <p className="mt-6 font-bold text-slate-400 uppercase text-sm">
-              {!isVerified ? "Account Locked" : isOnline ? "You are Online" : "You are Offline"}
-            </p>
+        <section className="mb-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-black uppercase tracking-wide text-slate-400">Setup checklist</p>
+              <h2 className="mt-1 text-lg font-black text-slate-950">{completedSetupCount} of {setupItems.length} complete</h2>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-sm font-black text-slate-900">
+              {completionPercent}%
+            </div>
           </div>
 
-          {/* RIGHT: Profile Settings & Car Photo */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-slate-900">Ride Details</h2>
-              <span className="text-xs font-bold text-slate-400 uppercase">Update Info</span>
+          <div className="mb-4 h-2 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${completionPercent}%` }} />
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            {setupItems.map((item) => (
+              <SetupItem key={item.label} item={item} />
+            ))}
+          </div>
+        </section>
+
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.86fr)]">
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-wide text-slate-400">Ride profile</p>
+                <h2 className="mt-1 text-xl font-black text-slate-950">Details riders see</h2>
+              </div>
+              <ShieldCheck size={24} className="text-slate-300" />
+            </div>
+
+            <div className="space-y-4">
+              <LabeledInput
+                icon={Car}
+                label="Vehicle model"
+                value={formData.vehicle}
+                placeholder="e.g. Maruti 800"
+                onChange={(value) => setFormData({ ...formData, vehicle: value })}
+              />
+
+              <LabeledInput
+                icon={Phone}
+                label="Phone number"
+                value={formData.phone}
+                placeholder="e.g. 98630..."
+                inputMode="tel"
+                onChange={(value) => setFormData({ ...formData, phone: value })}
+              />
+
+              <LabeledInput
+                icon={MapPin}
+                label="Routes"
+                value={formData.routes}
+                placeholder="e.g. BOC, Kohima"
+                onChange={(value) => setFormData({ ...formData, routes: value })}
+                helper="Separate areas with commas so riders can find you faster."
+              />
+
+              <button
+                onClick={() => handleUpdate()}
+                disabled={isSaving}
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 text-sm font-black text-white transition hover:bg-black disabled:cursor-wait disabled:opacity-70"
+              >
+                {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18}/>}
+                {isSaving ? 'Saving details...' : 'Save ride details'}
+              </button>
+            </div>
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-wide text-slate-400">Documents</p>
+                <h2 className="mt-1 text-xl font-black text-slate-950">Photos and license</h2>
+              </div>
+              <FileText size={24} className="text-slate-300" />
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-400 uppercase ml-1">Vehicle Model</label>
-                <div className="flex items-center bg-slate-50 rounded-xl px-4 border border-slate-200">
-                  <Car size={18} className="text-slate-400"/>
-                  <input className="bg-transparent w-full p-3 outline-none font-medium" placeholder="e.g. Maruti 800" value={formData.vehicle} onChange={e => setFormData({...formData, vehicle: e.target.value})} />
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label className="text-xs font-black uppercase tracking-wide text-slate-400">Vehicle photo</label>
+                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${driverDbData.carPic ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                    {driverDbData.carPic ? 'Uploaded' : 'Needed'}
+                  </span>
                 </div>
-              </div>
 
-              <div>
-                <label className="text-xs font-bold text-slate-400 uppercase ml-1">Phone Number</label>
-                <div className="flex items-center bg-slate-50 rounded-xl px-4 border border-slate-200">
-                  <Phone size={18} className="text-slate-400"/>
-                  <input className="bg-transparent w-full p-3 outline-none font-medium" placeholder="e.g. 98630..." value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-400 uppercase ml-1">Routes</label>
-                <div className="flex items-center bg-slate-50 rounded-xl px-4 border border-slate-200">
-                  <MapPin size={18} className="text-slate-400"/>
-                  <input className="bg-transparent w-full p-3 outline-none font-medium" placeholder="e.g. BOC, Kohima" value={formData.routes} onChange={e => setFormData({...formData, routes: e.target.value})} />
-                </div>
-              </div>
-
-              {/* CAR PHOTO UPLOADER */}
-              <div>
-                <label className="text-xs font-bold text-slate-400 uppercase ml-1">Vehicle Photo</label>
-                <div className="mt-2 relative h-32 w-full rounded-xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 group">
+                <label className="group relative block h-40 cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition hover:border-slate-300 hover:bg-slate-100">
                   {driverDbData.carPic ? (
                     <Image
                       src={driverDbData.carPic}
-                      alt="Car"
+                      alt={`${formData.vehicle || 'Vehicle'} photo`}
                       fill
                       sizes="(max-width: 768px) 100vw, 480px"
                       className="object-cover"
@@ -426,57 +538,56 @@ export default function DriverDashboard() {
                       <span className="text-xs font-bold">Uploading...</span>
                     </div>
                   )}
-                  
-                  <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer text-white font-bold text-sm">
-                    Click to Change
-                    <input 
-                      type="file" 
-                      className="hidden" 
-                      accept="image/*"
-                      disabled={uploadingImageType === 'car'}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        e.target.value = '';
-                        handleImageUpload(file, 'car', clerkUser.id, setDriverDbData, showNotice, setUploadingImageType);
-                      }}
-                    />
-                  </label>
-                </div>
+
+                  {driverDbData.carPic && uploadingImageType !== 'car' && (
+                    <div className="absolute inset-x-3 bottom-3 flex items-center justify-center gap-2 rounded-2xl bg-black/65 px-3 py-2 text-sm font-black text-white backdrop-blur-sm transition group-hover:bg-black/75">
+                      <Camera size={17} />
+                      Change vehicle photo
+                    </div>
+                  )}
+
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    disabled={uploadingImageType === 'car'}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = '';
+                      handleImageUpload(file, 'car', clerkUser.id, applyDriverProfile, showNotice, setUploadingImageType);
+                    }}
+                  />
+                </label>
               </div>
 
-              {/* DRIVING LICENSE UPLOAD (AI POWERED) */}
               <div>
-                <div className="flex justify-between items-end mb-1">
-                  <label className="text-xs font-bold text-slate-400 uppercase ml-1">Driving License</label>
-                  {driverDbData.verificationStatus && (
-                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
-                      driverDbData.verificationStatus === 'Approved' ? 'bg-green-100 text-green-700' : 
-                      driverDbData.verificationStatus === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
-                      'bg-orange-100 text-orange-700'
-                    }`}>
-                      {driverDbData.verificationStatus}
-                    </span>
-                  )}
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label className="text-xs font-black uppercase tracking-wide text-slate-400">Driving license</label>
+                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${
+                    isVerified ? 'bg-green-50 text-green-700' : driverDbData.licenseUrl ? 'bg-yellow-50 text-yellow-700' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {driverDbData.licenseUrl ? verificationStatus : 'Needed'}
+                  </span>
                 </div>
                 
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition relative overflow-hidden group">
-                  
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <label className="relative flex min-h-36 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center transition hover:border-slate-300 hover:bg-slate-100">
+                  <div className="flex flex-col items-center justify-center">
                     {uploadingLicense ? (
-                      <div className="text-blue-600 flex flex-col items-center font-medium">
-                        <Loader2 size={28} className="animate-spin mb-2" />
-                        <span className="animate-pulse text-sm">AI Scanning...</span>
+                      <div className="flex flex-col items-center font-black text-blue-600">
+                        <Loader2 size={28} className="mb-2 animate-spin" />
+                        <span className="text-sm">Uploading license...</span>
                       </div>
                     ) : driverDbData.licenseUrl ? (
-                       <div className="text-green-600 flex flex-col items-center font-medium">
+                       <div className="flex flex-col items-center font-black text-green-600">
                          <FileText size={28} className="mb-2" />
-                         <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition">Update License</span>
+                         <span className="text-sm text-slate-700">License uploaded</span>
+                         <span className="mt-1 text-xs font-bold text-slate-400">Tap to replace if needed</span>
                        </div>
                     ) : (
                       <>
                         <FileText size={28} className="mb-2 text-slate-400" />
-                        <p className="text-sm text-slate-500 font-bold mt-1">Upload License</p>
-                        <p className="text-xs text-slate-400 mt-1">AI Auto-Verification</p>
+                        <p className="mt-1 text-sm font-black text-slate-600">Upload license</p>
+                        <p className="mt-1 text-xs font-bold text-slate-400">This sends a verification request to admin.</p>
                       </>
                     )}
                   </div>
@@ -489,14 +600,20 @@ export default function DriverDashboard() {
                     disabled={uploadingLicense}
                   />
                 </label>
+
+                {driverDbData.licenseUrl && (
+                  <a
+                    href={driverDbData.licenseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex text-xs font-black text-slate-500 underline underline-offset-4"
+                  >
+                    View uploaded license
+                  </a>
+                )}
               </div>
-
-              <button onClick={() => handleUpdate()} className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-black transition flex items-center justify-center gap-2 mt-4">
-                {isSaving ? "Saving..." : "Save Details"} <Save size={18}/>
-              </button>
             </div>
-          </div>
-
+          </section>
         </div>
       </div>
     </div>
@@ -543,6 +660,79 @@ function DriverDashboardSkeleton({ message }) {
   );
 }
 
+function DriverStatusPill({ isVerified, isOnline, status }) {
+  const label = isVerified ? (isOnline ? 'Live' : 'Approved') : status || 'Pending';
+  const tone = isVerified
+    ? isOnline
+      ? 'bg-emerald-400 text-slate-950'
+      : 'bg-white/15 text-white'
+    : 'bg-yellow-300 text-slate-950';
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide ${tone}`}>
+      {isVerified ? <CheckCircle2 size={13} /> : <Clock size={13} />}
+      {label}
+    </span>
+  );
+}
+
+function MetricStrip({ label, value }) {
+  return (
+    <div className="min-w-0 border-white/10 px-5 py-4 first:border-0 sm:border-l">
+      <p className="text-xs font-black uppercase tracking-wide text-white/35">{label}</p>
+      <p className="mt-1 truncate text-lg font-black text-white">{value}</p>
+    </div>
+  );
+}
+
+function QuickAction({ href, icon: Icon, label, detail }) {
+  return (
+    <Link
+      href={href}
+      className="flex min-h-20 flex-col justify-between rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300"
+    >
+      <Icon size={21} className="text-slate-900" />
+      <span>
+        <span className="block text-sm font-black text-slate-950">{label}</span>
+        <span className="block truncate text-xs font-bold text-slate-400">{detail}</span>
+      </span>
+    </Link>
+  );
+}
+
+function SetupItem({ item }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3">
+      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${item.done ? 'bg-emerald-100 text-emerald-700' : 'bg-white text-slate-400'}`}>
+        {item.done ? <CheckCircle2 size={19} /> : <Clock size={18} />}
+      </div>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-black text-slate-950">{item.label}</p>
+        <p className="truncate text-xs font-bold text-slate-400">{item.detail}</p>
+      </div>
+    </div>
+  );
+}
+
+function LabeledInput({ icon: Icon, label, value, placeholder, onChange, helper, inputMode = 'text' }) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">{label}</span>
+      <span className="flex min-h-12 items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 transition focus-within:border-slate-300 focus-within:bg-white">
+        <Icon size={18} className="mr-3 shrink-0 text-slate-400" />
+        <input
+          className="min-w-0 flex-1 bg-transparent py-3 text-base font-bold text-slate-950 outline-none placeholder:text-slate-300"
+          value={value}
+          placeholder={placeholder}
+          inputMode={inputMode}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </span>
+      {helper && <span className="mt-2 block text-xs font-semibold text-slate-400">{helper}</span>}
+    </label>
+  );
+}
+
 function DashboardNotice({ notice, onDismiss }) {
   const isSuccess = notice.type === 'success';
   const isInfo = notice.type === 'info';
@@ -583,7 +773,7 @@ function DashboardNotice({ notice, onDismiss }) {
 }
 
 // --- HELPER: HANDLE IMAGE UPLOAD ---
-async function handleImageUpload(file, type, clerkId, setDriverDbData, showNotice, setUploadingImageType) {
+async function handleImageUpload(file, type, clerkId, onDriverUpdated, showNotice, setUploadingImageType) {
   if (!file) return;
 
   setUploadingImageType(type);
@@ -601,7 +791,7 @@ async function handleImageUpload(file, type, clerkId, setDriverDbData, showNotic
     
     const data = await res.json();
     if (data.success) {
-      setDriverDbData(data.driver);
+      onDriverUpdated(data.driver);
       writeCachedDriverProfile(clerkId, data.driver);
       showNotice(
         'success',
