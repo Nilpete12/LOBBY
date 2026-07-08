@@ -52,23 +52,19 @@ export default function UserTable({ role, limit, refreshKey = 0, onChanged, onSe
 
   const fetchUsers = useCallback(async () => {
     try {
-      const params = new URLSearchParams();
-      if (role) params.set('role', role);
-      if (limit) params.set('limit', String(limit));
-      const queryString = params.toString() ? `?${params.toString()}` : '';
-
-      const res = await fetch(`${API_BASE_URL}/admin/users${queryString}`, {
+      // Add credentials: 'same-origin' to send the admin session cookie!
+      const res = await fetch(`${API_BASE_URL}/admin/users`, {
         cache: 'no-store',
-        credentials: 'same-origin',
+        credentials: 'same-origin' 
       });
       const data = await res.json();
+
       if (!data.success) return [];
-      return data.users;
+      return role ? data.users.filter((user) => user.role === role) : data.users;
     } catch (err) {
-      console.error('Failed to fetch admin users:', err);
       return [];
     }
-  }, [limit, role]);
+  }, [role]);
 
   const refreshUsers = useCallback(async () => {
     const nextUsers = await fetchUsers();

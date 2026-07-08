@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { formatActivityLog } from '@/lib/supabaseFormat';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 
@@ -7,10 +7,18 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 async function countRows(table, apply = (query) => query) {
-  const query = apply(supabase.from(table).select('*', { count: 'exact', head: true }));
-  const { count, error } = await query;
-  if (error) throw error;
-  return count || 0;
+  try {
+    const query = apply(supabaseAdmin.from(table).select('*', { count: 'exact', head: true }));
+    const { count, error } = await query;
+    if (error) {
+      const err = new Error(`Failed to count ${table}: ${error.message}`);
+      throw err;
+    }
+    return count || 0;
+  } catch (error) {
+    console.error(`[countRows] Error counting ${table}:`, error.message || error);
+    throw error;
+  }
 }
 
 async function safeCountRows(table, apply = (query) => query) {
@@ -24,7 +32,7 @@ async function safeCountRows(table, apply = (query) => query) {
 
 async function countPendingDriverLicenses() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .select('verification_status')
       .eq('role', 'driver')
@@ -60,9 +68,16 @@ function topDestinations(rows = []) {
 }
 
 export async function GET() {
-  if (!(await isAdminAuthenticated())) return adminUnauthorized();
+  console.log('[Admin Stats] Request received');
+  
+  if (!(await isAdminAuthenticated())) {
+    console.log('[Admin Stats] Authentication failed');
+    return adminUnauthorized();
+  }
 
   try {
+    console.log('[Admin Stats] Starting stats aggregation');
+    
     const [
       totalUsers,
       totalDrivers,
@@ -80,27 +95,46 @@ export async function GET() {
       bookingsResult,
       recentActivityResult,
     ] = await Promise.all([
-      countRows('users'),
-      countRows('users', (query) => query.eq('role', 'driver')),
-      countRows('users', (query) => query.eq('role', 'driver').eq('is_available', true)),
-      countRows('users', (query) => query.eq('role', 'driver').eq('is_verified', false)),
+      safeCountRows('users'),
+      safeCountRows('users', (query) => query.eq('role', 'driver')),
+      safeCountRows('users', (query) => query.eq('role', 'driver').eq('is_available', true)),
+      safeCountRows('users', (query) => query.eq('role', 'driver').eq('is_verified', false)),
       safeCountRows('verification_requests', (query) => query.in('status', ['pending', 'Pending'])),
       countPendingDriverLicenses(),
-      countRows('complaints', (query) => query.neq('status', 'resolved')),
-      countRows('users', (query) => query.eq('account_status', 'suspended')),
-      countRows('users', (query) => query.eq('role', 'driver').eq('subscription_status', 'paid')),
-      countRows('complaints', (query) => query.eq('report_type', 'driver_report').neq('status', 'resolved')),
-      countRows('analytics', (query) => query.eq('event_type', 'call_click')),
-      countRows('analytics', (query) => query.eq('event_type', 'profile_view')),
-      countRows('analytics', (query) => query.eq('event_type', 'whatsapp_click')),
-      supabase.from('bookings').select('status,destination'),
-      supabase.from('admin_activity_logs').select('*').order('created_at', { ascending: false }).limit(5),
+      safeCountRows('complaints', (query) => query.neq('status', 'resolved')),
+      safeCountRows('users', (query) => query.eq('account_status', 'suspended')),
+      safeCountRows('users', (query) => query.eq('role', 'driver').eq('subscription_status', 'paid')),
+      safeCountRows('complaints', (query) => query.eq('report_type', 'driver_report').neq('status', 'resolved')),
+      safeCountRows('analytics', (query) => query.eq('event_type', 'call_click')),
+      safeCountRows('analytics', (query) => query.eq('event_type', 'profile_view')),
+      safeCountRows('analytics', (query) => query.eq('event_type', 'whatsapp_click')),
+      (async () => {
+        try {
+          const result = await supabaseAdmin.from('bookings').select('status,destination');
+          return result;
+        } catch (err) {
+          console.error('[Admin Stats] Error fetching bookings:', err);
+          return { data: [], error: err };
+        }
+      })(),
+      (async () => {
+        try {
+          const result = await supabaseAdmin.from('admin_activity_logs').select('*').order('created_at', { ascending: false }).limit(5);
+          return result;
+        } catch (err) {
+          console.error('[Admin Stats] Error fetching activity logs:', err);
+          return { data: [], error: err };
+        }
+      })(),
     ]);
 
-    if (bookingsResult.error) throw bookingsResult.error;
-    if (recentActivityResult.error) throw recentActivityResult.error;
+    console.log('[Admin Stats] Counters aggregated successfully:', { totalUsers, totalDrivers, activeDrivers });
 
-    const bookings = bookingsResult.data || [];
+    if (bookingsResult?.error) console.warn('[Admin Stats] Bookings error:', bookingsResult.error);
+    if (recentActivityResult?.error) console.warn('[Admin Stats] Activity logs error:', recentActivityResult.error);
+
+    const bookings = bookingsResult?.data || [];
+    const recentActivity = recentActivityResult?.data || [];
 
     const response = NextResponse.json({
       success: true,
@@ -122,14 +156,23 @@ export async function GET() {
         activeRides: bookings.filter((booking) => booking.status === 'accepted').length,
         bookingStatus: countByKey(bookings, 'status'),
         topDestinations: topDestinations(bookings),
-        recentActivity: (recentActivityResult.data || []).map(formatActivityLog),
+        recentActivity: recentActivity.map(formatActivityLog),
       },
     });
 
     response.headers.set('Cache-Control', 'no-store, max-age=0');
+    console.log('[Admin Stats] Response sent successfully');
     return response;
   } catch (error) {
-    console.error('Admin Stats Error:', error);
-    return NextResponse.json({ success: false, message: 'Failed to fetch admin stats' }, { status: 500 });
+    console.error('[Admin Stats] Error:', error?.message || error, error?.stack);
+    const isDev = process.env.NODE_ENV === 'development';
+    return NextResponse.json(
+      { 
+        success: false, 
+        message: 'Failed to fetch admin stats',
+        ...(isDev && { error: error?.message || String(error) })
+      }, 
+      { status: 500 }
+    );
   }
 }
