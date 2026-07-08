@@ -372,17 +372,16 @@ export default function AdminPage() {
     if (!isAuthenticated) return;
 
     const syncInterval = setInterval(() => {
-      // Pass 'true' so the UI pulls fresh data silently without flashing the loading spinner
       refreshAdminData(true);
+      refreshUserTables(); // <-- ADD THIS LINE to auto-refresh the users table
 
-      // Only refresh the heavy lists if the admin is actively looking at that tab
       if (activeTab === 'activity') loadActivity(true);
       if (activeTab === 'complaints') loadComplaints(true);
       if (activeTab === 'bookings') loadBookings(true);
-    }, 5000); // Scans the database every 5 seconds
+    }, 5000); 
 
     return () => clearInterval(syncInterval);
-  }, [isAuthenticated, activeTab, refreshAdminData, loadActivity, loadComplaints, loadBookings]);
+  }, [isAuthenticated, activeTab, refreshAdminData, loadActivity, loadComplaints, loadBookings, refreshUserTables]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -1077,7 +1076,7 @@ export default function AdminPage() {
 
 function AdminExitPrompt({ onCancel, onConfirm }) {
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/60 p-3 sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-60 flex items-end justify-center bg-slate-950/60 p-3 sm:items-center sm:p-4">
       <section className="w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl">
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600">

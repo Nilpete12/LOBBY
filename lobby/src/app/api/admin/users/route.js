@@ -1,44 +1,29 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { isAdminAuthenticated } from '@/lib/adminAuth';
-
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-function adminJson(body, init = {}) {
-  const response = NextResponse.json(body, init);
-  response.headers.set('Cache-Control', 'no-store, max-age=0');
-  return response;
-}
 
 export async function GET(req) {
   if (!(await isAdminAuthenticated())) {
-    return adminJson({ success: false, message: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    // Extract query parameters (UserTable might pass a role or limit filter)
     const { searchParams } = new URL(req.url);
     const role = searchParams.get('role');
     const limit = parseInt(searchParams.get('limit')) || 50;
 
-    // Build the Supabase query
-    let query = supabase
+    let query = supabaseAdmin
       .from('users')
       .select('*')
-      .order('created_at', { ascending: false, nullsFirst: false })
       .limit(limit);
 
-    // Apply role filter if the dashboard tab requires it
     if (role) {
       query = query.eq('role', role);
     }
 
     const { data: users, error } = await query;
-
     if (error) throw error;
 
-    // Map the database columns so the frontend table maps them correctly
     const formattedUsers = users.map(u => ({
       id: u.id,
       clerkId: u.clerk_id,
@@ -52,9 +37,17 @@ export async function GET(req) {
       createdAt: u.created_at
     }));
 
-    return adminJson({ success: true, users: formattedUsers });
+    return NextResponse.json({ success: true, users: formattedUsers });
   } catch (error) {
-    console.error("User fetch error:", error);
-    return adminJson({ success: false, error: 'Server error' }, { status: 500 });
+    console.error('[Admin Users API] Error fetching users:', error);
+    const isDev = process.env.NODE_ENV === 'development';
+    return NextResponse.json(
+      { 
+        success: false, 
+        message: 'Failed to fetch users',
+        ...(isDev && { error: error.message })
+      }, 
+      { status: 500 }
+    );
   }
 }
