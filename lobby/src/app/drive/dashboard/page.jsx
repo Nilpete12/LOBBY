@@ -56,6 +56,7 @@ export default function DriverDashboard() {
   const [isOnline, setIsOnline] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingLicense, setUploadingLicense] = useState(false);
+  const [uploadingImageType, setUploadingImageType] = useState('');
   const [notice, setNotice] = useState(null);
   const [dashboardError, setDashboardError] = useState('');
 
@@ -200,7 +201,8 @@ export default function DriverDashboard() {
 
   // --- 3. AI LICENSE UPLOAD HANDLER ---
   const handleLicenseUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
 
     setUploadingLicense(true);
@@ -313,7 +315,12 @@ export default function DriverDashboard() {
                   type="file" 
                   className="hidden" 
                   accept="image/*"
-                  onChange={(e) => handleImageUpload(e.target.files[0], 'profile', clerkUser.id, setDriverDbData, showNotice)}
+                  disabled={uploadingImageType === 'profile'}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    handleImageUpload(file, 'profile', clerkUser.id, setDriverDbData, showNotice, setUploadingImageType);
+                  }}
                 />
               </label>
             </div>
@@ -399,8 +406,24 @@ export default function DriverDashboard() {
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
-                      <UploadCloud size={24} />
-                      <span className="text-xs font-bold mt-1">Upload Car Photo</span>
+                      {uploadingImageType === 'car' ? (
+                        <>
+                          <Loader2 size={24} className="animate-spin text-blue-500" />
+                          <span className="text-xs font-bold mt-1 text-blue-500">Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud size={24} />
+                          <span className="text-xs font-bold mt-1">Upload Car Photo</span>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {driverDbData.carPic && uploadingImageType === 'car' && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/55 text-white">
+                      <Loader2 size={24} className="mb-2 animate-spin" />
+                      <span className="text-xs font-bold">Uploading...</span>
                     </div>
                   )}
                   
@@ -410,7 +433,12 @@ export default function DriverDashboard() {
                       type="file" 
                       className="hidden" 
                       accept="image/*"
-                      onChange={(e) => handleImageUpload(e.target.files[0], 'car', clerkUser.id, setDriverDbData, showNotice)}
+                      disabled={uploadingImageType === 'car'}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = '';
+                        handleImageUpload(file, 'car', clerkUser.id, setDriverDbData, showNotice, setUploadingImageType);
+                      }}
                     />
                   </label>
                 </div>
@@ -555,8 +583,10 @@ function DashboardNotice({ notice, onDismiss }) {
 }
 
 // --- HELPER: HANDLE IMAGE UPLOAD ---
-async function handleImageUpload(file, type, clerkId, setDriverDbData, showNotice) {
+async function handleImageUpload(file, type, clerkId, setDriverDbData, showNotice, setUploadingImageType) {
   if (!file) return;
+
+  setUploadingImageType(type);
 
   const formData = new FormData();
   formData.append('image', file);
@@ -584,5 +614,7 @@ async function handleImageUpload(file, type, clerkId, setDriverDbData, showNotic
   } catch (err) {
     console.error(err);
     showNotice('error', 'Upload failed', 'The image could not be uploaded. Please try again.');
+  } finally {
+    setUploadingImageType('');
   }
 }
