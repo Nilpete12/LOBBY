@@ -9,6 +9,8 @@ import API_BASE_URL from '@/config';
 import IncomingRideAlert from '@/components/IncomingRideAlert';
 
 const DRIVER_PROFILE_CACHE_TTL = 60 * 1000;
+const CLIENT_UPLOAD_TARGET_BYTES = 3.5 * 1024 * 1024;
+const CANVAS_COMPRESSIBLE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
 
 function getDriverProfileCacheKey(clerkId) {
   return `lobby:driver-profile:${clerkId}`;
@@ -211,18 +213,21 @@ export default function DriverDashboard() {
     setUploadingLicense(true);
 
     const uploadData = new FormData();
-    uploadData.append('image', file);
-    uploadData.append('clerkId', clerkUser.id);
-    uploadData.append('type', 'license'); 
-    uploadData.append('driverName', clerkUser.fullName);
 
     try {
+      const uploadFile = await prepareImageForUpload(file, 'license');
+      uploadData.append('image', uploadFile);
+      uploadData.append('clerkId', clerkUser.id);
+      uploadData.append('type', 'license');
+      uploadData.append('driverName', clerkUser.fullName);
+
       const res = await fetch(`${API_BASE_URL}/driver/upload`, {
         method: 'POST',
+        credentials: 'same-origin',
         body: uploadData
       });
       
-      const data = await res.json();
+      const data = await readUploadResponse(res);
       
       if (data.success) {
         applyDriverProfile(data.driver);
@@ -772,6 +777,93 @@ function DashboardNotice({ notice, onDismiss }) {
   );
 }
 
+async function readUploadResponse(response) {
+  const text = await response.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = {};
+  }
+
+  if (response.ok) return data;
+
+  return {
+    success: false,
+    message: data.message || uploadStatusMessage(response.status),
+  };
+}
+
+function uploadStatusMessage(status) {
+  if (status === 401) return 'Please sign in again before uploading.';
+  if (status === 403) return 'Only driver accounts can upload vehicle documents.';
+  if (status === 404) return 'Driver profile or upload storage was not found.';
+  if (status === 413) return 'That image is too large. Try a smaller photo.';
+  return 'Upload failed. Please try again.';
+}
+
+function loadImageElement(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new window.Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Could not read image'));
+    };
+
+    image.src = objectUrl;
+  });
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
+}
+
+async function prepareImageForUpload(file, type) {
+  if (!file || file.size <= CLIENT_UPLOAD_TARGET_BYTES || typeof document === 'undefined') return file;
+
+  const fileType = String(file.type || '').toLowerCase();
+  if (!CANVAS_COMPRESSIBLE_TYPES.has(fileType)) return file;
+
+  try {
+    const image = await loadImageElement(file);
+    const width = image.naturalWidth || image.width;
+    const height = image.naturalHeight || image.height;
+    const maxSide = type === 'license' ? 2000 : 1600;
+    const scale = Math.min(1, maxSide / Math.max(width, height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+
+    const context = canvas.getContext('2d');
+    if (!context) return file;
+
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    for (const quality of [0.82, 0.72, 0.62]) {
+      const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
+      if (blob && blob.size < file.size) {
+        const baseName = file.name.replace(/\.[^.]+$/, '') || `${type}-upload`;
+        return new File([blob], `${baseName}.jpg`, {
+          type: 'image/jpeg',
+          lastModified: Date.now(),
+        });
+      }
+    }
+  } catch (error) {
+    console.warn('Image compression skipped:', error);
+  }
+
+  return file;
+}
+
 // --- HELPER: HANDLE IMAGE UPLOAD ---
 async function handleImageUpload(file, type, clerkId, onDriverUpdated, showNotice, setUploadingImageType) {
   if (!file) return;
@@ -779,17 +871,20 @@ async function handleImageUpload(file, type, clerkId, onDriverUpdated, showNotic
   setUploadingImageType(type);
 
   const formData = new FormData();
-  formData.append('image', file);
-  formData.append('clerkId', clerkId); 
-  formData.append('type', type);
 
   try {
+    const uploadFile = await prepareImageForUpload(file, type);
+    formData.append('image', uploadFile);
+    formData.append('clerkId', clerkId);
+    formData.append('type', type);
+
     const res = await fetch(`${API_BASE_URL}/driver/upload`, {
       method: 'POST',
-      body: formData 
+      credentials: 'same-origin',
+      body: formData
     });
     
-    const data = await res.json();
+    const data = await readUploadResponse(res);
     if (data.success) {
       onDriverUpdated(data.driver);
       writeCachedDriverProfile(clerkId, data.driver);

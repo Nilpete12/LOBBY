@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import { randomUUID } from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase';
 import { formatUser } from '@/lib/supabaseFormat';
@@ -20,6 +20,7 @@ const OPTIONAL_VERIFICATION_REQUEST_COLUMNS = new Set([
 ]);
 
 const ALLOWED_UPLOAD_TYPES = new Set(['car', 'license', 'profile']);
+const DRIVER_DOCUMENTS_BUCKET = 'driver-documents';
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 const IMAGE_EXTENSIONS = {
   'image/jpeg': 'jpg',
@@ -42,6 +43,84 @@ function cleanString(value, maxLength = 500) {
 
 function safeStorageSegment(value) {
   return cleanString(value, 120).replace(/[^a-zA-Z0-9_-]/g, '_') || 'driver';
+}
+
+function isMissingBucketError(error = {}) {
+  const text = [error.message, error.error, error.name].filter(Boolean).join(' ').toLowerCase();
+  return error.statusCode === 404 || error.status === 404 || text.includes('bucket not found') || text.includes('not found');
+}
+
+function getUploadErrorMessage(error = {}) {
+  const text = [error.message, error.details, error.hint, error.error].filter(Boolean).join(' ');
+  const lowerText = text.toLowerCase();
+
+  if (isMissingBucketError(error)) {
+    return 'Storage is not ready yet. Please try again in a moment.';
+  }
+
+  if (lowerText.includes('row-level security') || lowerText.includes('permission')) {
+    return 'Storage permission blocked the upload. Check the Supabase service role key.';
+  }
+
+  if (lowerText.includes('column') && lowerText.includes('does not exist')) {
+    return 'The driver upload database columns are missing. Please update the Supabase users table.';
+  }
+
+  if (lowerText.includes('payload') || lowerText.includes('too large') || error.status === 413) {
+    return 'Image is too large. Please use a smaller photo and try again.';
+  }
+
+  return 'Upload failed. Please try again.';
+}
+
+async function ensureDriverDocumentsBucket() {
+  const { data: bucket, error } = await supabaseAdmin.storage.getBucket(DRIVER_DOCUMENTS_BUCKET);
+
+  if (!error) {
+    if (bucket?.public === false) {
+      const { error: updateError } = await supabaseAdmin.storage.updateBucket(DRIVER_DOCUMENTS_BUCKET, {
+        public: true,
+        allowedMimeTypes: Object.keys(IMAGE_EXTENSIONS),
+        fileSizeLimit: MAX_UPLOAD_BYTES,
+      });
+
+      if (updateError) throw updateError;
+    }
+
+    return;
+  }
+
+  if (!isMissingBucketError(error)) throw error;
+
+  const { error: createError } = await supabaseAdmin.storage.createBucket(DRIVER_DOCUMENTS_BUCKET, {
+    public: true,
+    allowedMimeTypes: Object.keys(IMAGE_EXTENSIONS),
+    fileSizeLimit: MAX_UPLOAD_BYTES,
+  });
+
+  if (createError && !String(createError.message || '').toLowerCase().includes('already exists')) {
+    throw createError;
+  }
+}
+
+async function getClerkRole(userId, sessionClaims) {
+  const claimRole = cleanString(
+    sessionClaims?.metadata?.role ||
+      sessionClaims?.publicMetadata?.role ||
+      sessionClaims?.public_metadata?.role,
+    40
+  ).toLowerCase();
+
+  if (claimRole) return claimRole;
+
+  try {
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    return cleanString(user?.publicMetadata?.role, 40).toLowerCase();
+  } catch (error) {
+    console.error('Failed to read Clerk role for upload:', error);
+    return '';
+  }
 }
 
 async function createVerificationRequest(driver, publicUrl) {
@@ -76,7 +155,7 @@ async function createVerificationRequest(driver, publicUrl) {
 
 export async function POST(req) {
   try {
-    const { userId } = await auth();
+    const { userId, sessionClaims } = await auth();
     const formData = await req.formData();
     const file = formData.get('image');
     const clerkId = cleanString(formData.get('clerkId'), 120);
@@ -115,18 +194,26 @@ export async function POST(req) {
       .maybeSingle();
 
     if (driverError) throw driverError;
-    if (!existingDriver || existingDriver.role !== 'driver') {
-      return uploadJson({ success: false, message: 'Driver profile not found.' }, { status: 404 });
+    if (!existingDriver) {
+      return uploadJson({ success: false, message: 'Driver profile not found. Please complete driver onboarding first.' }, { status: 404 });
+    }
+
+    const supabaseRole = cleanString(existingDriver.role, 40).toLowerCase();
+    const clerkRole = supabaseRole === 'driver' ? 'driver' : await getClerkRole(userId, sessionClaims);
+    if (supabaseRole !== 'driver' && clerkRole !== 'driver') {
+      return uploadJson({ success: false, message: 'Only driver accounts can upload vehicle documents.' }, { status: 403 });
     }
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const fileName = `drivers/${safeStorageSegment(clerkId)}/${type}-${Date.now()}-${randomUUID()}.${fileExt}`;
 
+    await ensureDriverDocumentsBucket();
+
     // 2. Upload to Supabase Storage bucket named 'driver-documents'
     const { error: uploadError } = await supabaseAdmin
       .storage
-      .from('driver-documents')
+      .from(DRIVER_DOCUMENTS_BUCKET)
       .upload(fileName, buffer, {
         contentType: file.type,
         upsert: true
@@ -137,8 +224,10 @@ export async function POST(req) {
     // 3. Get the public URL for the uploaded image
     const { data: { publicUrl } } = supabaseAdmin
       .storage
-      .from('driver-documents')
+      .from(DRIVER_DOCUMENTS_BUCKET)
       .getPublicUrl(fileName);
+
+    if (!publicUrl) throw new Error('Supabase did not return a public URL for the uploaded image');
 
     // 4. Update the appropriate column in the users table
     const updatePayload = {};
@@ -166,6 +255,6 @@ export async function POST(req) {
 
   } catch (error) {
     console.error("Upload Error:", error);
-    return uploadJson({ success: false, message: 'Upload failed. Please try again.' }, { status: 500 });
+    return uploadJson({ success: false, message: getUploadErrorMessage(error) }, { status: 500 });
   }
 }
