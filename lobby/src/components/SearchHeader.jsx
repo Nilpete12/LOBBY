@@ -21,7 +21,10 @@ export default function SearchHeader({ onSearch }) {
         <div className="flex-1 relative">
           <MapPin className="absolute left-4 top-3.5 text-slate-400" size={20} />
           <input 
-            type="text" 
+            type="search"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
             placeholder="Where are you heading?" 

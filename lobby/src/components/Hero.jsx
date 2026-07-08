@@ -55,8 +55,11 @@ export default function Hero() {
 
               {/* Text Input - Slightly shorter on mobile */}
               <input 
-                type="text" 
+                type="search"
                 name="q"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
                 placeholder="Where to?" 
                 aria-label="Destination"
                 className="w-full h-12 md:h-14 bg-transparent outline-none text-base md:text-lg text-slate-800 placeholder-slate-400 px-2"

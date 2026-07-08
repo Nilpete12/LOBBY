@@ -85,17 +85,23 @@ body {
   font-display: swap;
 }
 
-/* Fix browser autofill styling for dark inputs */
+/* Keep browser autofill from painting rider/search inputs as dark blocks. */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    /* Matches your dark blue input background */
-    -webkit-box-shadow: 0 0 0 30px #031a37 inset !important;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #0f172a !important;
+  caret-color: #0f766e;
+  transition: background-color 5000s ease-in-out 0s;
+}
 
-    /* Forces the text to stay white */
-    -webkit-text-fill-color: white !important;
-
-    transition: background-color 5000s ease-in-out 0s;
+input.dark-autofill:-webkit-autofill,
+input.dark-autofill:-webkit-autofill:hover,
+input.dark-autofill:-webkit-autofill:focus,
+input.dark-autofill:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #031a37 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
 }
 

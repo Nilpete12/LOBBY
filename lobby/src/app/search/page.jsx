@@ -244,9 +244,12 @@ export default function SearchPage() {
           <form action="/search" onSubmit={handleSearch} className="relative flex items-center">
             <MapPin className="absolute left-4 text-slate-400" size={20} />
             <input
-              type="text"
+              type="search"
               name="q"
               aria-label="Destination"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
               placeholder="Where do you want to go? (e.g. Dawki)"
               className="w-full rounded-2xl border border-slate-200 py-4 pl-12 pr-14 text-base font-medium shadow-sm outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 sm:text-lg"
               value={searchQuery}
