@@ -9,6 +9,7 @@ import API_BASE_URL from '@/config';
 import InstantBook from '@/components/InstantBook';
 
 const FILTERS = ['All Rides', 'Hatchback', 'SUV', 'Top Rated'];
+const SEARCH_CACHE_VERSION = 'v2';
 const SEARCH_CACHE_TTL = 45 * 1000;
 
 function getInitialSearchQuery() {
@@ -18,7 +19,7 @@ function getInitialSearchQuery() {
 
 function getSearchCacheKey(query = '') {
   const normalizedQuery = query.trim().toLowerCase() || 'all';
-  return `lobby:driver-search:${normalizedQuery}`;
+  return `lobby:driver-search:${SEARCH_CACHE_VERSION}:${normalizedQuery}`;
 }
 
 function readCachedDrivers(query = '') {
@@ -376,6 +377,16 @@ function getDriverInitial(driver) {
   return driver.fullName?.charAt(0) || 'D';
 }
 
+function getDriverVehiclePlate(driver = {}) {
+  return String(
+    driver.vehiclePlate ||
+    driver.vehicle_plate ||
+    driver.numberPlate ||
+    driver.plateNumber ||
+    ''
+  ).trim();
+}
+
 function DriverAvatar({ driver, size = 64 }) {
   return (
     <div
@@ -401,7 +412,7 @@ function DriverAvatar({ driver, size = 64 }) {
 
 function DriverResultCard({ driver, onSelect }) {
   const vehicle = driver.vehicle || 'Standard Taxi';
-  const vehiclePlate = driver.vehiclePlate || '';
+  const vehiclePlate = getDriverVehiclePlate(driver);
   const routes = getDriverRoutes(driver);
 
   return (
@@ -469,7 +480,7 @@ function getWhatsAppHref(phone) {
 
 function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
   const vehicle = driver.vehicle || 'Standard Taxi';
-  const vehiclePlate = driver.vehiclePlate || '';
+  const vehiclePlate = getDriverVehiclePlate(driver);
   const routes = getDriverRoutes(driver);
   const phoneHref = driver.phone ? `tel:${driver.phone}` : undefined;
   const whatsappHref = getWhatsAppHref(driver.phone);
@@ -589,15 +600,15 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
             <p className="mt-1 truncate text-sm font-bold text-slate-900">{driver.phone || 'Unavailable'}</p>
           </div>
 
-          {vehiclePlate && (
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#0F766E] shadow-sm">
-                <Hash size={18} />
-              </div>
-              <p className="text-xs font-bold uppercase text-slate-400">Number plate</p>
-              <p className="mt-1 truncate text-sm font-black uppercase tracking-wide text-slate-900">{vehiclePlate}</p>
+          <div className="rounded-2xl bg-slate-50 p-4">
+            <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#0F766E] shadow-sm">
+              <Hash size={18} />
             </div>
-          )}
+            <p className="text-xs font-bold uppercase text-slate-400">Number plate</p>
+            <p className={`mt-1 truncate text-sm font-black uppercase tracking-wide ${vehiclePlate ? 'text-slate-900' : 'text-slate-400'}`}>
+              {vehiclePlate || 'Not added'}
+            </p>
+          </div>
         </div>
 
         <div className="mb-6">
