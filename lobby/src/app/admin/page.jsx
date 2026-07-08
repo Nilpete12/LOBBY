@@ -134,6 +134,7 @@ export default function AdminPage() {
   const [notice, setNotice] = useState(null);
   const [resetState, setResetState] = useState({ status: 'idle', message: '' });
   const [syncState, setSyncState] = useState({ status: 'idle', message: '' });
+  const [isManualRefreshing, setManualRefreshing] = useState(false);
   const [usersRefreshKey, setUsersRefreshKey] = useState(0);
   const [loading, setLoading] = useState({
     complaints: false,
@@ -259,6 +260,20 @@ export default function AdminPage() {
     ]);
   }, [loadActivity, loadBookings, loadComplaints, refreshAdminData, refreshUserTables]);
 
+  const refreshAdminManually = useCallback(async () => {
+    setManualRefreshing(true);
+
+    try {
+      await refreshAdminWorkspace();
+      showNotice('success', 'Admin data refreshed.');
+    } catch (error) {
+      console.error('Manual admin refresh failed', error);
+      showNotice('error', 'Could not refresh admin data.');
+    } finally {
+      setManualRefreshing(false);
+    }
+  }, [refreshAdminWorkspace, showNotice]);
+
   const syncClerkUsers = useCallback(async () => {
     setSyncState({ status: 'loading', message: '' });
 
@@ -366,22 +381,6 @@ export default function AdminPage() {
     window.addEventListener('pageshow', verifyRestoredAdminSession);
     return () => window.removeEventListener('pageshow', verifyRestoredAdminSession);
   }, [isAuthenticated]);
-
-  // REAL-TIME AUTO-SYNC BACKGROUND LOOP
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const syncInterval = setInterval(() => {
-      refreshAdminData(true);
-      refreshUserTables(); // <-- ADD THIS LINE to auto-refresh the users table
-
-      if (activeTab === 'activity') loadActivity(true);
-      if (activeTab === 'complaints') loadComplaints(true);
-      if (activeTab === 'bookings') loadBookings(true);
-    }, 5000); 
-
-    return () => clearInterval(syncInterval);
-  }, [isAuthenticated, activeTab, refreshAdminData, loadActivity, loadComplaints, loadBookings, refreshUserTables]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -981,6 +980,15 @@ export default function AdminPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                onClick={refreshAdminManually}
+                disabled={isManualRefreshing}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+              >
+                <RefreshCw size={17} className={isManualRefreshing ? 'animate-spin' : ''} />
+                <span className="hidden sm:inline">{isManualRefreshing ? 'Refreshing' : 'Refresh'}</span>
+              </button>
+
               <button
                 onClick={syncClerkUsers}
                 disabled={syncState.status === 'loading'}
