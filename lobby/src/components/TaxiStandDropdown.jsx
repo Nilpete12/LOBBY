@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Car, Check, ChevronDown, MapPin } from 'lucide-react';
 import { TAXI_STANDS } from '@/lib/taxiStands';
 
@@ -30,18 +31,53 @@ export default function TaxiStandDropdown({
   const listId = useId();
   const rootRef = useRef(null);
   const buttonRef = useRef(null);
+  const panelRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [panelStyle, setPanelStyle] = useState(null);
   const [internalValue, setInternalValue] = useState(defaultValue);
   const isControlled = value !== undefined;
   const selectedValue = isControlled ? value : internalValue;
   const selectedStand = TAXI_STANDS.find((stand) => stand.name === selectedValue);
   const styles = VARIANT_STYLES[variant] || VARIANT_STYLES.search;
 
+  const updatePanelPosition = useCallback(() => {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const viewportPadding = 12;
+    const gap = 8;
+    const preferredMaxHeight = 320;
+    const minHeight = 168;
+    const width = Math.min(rect.width, window.innerWidth - viewportPadding * 2);
+    const left = Math.min(
+      Math.max(rect.left, viewportPadding),
+      window.innerWidth - viewportPadding - width
+    );
+    const spaceBelow = window.innerHeight - rect.bottom - viewportPadding - gap;
+    const spaceAbove = rect.top - viewportPadding - gap;
+    const openAbove = spaceBelow < 260 && spaceAbove > spaceBelow;
+    const availableSpace = openAbove ? spaceAbove : spaceBelow;
+    const maxHeight = Math.max(minHeight, Math.min(preferredMaxHeight, availableSpace));
+    const top = openAbove
+      ? Math.max(viewportPadding, rect.top - gap - maxHeight)
+      : Math.min(window.innerHeight - viewportPadding - maxHeight, rect.bottom + gap);
+
+    setPanelStyle({ left, top, width, maxHeight });
+  }, []);
+
   useEffect(() => {
     if (!isOpen) return;
 
+    updatePanelPosition();
+
     const handlePointerDown = (event) => {
-      if (!rootRef.current?.contains(event.target)) setIsOpen(false);
+      const target = event.target;
+      if (
+        !rootRef.current?.contains(target) &&
+        !panelRef.current?.contains(target)
+      ) {
+        setIsOpen(false);
+      }
     };
 
     const handleKeyDown = (event) => {
@@ -53,12 +89,16 @@ export default function TaxiStandDropdown({
 
     document.addEventListener('pointerdown', handlePointerDown);
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('resize', updatePanelPosition);
+    window.addEventListener('scroll', updatePanelPosition, true);
 
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown);
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', updatePanelPosition);
+      window.removeEventListener('scroll', updatePanelPosition, true);
     };
-  }, [isOpen]);
+  }, [isOpen, updatePanelPosition]);
 
   const selectStand = (nextValue) => {
     if (!isControlled) setInternalValue(nextValue);
@@ -78,7 +118,10 @@ export default function TaxiStandDropdown({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         className={`flex w-full items-center gap-2 text-left outline-none transition ${styles.button}`}
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={() => {
+          if (!isOpen) updatePanelPosition();
+          setIsOpen((current) => !current);
+        }}
       >
         <span className={`flex shrink-0 items-center justify-center text-[#0F5A53] ${styles.iconWrap}`}>
           <Car size={20} />
@@ -101,11 +144,13 @@ export default function TaxiStandDropdown({
         />
       </button>
 
-      {isOpen && (
+      {isOpen && panelStyle && typeof document !== 'undefined' && createPortal(
         <div
+          ref={panelRef}
           id={listId}
           role="listbox"
-          className="absolute left-0 right-0 top-full z-50 mt-2 max-h-80 overflow-y-auto rounded-3xl border border-slate-200 bg-white p-2 text-left shadow-2xl shadow-slate-900/15"
+          style={panelStyle}
+          className="fixed z-[80] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-2 text-left shadow-2xl shadow-slate-900/15"
         >
           <TaxiStandOption
             name="Taxi Stands"
@@ -125,7 +170,8 @@ export default function TaxiStandDropdown({
               onSelect={() => selectStand(stand.name)}
             />
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
