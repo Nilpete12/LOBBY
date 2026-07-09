@@ -6,6 +6,7 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('destination')?.toLowerCase();
+    const taxiStand = searchParams.get('stand')?.trim().toLowerCase();
 
     // Fetch all available drivers
     let { data: drivers, error } = await supabase
@@ -21,8 +22,18 @@ export async function GET(req) {
     // Optional: Filter by route if the rider typed a destination
     if (query && drivers) {
       drivers = drivers.filter(driver =>
-        driver.routes && driver.routes.some(route => route.toLowerCase().includes(query))
+        driver.routes && driver.routes.some(route => String(route).toLowerCase().includes(query))
       );
+    }
+
+    if (taxiStand && drivers) {
+      drivers = drivers.filter((driver) => {
+        const stands = Array.isArray(driver.taxi_stands) ? driver.taxi_stands : [];
+        const routes = Array.isArray(driver.routes) ? driver.routes : [];
+
+        return stands.some((stand) => String(stand).toLowerCase() === taxiStand) ||
+          routes.some((route) => String(route).toLowerCase().includes(taxiStand));
+      });
     }
 
     return NextResponse.json({ success: true, drivers: (drivers || []).map(formatUser) });

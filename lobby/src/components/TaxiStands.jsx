@@ -1,71 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { MapPin, Car, ArrowRight, Activity, Users } from "lucide-react";
+import { TAXI_STANDS } from "@/lib/taxiStands";
 
 // Accept the isDriverView prop (defaults to false for regular users)
 export default function TaxiStands({ isDriverView = false }) {
   const [visibleCount, setVisibleCount] = useState(3);
 
-  // DUMMY DATA FOR KOHIMA TAXI STANDS
-  const standsData = [
-    {
-      id: 1,
-      name: "PR Hill Junction",
-      location: "Central Kohima, Near Police Headquarters",
-      taxis: "25+",
-      passengers: "High",
-      status: "Busy",
-      statusColor: "text-orange-600 bg-orange-100 border-orange-200",
-    },
-    {
-      id: 2,
-      name: "BOC Taxi Point",
-      location: "South Kohima, Highway Connecting Point",
-      taxis: "40+",
-      passengers: "Steady",
-      status: "Moderate",
-      statusColor: "text-emerald-700 bg-emerald-100 border-emerald-200",
-    },
-    {
-      id: 3,
-      name: "High School Junction",
-      location: "North Kohima, Near Secretariat Area",
-      taxis: "15+",
-      passengers: "Steady",
-      status: "Moderate",
-      statusColor: "text-emerald-700 bg-emerald-100 border-emerald-200",
-    },
-    {
-      id: 4,
-      name: "Razhu Point",
-      location: "Main Town Center, Commercial Hub",
-      taxis: "20+",
-      passengers: "High",
-      status: "Busy",
-      statusColor: "text-orange-600 bg-orange-100 border-orange-200",
-    },
-    {
-      id: 5,
-      name: "Keziekie Stand",
-      location: "Near Local Market Area",
-      taxis: "10+",
-      passengers: "Low",
-      status: "Quiet",
-      statusColor: "text-blue-600 bg-blue-100 border-blue-200",
-    },
-    {
-      id: 6,
-      name: "Phoolbari Stand",
-      location: "Town Center, Near Old NST",
-      taxis: "15+",
-      passengers: "Steady",
-      status: "Moderate",
-      statusColor: "text-emerald-700 bg-emerald-100 border-emerald-200",
-    },
-  ];
-
-  const showMore = () => setVisibleCount(standsData.length);
+  const showMore = () => setVisibleCount(TAXI_STANDS.length);
   const showLess = () => setVisibleCount(3);
 
   return (
@@ -90,7 +34,7 @@ export default function TaxiStands({ isDriverView = false }) {
 
         {/* GRID OF STANDS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          {standsData.slice(0, visibleCount).map((stand) => (
+          {TAXI_STANDS.slice(0, visibleCount).map((stand) => (
             <div
               key={stand.id}
               className="group bg-white rounded-3xl p-6 border border-[#DBEAFE] shadow-sm hover:shadow-[0_10px_40px_-10px_rgba(15,118,110,0.15)] hover:border-[#0F766E]/30 transition-all duration-300 relative overflow-hidden"
@@ -129,9 +73,19 @@ export default function TaxiStands({ isDriverView = false }) {
                   )}
                 </div>
                 
-                <button className="text-[#0F766E] p-2 rounded-full hover:bg-teal-50 transition-colors">
-                  <ArrowRight size={20} />
-                </button>
+                {isDriverView ? (
+                  <span className="text-[#0F766E] p-2 rounded-full">
+                    <ArrowRight size={20} />
+                  </span>
+                ) : (
+                  <Link
+                    href={`/search?stand=${encodeURIComponent(stand.name)}`}
+                    className="text-[#0F766E] p-2 rounded-full hover:bg-teal-50 transition-colors"
+                    aria-label={`Find drivers at ${stand.name}`}
+                  >
+                    <ArrowRight size={20} />
+                  </Link>
+                )}
               </div>
             </div>
           ))}
@@ -139,7 +93,7 @@ export default function TaxiStands({ isDriverView = false }) {
 
         {/* View More / View Less Button */}
         <div className="flex justify-center">
-          {visibleCount < standsData.length ? (
+          {visibleCount < TAXI_STANDS.length ? (
             <button
               onClick={showMore}
               className="bg-slate-900 dark-section text-white px-8 py-3.5 rounded-full font-[Proxima_Nova_Semibold] text-sm hover:bg-slate-800 transition shadow-lg shadow-slate-200 flex items-center gap-2"

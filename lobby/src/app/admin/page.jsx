@@ -13,6 +13,7 @@ import StatsCard from '@/components/admin/StatsCard';
 import AdminLog from '@/components/admin/Adminlog';
 import Sidebar from '@/components/admin/Sidebar';
 import API_BASE_URL from '@/config';
+import { TAXI_STANDS } from '@/lib/taxiStands';
 
 const EMPTY_STATS = {
   totalUsers: 0,
@@ -436,6 +437,7 @@ export default function AdminPage() {
         phone: data.user.phone || '',
         vehicle: data.user.vehicle || '',
         routes: Array.isArray(data.user.routes) ? data.user.routes.join(', ') : '',
+        taxiStands: Array.isArray(data.user.taxiStands) ? data.user.taxiStands.join(', ') : '',
         rating: data.user.rating || 5,
         aiNotes: data.user.aiNotes || '',
       });
@@ -1457,6 +1459,12 @@ function UserDetailDrawer({
                 {user.role === 'driver' && (
                   <>
                     <AdminInput label="Vehicle" value={form.vehicle} onChange={(value) => setForm((current) => ({ ...current, vehicle: value }))} />
+                    <AdminInput
+                      label="Taxi stands"
+                      value={form.taxiStands}
+                      onChange={(value) => setForm((current) => ({ ...current, taxiStands: value }))}
+                      placeholder={TAXI_STANDS.map((stand) => stand.name).slice(0, 2).join(', ')}
+                    />
                     <AdminInput label="Routes" value={form.routes} onChange={(value) => setForm((current) => ({ ...current, routes: value }))} />
                     <AdminInput label="Rating" value={String(form.rating)} onChange={(value) => setForm((current) => ({ ...current, rating: value }))} />
                     <AdminInput label="Admin Notes" value={form.aiNotes} onChange={(value) => setForm((current) => ({ ...current, aiNotes: value }))} />
@@ -1609,12 +1617,13 @@ function UserDetailDrawer({
   );
 }
 
-function AdminInput({ label, value, onChange }) {
+function AdminInput({ label, value, onChange, placeholder = '' }) {
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-black uppercase text-slate-500">{label}</span>
       <input
         value={value || ''}
+        placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:border-slate-400"
       />

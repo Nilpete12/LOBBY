@@ -7,9 +7,10 @@ import { useUser } from '@clerk/nextjs';
 import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
 import API_BASE_URL from '@/config';
 import InstantBook from '@/components/InstantBook';
+import { TAXI_STANDS } from '@/lib/taxiStands';
 
 const FILTERS = ['All Rides', 'Hatchback', 'SUV', 'Top Rated'];
-const SEARCH_CACHE_VERSION = 'v2';
+const SEARCH_CACHE_VERSION = 'v3';
 const SEARCH_CACHE_TTL = 45 * 1000;
 
 function getInitialSearchQuery() {
@@ -17,16 +18,22 @@ function getInitialSearchQuery() {
   return new URLSearchParams(window.location.search).get('q') || '';
 }
 
-function getSearchCacheKey(query = '') {
-  const normalizedQuery = query.trim().toLowerCase() || 'all';
-  return `lobby:driver-search:${SEARCH_CACHE_VERSION}:${normalizedQuery}`;
+function getInitialTaxiStand() {
+  if (typeof window === 'undefined') return '';
+  return new URLSearchParams(window.location.search).get('stand') || '';
 }
 
-function readCachedDrivers(query = '') {
+function getSearchCacheKey(query = '', taxiStand = '') {
+  const normalizedQuery = query.trim().toLowerCase() || 'all';
+  const normalizedStand = taxiStand.trim().toLowerCase() || 'any-stand';
+  return `lobby:driver-search:${SEARCH_CACHE_VERSION}:${normalizedQuery}:${normalizedStand}`;
+}
+
+function readCachedDrivers(query = '', taxiStand = '') {
   if (typeof window === 'undefined') return null;
 
   try {
-    const raw = window.sessionStorage.getItem(getSearchCacheKey(query));
+    const raw = window.sessionStorage.getItem(getSearchCacheKey(query, taxiStand));
     if (!raw) return null;
 
     const cached = JSON.parse(raw);
@@ -39,12 +46,12 @@ function readCachedDrivers(query = '') {
   }
 }
 
-function writeCachedDrivers(query = '', drivers = []) {
+function writeCachedDrivers(query = '', taxiStand = '', drivers = []) {
   if (typeof window === 'undefined') return;
 
   try {
     window.sessionStorage.setItem(
-      getSearchCacheKey(query),
+      getSearchCacheKey(query, taxiStand),
       JSON.stringify({ savedAt: Date.now(), drivers })
     );
   } catch {
@@ -52,9 +59,10 @@ function writeCachedDrivers(query = '', drivers = []) {
   }
 }
 
-async function requestDrivers(query = '', options = {}) {
+async function requestDrivers(query = '', taxiStand = '', options = {}) {
   const params = new URLSearchParams();
   if (query.trim()) params.set('destination', query.trim());
+  if (taxiStand.trim()) params.set('stand', taxiStand.trim());
 
   const url = `${API_BASE_URL}/driver/search${params.toString() ? `?${params.toString()}` : ''}`;
   const res = await fetch(url, { signal: options.signal });
@@ -75,6 +83,7 @@ export default function SearchPage() {
   const { user } = useUser();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState(getInitialSearchQuery);
+  const [selectedTaxiStand, setSelectedTaxiStand] = useState(getInitialTaxiStand);
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -99,8 +108,8 @@ export default function SearchPage() {
     return drivers;
   }, [activeFilter, drivers]);
 
-  const fetchDrivers = useCallback(async (query = '', options = {}) => {
-    const cachedDrivers = options.preferCache ? readCachedDrivers(query) : null;
+  const fetchDrivers = useCallback(async (query = '', taxiStand = '', options = {}) => {
+    const cachedDrivers = options.preferCache ? readCachedDrivers(query, taxiStand) : null;
     const fetchId = Date.now();
 
     activeFetchRef.current = fetchId;
@@ -119,11 +128,11 @@ export default function SearchPage() {
     setError('');
 
     try {
-      const nextDrivers = await requestDrivers(query, { signal: controller.signal });
+      const nextDrivers = await requestDrivers(query, taxiStand, { signal: controller.signal });
       if (activeFetchRef.current !== fetchId) return;
 
       setDrivers(nextDrivers);
-      writeCachedDrivers(query, nextDrivers);
+      writeCachedDrivers(query, taxiStand, nextDrivers);
     } catch (err) {
       if (err.name === 'AbortError') return;
       console.error("Fetch error:", err);
@@ -137,8 +146,9 @@ export default function SearchPage() {
   useEffect(() => {
     let cancelled = false;
     const initialQuery = getInitialSearchQuery();
+    const initialTaxiStand = getInitialTaxiStand();
     window.queueMicrotask(() => {
-      if (!cancelled) fetchDrivers(initialQuery, { preferCache: true });
+      if (!cancelled) fetchDrivers(initialQuery, initialTaxiStand, { preferCache: true });
     });
 
     return () => {
@@ -152,18 +162,18 @@ export default function SearchPage() {
     const intervalId = setInterval(async () => {
       try {
         // Fetch quietly in the background without triggering loading skeletons
-        const updatedDrivers = await requestDrivers(searchQuery);
+        const updatedDrivers = await requestDrivers(searchQuery, selectedTaxiStand);
 
         // Instantly update UI. If a driver went offline, they are removed.
         setDrivers(updatedDrivers);
-        writeCachedDrivers(searchQuery, updatedDrivers); // Keep cache fresh
+        writeCachedDrivers(searchQuery, selectedTaxiStand, updatedDrivers); // Keep cache fresh
       } catch (err) {
         console.error("Live update failed silently:", err);
       }
     }, 10000); // Polls every 10 seconds
 
     return () => clearInterval(intervalId);
-  }, [searchQuery]);
+  }, [searchQuery, selectedTaxiStand]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -171,11 +181,12 @@ export default function SearchPage() {
     const params = new URLSearchParams();
 
     if (query) params.set('q', query);
+    if (selectedTaxiStand) params.set('stand', selectedTaxiStand);
 
     setActiveFilter('All Rides');
     setSelectedDriver(null);
     router.push(`/search${params.toString() ? `?${params.toString()}` : ''}`);
-    fetchDrivers(query, { preferCache: true });
+    fetchDrivers(query, selectedTaxiStand, { preferCache: true });
   };
 
   const trackDriverEvent = useCallback(async (driver, type) => {
@@ -242,29 +253,52 @@ export default function SearchPage() {
         {/* Search Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="mb-2 text-3xl font-bold text-slate-900">Find a Ride</h1>
-          <form action="/search" onSubmit={handleSearch} className="relative flex items-center">
-            <MapPin className="absolute left-4 text-slate-400" size={20} />
-            <input
-              type="search"
-              name="q"
-              aria-label="Destination"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              placeholder="Where do you want to go? (e.g. Dawki)"
-              className="w-full rounded-2xl border border-slate-200 py-4 pl-12 pr-14 text-base font-medium shadow-sm outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 sm:text-lg"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button
-              type="submit"
-              aria-label="Search drivers"
-              disabled={loading}
-              className="absolute right-2 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {loading ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} />}
-            </button>
+          <form action="/search" onSubmit={handleSearch} className="space-y-3">
+            <div className="relative flex items-center">
+              <MapPin className="absolute left-4 text-slate-400" size={20} />
+              <input
+                type="search"
+                name="q"
+                aria-label="Destination"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                placeholder="Where do you want to go? (e.g. Dawki)"
+                className="w-full rounded-2xl border border-slate-200 py-4 pl-12 pr-14 text-base font-medium shadow-sm outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 sm:text-lg"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button
+                type="submit"
+                aria-label="Search drivers"
+                disabled={loading}
+                className="absolute right-2 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {loading ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} />}
+              </button>
+            </div>
+
+            <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 shadow-sm transition focus-within:border-[#0F766E] focus-within:ring-2 focus-within:ring-[#0F766E]/10">
+              <Car size={19} className="shrink-0 text-slate-400" />
+              <select
+                name="stand"
+                aria-label="Taxi stand"
+                value={selectedTaxiStand}
+                onChange={(event) => setSelectedTaxiStand(event.target.value)}
+                className="min-w-0 flex-1 bg-transparent py-3 text-base font-bold text-slate-800 outline-none"
+              >
+                <option value="">Any taxi stand</option>
+                {TAXI_STANDS.map((stand) => (
+                  <option key={stand.id} value={stand.name}>{stand.name}</option>
+                ))}
+              </select>
+            </label>
           </form>
+          {selectedTaxiStand && (
+            <p className="mt-2 text-sm font-semibold text-[#0F766E]">
+              Showing drivers who park at {selectedTaxiStand}.
+            </p>
+          )}
         </div>
 
         {/* Filters */}
@@ -293,7 +327,7 @@ export default function SearchPage() {
               Skip the manual search. Let us find the nearest available driver for you.
             </p>
           </div>
-          <InstantBook destination={searchQuery || "Kohima"} />
+          <InstantBook destination={searchQuery || selectedTaxiStand || "Kohima"} />
         </div>
 
         {/* Divider before manual results */}
@@ -324,7 +358,9 @@ export default function SearchPage() {
             </h3>
             <p className="mx-auto mt-1 max-w-xs text-slate-500">
               {drivers.length === 0
-                ? 'Try searching for a different location or check back later.'
+                ? selectedTaxiStand
+                  ? `No verified drivers are online at ${selectedTaxiStand} right now. Try another stand or check back later.`
+                  : 'Try searching for a different location or check back later.'
                 : 'Try another search or switch back to all rides.'}
             </p>
             {activeFilter !== 'All Rides' && (
@@ -373,6 +409,14 @@ function getDriverRoutes(driver) {
   return driver.routes && driver.routes.length > 0 ? driver.routes : ['Local City Run'];
 }
 
+function getDriverTaxiStands(driver = {}) {
+  return Array.isArray(driver.taxiStands)
+    ? driver.taxiStands
+    : Array.isArray(driver.taxi_stands)
+      ? driver.taxi_stands
+      : [];
+}
+
 function getDriverInitial(driver) {
   return driver.fullName?.charAt(0) || 'D';
 }
@@ -414,6 +458,7 @@ function DriverResultCard({ driver, onSelect }) {
   const vehicle = driver.vehicle || 'Standard Taxi';
   const vehiclePlate = getDriverVehiclePlate(driver);
   const routes = getDriverRoutes(driver);
+  const taxiStands = getDriverTaxiStands(driver);
 
   return (
     <button
@@ -441,6 +486,12 @@ function DriverResultCard({ driver, onSelect }) {
                   <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-slate-700">
                     <Hash size={11} />
                     <span className="truncate">{vehiclePlate}</span>
+                  </span>
+                )}
+                {taxiStands[0] && (
+                  <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-black text-[#0F766E]">
+                    <MapPin size={11} />
+                    <span className="truncate">{taxiStands[0]}</span>
                   </span>
                 )}
               </div>
@@ -482,6 +533,7 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
   const vehicle = driver.vehicle || 'Standard Taxi';
   const vehiclePlate = getDriverVehiclePlate(driver);
   const routes = getDriverRoutes(driver);
+  const taxiStands = getDriverTaxiStands(driver);
   const phoneHref = driver.phone ? `tel:${driver.phone}` : undefined;
   const whatsappHref = getWhatsAppHref(driver.phone);
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -612,6 +664,25 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
         </div>
 
         <div className="mb-6">
+          <p className="mb-3 text-xs font-bold uppercase text-slate-400">Daily stands</p>
+          <div className="mb-5 flex flex-wrap gap-2">
+            {taxiStands.length > 0 ? (
+              taxiStands.map((stand) => (
+                <span
+                  key={stand}
+                  className="flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-bold text-[#0F766E]"
+                >
+                  <MapPin size={12} />
+                  {stand}
+                </span>
+              ))
+            ) : (
+              <span className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-400">
+                No daily stand added
+              </span>
+            )}
+          </div>
+
           <p className="mb-3 text-xs font-bold uppercase text-slate-400">Routes</p>
           <div className="flex flex-wrap gap-2">
             {routes.map((route) => (

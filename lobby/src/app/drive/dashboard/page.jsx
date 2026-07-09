@@ -7,6 +7,7 @@ import { useUser, useClerk } from '@clerk/nextjs';
 import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadCloud, Loader2, FileText, CheckCircle2, AlertCircle, X, ShieldCheck, Wallet, History, MessageCircle, Hash } from 'lucide-react';
 import API_BASE_URL from '@/config';
 import IncomingRideAlert from '@/components/IncomingRideAlert';
+import { TAXI_STANDS } from '@/lib/taxiStands';
 
 const DRIVER_PROFILE_CACHE_TTL = 60 * 1000;
 const CLIENT_UPLOAD_TARGET_BYTES = 3.5 * 1024 * 1024;
@@ -55,7 +56,7 @@ export default function DriverDashboard() {
   // 2. MONGODB DRIVER STATE (Vehicle, Routes, Verification, etc.)
   const [driverDbData, setDriverDbData] = useState(null);
   
-  const [formData, setFormData] = useState({ vehicle: '', vehiclePlate: '', phone: '', routes: '' });
+  const [formData, setFormData] = useState({ vehicle: '', vehiclePlate: '', phone: '', routes: '', taxiStands: [] });
   const [isOnline, setIsOnline] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingLicense, setUploadingLicense] = useState(false);
@@ -76,6 +77,7 @@ export default function DriverDashboard() {
       vehiclePlate: driver.vehiclePlate || '',
       phone: driver.phone || '',
       routes,
+      taxiStands: Array.isArray(driver.taxiStands) ? driver.taxiStands : [],
     });
     setIsOnline(driver.isAvailable || false);
   }, []);
@@ -171,6 +173,7 @@ export default function DriverDashboard() {
           vehiclePlate: formData.vehiclePlate,
           phone: formData.phone,
           routes: formData.routes.split(',').map(s => s.trim()).filter(Boolean),
+          taxiStands: formData.taxiStands,
           isAvailable: statusToSend
         })
       });
@@ -180,7 +183,7 @@ export default function DriverDashboard() {
         applyDriverProfile(data.driver);
         writeCachedDriverProfile(clerkUser.id, data.driver);
         if (newStatus === undefined) {
-          showNotice('success', 'Profile saved', 'Your vehicle, phone, and route details were updated.');
+          showNotice('success', 'Profile saved', 'Your vehicle, stand, phone, and route details were updated.');
         } else {
           showNotice(
             'success',
@@ -282,11 +285,17 @@ export default function DriverDashboard() {
   const driverName = clerkUser.fullName || driverDbData.fullName || 'Driver';
   const driverEmail = clerkUser.primaryEmailAddress?.emailAddress || driverDbData.email || '';
   const routeList = formData.routes.split(',').map(route => route.trim()).filter(Boolean);
+  const selectedTaxiStands = Array.isArray(formData.taxiStands) ? formData.taxiStands : [];
   const setupItems = [
     {
       label: 'Phone number',
       detail: formData.phone ? 'Added' : 'Add a number riders can call',
       done: Boolean(formData.phone),
+    },
+    {
+      label: 'Taxi stands',
+      detail: selectedTaxiStands.length ? `${selectedTaxiStands.length} stand${selectedTaxiStands.length === 1 ? '' : 's'} selected` : 'Select where you park daily',
+      done: selectedTaxiStands.length > 0,
     },
     {
       label: 'Routes',
@@ -420,7 +429,7 @@ export default function DriverDashboard() {
 
           <div className="grid border-t border-white/10 sm:grid-cols-3">
             <MetricStrip label="Setup" value={`${completionPercent}%`} />
-            <MetricStrip label="Routes" value={routeList.length || '0'} />
+            <MetricStrip label="Stands" value={selectedTaxiStands.length || '0'} />
             <MetricStrip label="Plate" value={formData.vehiclePlate || 'Not set'} />
           </div>
         </section>
@@ -489,6 +498,11 @@ export default function DriverDashboard() {
                 placeholder="e.g. 98630..."
                 inputMode="tel"
                 onChange={(value) => setFormData({ ...formData, phone: value })}
+              />
+
+              <TaxiStandSelector
+                selected={selectedTaxiStands}
+                onChange={(taxiStands) => setFormData({ ...formData, taxiStands })}
               />
 
               <LabeledInput
@@ -742,6 +756,63 @@ function formatVehiclePlateInput(value) {
     .replace(/[^A-Z0-9 -]/g, '')
     .replace(/\s+/g, ' ')
     .slice(0, 40);
+}
+
+function TaxiStandSelector({ selected = [], onChange }) {
+  const selectedSet = new Set(selected);
+
+  const toggleStand = (standName) => {
+    const next = selectedSet.has(standName)
+      ? selected.filter((name) => name !== standName)
+      : [...selected, standName];
+
+    onChange(next);
+  };
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <span className="block text-xs font-black uppercase tracking-wide text-slate-400">Daily taxi stands</span>
+        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">
+          {selected.length || 0} selected
+        </span>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        {TAXI_STANDS.map((stand) => {
+          const isSelected = selectedSet.has(stand.name);
+
+          return (
+            <button
+              key={stand.id}
+              type="button"
+              onClick={() => toggleStand(stand.name)}
+              className={`min-h-16 rounded-2xl border px-3 py-3 text-left transition ${
+                isSelected
+                  ? 'border-[#0F766E] bg-emerald-50 text-[#0F766E] shadow-sm'
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white'
+              }`}
+              aria-pressed={isSelected}
+            >
+              <span className="flex items-start gap-2">
+                <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isSelected ? 'bg-[#0F766E] text-white' : 'bg-white text-slate-400'}`}>
+                  {isSelected ? <CheckCircle2 size={14} /> : <MapPin size={14} />}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-black">{stand.name}</span>
+                  <span className="mt-0.5 block truncate text-xs font-semibold opacity-70">{stand.location}</span>
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="mt-2 text-xs font-semibold text-slate-400">
+        Riders can filter by these stands from the homepage.
+      </p>
+    </div>
+  );
 }
 
 function LabeledInput({ icon: Icon, label, value, placeholder, onChange, helper, inputMode = 'text', autoCapitalize }) {

@@ -9,6 +9,7 @@ import {
 } from '@/lib/supabaseFormat';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 import { deleteClerkUserAccount, updateClerkUserRole } from '@/lib/clerkUserSync';
+import { TAXI_STAND_NAMES } from '@/lib/taxiStands';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -33,6 +34,22 @@ function cleanRoutes(value) {
   }
 
   return [];
+}
+
+function cleanTaxiStands(value) {
+  const allowed = new Map(TAXI_STAND_NAMES.map((name) => [name.toLowerCase(), name]));
+  const raw = Array.isArray(value)
+    ? value
+    : typeof value === 'string'
+      ? value.split(',')
+      : [];
+
+  return [...new Set(
+    raw
+      .map((stand) => cleanString(stand, 80))
+      .map((stand) => allowed.get(stand.toLowerCase()))
+      .filter(Boolean)
+  )].slice(0, TAXI_STAND_NAMES.length);
 }
 
 function addMonths(date, months) {
@@ -230,6 +247,7 @@ export async function PATCH(request, context) {
       if (typeof body.phone === 'string') updates.phone = cleanString(body.phone, 40);
       if (typeof body.vehicle === 'string') updates.vehicle = cleanString(body.vehicle, 120);
       if (body.routes !== undefined) updates.routes = cleanRoutes(body.routes);
+      if (body.taxiStands !== undefined) updates.taxiStands = cleanTaxiStands(body.taxiStands);
       if (typeof body.rating === 'number' && Number.isFinite(body.rating)) {
         updates.rating = Math.min(5, Math.max(1, body.rating));
       }

@@ -1,0 +1,58 @@
+export const TAXI_STANDS = [
+  {
+    id: 'pr-hill-junction',
+    name: 'PR Hill Junction',
+    location: 'Central Kohima, near Police Headquarters',
+    taxis: '25+',
+    passengers: 'High',
+    status: 'Busy',
+    statusColor: 'text-orange-600 bg-orange-100 border-orange-200',
+  },
+  {
+    id: 'boc-taxi-point',
+    name: 'BOC Taxi Point',
+    location: 'South Kohima, highway connecting point',
+    taxis: '40+',
+    passengers: 'Steady',
+    status: 'Moderate',
+    statusColor: 'text-emerald-700 bg-emerald-100 border-emerald-200',
+  },
+  {
+    id: 'high-school-junction',
+    name: 'High School Junction',
+    location: 'North Kohima, near Secretariat area',
+    taxis: '15+',
+    passengers: 'Steady',
+    status: 'Moderate',
+    statusColor: 'text-emerald-700 bg-emerald-100 border-emerald-200',
+  },
+  {
+    id: 'razhu-point',
+    name: 'Razhu Point',
+    location: 'Main town center, commercial hub',
+    taxis: '20+',
+    passengers: 'High',
+    status: 'Busy',
+    statusColor: 'text-orange-600 bg-orange-100 border-orange-200',
+  },
+  {
+    id: 'keziekie-stand',
+    name: 'Keziekie Stand',
+    location: 'Near local market area',
+    taxis: '10+',
+    passengers: 'Low',
+    status: 'Quiet',
+    statusColor: 'text-blue-600 bg-blue-100 border-blue-200',
+  },
+  {
+    id: 'phoolbari-stand',
+    name: 'Phoolbari Stand',
+    location: 'Town center, near old NST',
+    taxis: '15+',
+    passengers: 'Steady',
+    status: 'Moderate',
+    statusColor: 'text-emerald-700 bg-emerald-100 border-emerald-200',
+  },
+];
+
+export const TAXI_STAND_NAMES = TAXI_STANDS.map((stand) => stand.name);
