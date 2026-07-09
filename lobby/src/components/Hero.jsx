@@ -1,5 +1,5 @@
-import { ArrowRight, Car, MapPin, CheckCircle2 } from 'lucide-react';
-import { TAXI_STANDS } from '@/lib/taxiStands';
+import { ArrowRight, MapPin, CheckCircle2 } from 'lucide-react';
+import TaxiStandDropdown from '@/components/TaxiStandDropdown';
 
 export default function Hero() {
   return (
@@ -67,22 +67,7 @@ export default function Hero() {
               />
             </div>
 
-            <label className="flex w-full md:w-64 items-center gap-2 bg-[#eef5f2] md:bg-transparent rounded-xl md:rounded-none p-1 md:p-0">
-              <span className="w-10 h-10 md:w-14 md:h-14 bg-white md:bg-[#eef5f2] rounded-lg md:rounded-2xl flex items-center justify-center shrink-0 shadow-sm md:shadow-none">
-                <Car className="text-[#0F5A53] w-5 h-5 md:w-6 md:h-6" />
-              </span>
-              <select
-                name="stand"
-                aria-label="Taxi stand"
-                defaultValue=""
-                className="w-full h-12 md:h-14 bg-transparent outline-none text-base md:text-sm font-bold text-slate-800 px-2"
-              >
-                <option value="">Taxi Stands</option>
-                {TAXI_STANDS.map((stand) => (
-                  <option key={stand.id} value={stand.name}>{stand.name}</option>
-                ))}
-              </select>
-            </label>
+            <TaxiStandDropdown variant="hero" />
 
             {/* Search Button */}
             <button type="submit" className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#0F766E] hover:bg-[#0a423d] text-white rounded-xl md:rounded-2xl font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 shrink-0 text-sm md:text-base">

@@ -1,0 +1,163 @@
+"use client";
+
+import { useEffect, useId, useRef, useState } from 'react';
+import { Car, Check, ChevronDown, MapPin } from 'lucide-react';
+import { TAXI_STANDS } from '@/lib/taxiStands';
+
+const VARIANT_STYLES = {
+  hero: {
+    root: 'w-full md:w-64',
+    button: 'min-h-14 rounded-xl md:rounded-2xl bg-[#eef5f2] md:bg-transparent p-1 md:p-0',
+    iconWrap: 'h-10 w-10 md:h-14 md:w-14 rounded-lg md:rounded-2xl bg-white md:bg-[#eef5f2] shadow-sm md:shadow-none',
+    label: 'text-base md:text-sm',
+  },
+  search: {
+    root: 'w-full',
+    button: 'min-h-14 rounded-2xl border border-slate-200 bg-white px-4 shadow-sm focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10',
+    iconWrap: 'h-9 w-9 rounded-xl bg-slate-50',
+    label: 'text-base',
+  },
+};
+
+export default function TaxiStandDropdown({
+  name = 'stand',
+  value,
+  defaultValue = '',
+  onChange,
+  variant = 'search',
+  className = '',
+}) {
+  const listId = useId();
+  const rootRef = useRef(null);
+  const buttonRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [internalValue, setInternalValue] = useState(defaultValue);
+  const isControlled = value !== undefined;
+  const selectedValue = isControlled ? value : internalValue;
+  const selectedStand = TAXI_STANDS.find((stand) => stand.name === selectedValue);
+  const styles = VARIANT_STYLES[variant] || VARIANT_STYLES.search;
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event) => {
+      if (!rootRef.current?.contains(event.target)) setIsOpen(false);
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  const selectStand = (nextValue) => {
+    if (!isControlled) setInternalValue(nextValue);
+    onChange?.(nextValue);
+    setIsOpen(false);
+    buttonRef.current?.focus();
+  };
+
+  return (
+    <div ref={rootRef} className={`relative ${styles.root} ${className}`}>
+      <input type="hidden" name={name} value={selectedValue || ''} />
+
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-controls={listId}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        className={`flex w-full items-center gap-2 text-left outline-none transition ${styles.button}`}
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        <span className={`flex shrink-0 items-center justify-center text-[#0F5A53] ${styles.iconWrap}`}>
+          <Car size={20} />
+        </span>
+
+        <span className="min-w-0 flex-1 px-1">
+          <span className={`block truncate font-black text-slate-800 ${styles.label}`}>
+            {selectedStand?.name || 'Taxi Stands'}
+          </span>
+          {selectedStand && (
+            <span className="mt-0.5 block truncate text-xs font-semibold text-slate-400">
+              {selectedStand.location}
+            </span>
+          )}
+        </span>
+
+        <ChevronDown
+          size={18}
+          className={`shrink-0 text-slate-400 transition ${isOpen ? 'rotate-180 text-[#0F766E]' : ''}`}
+        />
+      </button>
+
+      {isOpen && (
+        <div
+          id={listId}
+          role="listbox"
+          className="absolute left-0 right-0 top-full z-50 mt-2 max-h-80 overflow-y-auto rounded-3xl border border-slate-200 bg-white p-2 text-left shadow-2xl shadow-slate-900/15"
+        >
+          <TaxiStandOption
+            name="Taxi Stands"
+            location="All major stands"
+            isSelected={!selectedValue}
+            onSelect={() => selectStand('')}
+          />
+
+          {TAXI_STANDS.map((stand) => (
+            <TaxiStandOption
+              key={stand.id}
+              name={stand.name}
+              location={stand.location}
+              status={stand.status}
+              statusColor={stand.statusColor}
+              isSelected={selectedValue === stand.name}
+              onSelect={() => selectStand(stand.name)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TaxiStandOption({ name, location, status, statusColor, isSelected, onSelect }) {
+  return (
+    <button
+      type="button"
+      role="option"
+      aria-selected={isSelected}
+      onClick={onSelect}
+      className={`mb-1 flex w-full items-center gap-3 rounded-2xl p-3 text-left transition last:mb-0 ${
+        isSelected
+          ? 'bg-emerald-50 text-[#0F766E]'
+          : 'text-slate-700 hover:bg-slate-50'
+      }`}
+    >
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isSelected ? 'bg-white text-[#0F766E]' : 'bg-slate-100 text-slate-400'}`}>
+        {isSelected ? <Check size={18} /> : <MapPin size={18} />}
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-black">{name}</span>
+        <span className="mt-0.5 block truncate text-xs font-semibold text-slate-400">{location}</span>
+      </span>
+
+      {status && (
+        <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase tracking-wide ${statusColor}`}>
+          {status}
+        </span>
+      )}
+    </button>
+  );
+}

@@ -7,7 +7,7 @@ import { useUser } from '@clerk/nextjs';
 import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
 import API_BASE_URL from '@/config';
 import InstantBook from '@/components/InstantBook';
-import { TAXI_STANDS } from '@/lib/taxiStands';
+import TaxiStandDropdown from '@/components/TaxiStandDropdown';
 
 const FILTERS = ['All Rides', 'Hatchback', 'SUV', 'Top Rated'];
 const SEARCH_CACHE_VERSION = 'v3';
@@ -278,21 +278,11 @@ export default function SearchPage() {
               </button>
             </div>
 
-            <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 shadow-sm transition focus-within:border-[#0F766E] focus-within:ring-2 focus-within:ring-[#0F766E]/10">
-              <Car size={19} className="shrink-0 text-slate-400" />
-              <select
-                name="stand"
-                aria-label="Taxi stand"
-                value={selectedTaxiStand}
-                onChange={(event) => setSelectedTaxiStand(event.target.value)}
-                className="min-w-0 flex-1 bg-transparent py-3 text-base font-bold text-slate-800 outline-none"
-              >
-                <option value="">Taxi Stands</option>
-                {TAXI_STANDS.map((stand) => (
-                  <option key={stand.id} value={stand.name}>{stand.name}</option>
-                ))}
-              </select>
-            </label>
+            <TaxiStandDropdown
+              value={selectedTaxiStand}
+              onChange={setSelectedTaxiStand}
+              variant="search"
+            />
           </form>
           {selectedTaxiStand && (
             <p className="mt-2 text-sm font-semibold text-[#0F766E]">
