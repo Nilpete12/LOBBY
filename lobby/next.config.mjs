@@ -1,3 +1,8 @@
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const appRoot = dirname(fileURLToPath(import.meta.url));
+
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -10,6 +15,9 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  turbopack: {
+    root: appRoot,
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'img.clerk.com' },

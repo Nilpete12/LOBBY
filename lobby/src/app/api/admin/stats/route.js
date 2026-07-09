@@ -68,16 +68,11 @@ function topDestinations(rows = []) {
 }
 
 export async function GET() {
-  console.log('[Admin Stats] Request received');
-  
   if (!(await isAdminAuthenticated())) {
-    console.log('[Admin Stats] Authentication failed');
     return adminUnauthorized();
   }
 
   try {
-    console.log('[Admin Stats] Starting stats aggregation');
-    
     const [
       totalUsers,
       totalDrivers,
@@ -128,8 +123,6 @@ export async function GET() {
       })(),
     ]);
 
-    console.log('[Admin Stats] Counters aggregated successfully:', { totalUsers, totalDrivers, activeDrivers });
-
     if (bookingsResult?.error) console.warn('[Admin Stats] Bookings error:', bookingsResult.error);
     if (recentActivityResult?.error) console.warn('[Admin Stats] Activity logs error:', recentActivityResult.error);
 
@@ -161,7 +154,6 @@ export async function GET() {
     });
 
     response.headers.set('Cache-Control', 'no-store, max-age=0');
-    console.log('[Admin Stats] Response sent successfully');
     return response;
   } catch (error) {
     console.error('[Admin Stats] Error:', error?.message || error, error?.stack);
