@@ -48,7 +48,6 @@ export default async function HomePage() {
   return (
     <div className="bg-white">
       <Hero />      
-      <TaxiStands isDriverView={false} />
       <Features />
       <HowItWorks />
     </div>
