@@ -287,7 +287,7 @@ export default function SearchPage() {
                 onChange={(event) => setSelectedTaxiStand(event.target.value)}
                 className="min-w-0 flex-1 bg-transparent py-3 text-base font-bold text-slate-800 outline-none"
               >
-                <option value="">Any taxi stand</option>
+                <option value="">Taxi Stands</option>
                 {TAXI_STANDS.map((stand) => (
                   <option key={stand.id} value={stand.name}>{stand.name}</option>
                 ))}

@@ -77,7 +77,7 @@ export default function Hero() {
                 defaultValue=""
                 className="w-full h-12 md:h-14 bg-transparent outline-none text-base md:text-sm font-bold text-slate-800 px-2"
               >
-                <option value="">Any stand</option>
+                <option value="">Taxi Stands</option>
                 {TAXI_STANDS.map((stand) => (
                   <option key={stand.id} value={stand.name}>{stand.name}</option>
                 ))}
