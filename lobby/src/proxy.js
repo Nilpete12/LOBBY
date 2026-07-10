@@ -2,7 +2,6 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 // 1. Only protect rider and driver routes
 const isProtectedRoute = createRouteMatcher([
-  '/drive(.*)',
   '/account(.*)',
 ]);
 
