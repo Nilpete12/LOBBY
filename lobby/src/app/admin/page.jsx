@@ -463,19 +463,32 @@ export default function AdminPage() {
   };
 
   const saveUserDetail = async () => {
-    // FIX: Using id or clerkId instead of _id
-    const identifier = selectedUserDetail?.user?.clerkId || selectedUserDetail?.user?.id;
+    const user = selectedUserDetail?.user;
+    const identifier = user?.clerkId || user?.id;
     if (!identifier) return;
+
+    const payload = {
+      action: 'update',
+      fullName: detailForm.fullName,
+      phone: detailForm.phone,
+    };
+
+    if (user.role === 'driver') {
+      Object.assign(payload, {
+        vehicle: detailForm.vehicle,
+        vehiclePlate: detailForm.vehiclePlate,
+        routes: detailForm.routes,
+        taxiStands: detailForm.taxiStands,
+        rating: Number(detailForm.rating) || 5,
+        aiNotes: detailForm.aiNotes,
+      });
+    }
 
     try {
       const res = await fetch(`${API_BASE_URL}/admin/user/${identifier}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update',
-          ...detailForm,
-          rating: Number(detailForm.rating) || 5,
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || 'Profile update failed');

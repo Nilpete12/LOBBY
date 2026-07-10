@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { isAdminAuthenticated } from '@/lib/adminAuth';
+import { formatUser } from '@/lib/supabaseFormat';
 
 export async function GET(req) {
   if (!(await isAdminAuthenticated())) {
@@ -24,18 +25,7 @@ export async function GET(req) {
     const { data: users, error } = await query;
     if (error) throw error;
 
-    const formattedUsers = users.map(u => ({
-      id: u.id,
-      clerkId: u.clerk_id,
-      fullName: u.full_name,
-      email: u.email,
-      phone: u.phone,
-      role: u.role,
-      isVerified: u.is_verified,
-      isAvailable: u.is_available,
-      accountStatus: u.account_status || 'active',
-      createdAt: u.created_at
-    }));
+    const formattedUsers = users.map(formatUser);
 
     return NextResponse.json({ success: true, users: formattedUsers });
   } catch (error) {

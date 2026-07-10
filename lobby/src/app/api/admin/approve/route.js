@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { isAdminAuthenticated, adminUnauthorized } from '@/lib/adminAuth';
 import { formatUser } from '@/lib/supabaseFormat';
 
@@ -18,7 +18,7 @@ export async function POST(req) {
     const newStatus = isApproved ? 'Approved' : 'Rejected';
 
     // Update Postgres driver record
-    let query = supabase
+    let query = supabaseAdmin
       .from('users')
       .update({
         is_verified: isApproved,

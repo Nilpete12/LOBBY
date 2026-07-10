@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { logAdminActivity } from '@/lib/adminActivity';
 import {
   formatBooking,
@@ -7,12 +7,15 @@ import {
   formatVerificationRequest,
   userUpdatesToRow,
 } from '@/lib/supabaseFormat';
+import { writeWithColumnFallback } from '@/lib/supabaseColumnFallback';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 import { deleteClerkUserAccount, updateClerkUserRole } from '@/lib/clerkUserSync';
 import { TAXI_STAND_NAMES } from '@/lib/taxiStands';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+const PROFILE_OPTIONAL_COLUMNS = new Set(['ai_notes', 'taxi_stands', 'vehicle_plate']);
 
 function cleanString(value, maxLength = 500) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -255,14 +258,17 @@ export async function PATCH(request, context) {
       if (typeof body.aiNotes === 'string') updates.aiNotes = cleanString(body.aiNotes, 500);
     }
 
-    const { data: updatedUser, error } = await supabase
-      .from('users')
-      .update(userUpdatesToRow(updates))
-      .eq('id', user.id)
-      .select()
-      .single();
-
-    if (error) throw error;
+    const updatedUser = await writeWithColumnFallback(
+      userUpdatesToRow(updates),
+      PROFILE_OPTIONAL_COLUMNS,
+      (row) =>
+        supabase
+          .from('users')
+          .update(row)
+          .eq('id', user.id)
+          .select()
+          .single()
+    );
 
     if (action === 'set_role' && user.clerk_id) {
       await updateClerkUserRole(user.clerk_id, updates.role);
