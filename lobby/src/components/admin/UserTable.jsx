@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { CheckCircle, Clock, Eye, Trash2, Search, ShieldCheck, RefreshCw } from 'lucide-react';
+import { CheckCircle, Clock, Eye, Trash2, Search, RefreshCw } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 function getStatus(user) {
@@ -117,7 +117,12 @@ export default function UserTable({ role, limit, refreshKey = 0, onChanged, onSe
       const name = user.fullName?.toLowerCase() || '';
       const email = user.email?.toLowerCase() || '';
       const phone = user.phone?.toLowerCase() || '';
-      return !normalizedSearch || name.includes(normalizedSearch) || email.includes(normalizedSearch) || phone.includes(normalizedSearch);
+      const plate = user.vehiclePlate?.toLowerCase() || '';
+      return !normalizedSearch
+        || name.includes(normalizedSearch)
+        || email.includes(normalizedSearch)
+        || phone.includes(normalizedSearch)
+        || plate.includes(normalizedSearch);
     })
     .slice(0, limit || users.length);
 
@@ -183,6 +188,7 @@ export default function UserTable({ role, limit, refreshKey = 0, onChanged, onSe
                   {user.role === 'driver' ? (
                     <div>
                       <div className="font-semibold text-slate-700">{user.vehicle || 'No vehicle'}</div>
+                      <div className="text-xs font-black text-slate-500">Plate: {user.vehiclePlate || 'Not added'}</div>
                       <div className="text-xs font-black text-slate-500">{user.isAvailable ? 'Online' : 'Offline'}</div>
                     </div>
                   ) : <span className="text-xs font-semibold text-slate-400">Rider</span>}
@@ -201,6 +207,87 @@ export default function UserTable({ role, limit, refreshKey = 0, onChanged, onSe
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="divide-y divide-slate-100 md:hidden">
+        {displayUsers.length === 0 ? (
+          <div className="p-6 text-center text-sm font-semibold text-slate-400">No users found.</div>
+        ) : (
+          displayUsers.map((user) => (
+            <article key={user.id} className="space-y-4 p-4">
+              <div className="flex items-start gap-3">
+                <Avatar user={user} size={44} />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-base font-black text-slate-900">{user.fullName || 'Unnamed user'}</div>
+                  <div className="truncate text-xs font-semibold text-slate-500">{user.email || 'No email'}</div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <StatusBadge user={user} />
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black uppercase text-slate-500">
+                      {user.role}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-slate-500">
+                <div className="rounded-2xl bg-slate-50 p-3">
+                  <span className="block font-black uppercase text-slate-400">Phone</span>
+                  <span className="mt-1 block break-words text-sm font-black text-slate-800">{user.phone || 'Not added'}</span>
+                </div>
+                <div className="rounded-2xl bg-slate-50 p-3">
+                  <span className="block font-black uppercase text-slate-400">Vehicle</span>
+                  <span className="mt-1 block break-words text-sm font-black text-slate-800">
+                    {user.role === 'driver' ? user.vehicle || 'Not added' : 'Rider'}
+                  </span>
+                </div>
+                {user.role === 'driver' && (
+                  <>
+                    <div className="rounded-2xl bg-slate-50 p-3">
+                      <span className="block font-black uppercase text-slate-400">Number Plate</span>
+                      <span className="mt-1 block break-words text-sm font-black text-slate-800">{user.vehiclePlate || 'Not added'}</span>
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 p-3">
+                      <span className="block font-black uppercase text-slate-400">Availability</span>
+                      <span className="mt-1 block text-sm font-black text-slate-800">{user.isAvailable ? 'Online' : 'Offline'}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => onSelectUser?.(user.id)}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-3 text-xs font-black text-white"
+                >
+                  <Eye size={16} />
+                  View
+                </button>
+                {user.role === 'driver' && !user.isVerified ? (
+                  <button
+                    onClick={() => handleApprove(user.id)}
+                    disabled={workingId === user.id}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-green-50 px-3 text-xs font-black text-green-700 ring-1 ring-green-100 disabled:opacity-50"
+                  >
+                    <CheckCircle size={16} />
+                    Verify
+                  </button>
+                ) : (
+                  <span className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-50 px-3 text-xs font-black text-slate-400 ring-1 ring-slate-100">
+                    Ready
+                  </span>
+                )}
+                <button
+                  onClick={() => handleDelete(user.id, user.fullName)}
+                  disabled={workingId === user.id}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-red-50 px-3 text-xs font-black text-red-600 ring-1 ring-red-100 disabled:opacity-50"
+                >
+                  <Trash2 size={16} />
+                  Delete
+                </button>
+              </div>
+            </article>
+          ))
+        )}
       </div>
     </div>
   );

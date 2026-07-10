@@ -72,8 +72,12 @@ const MOBILE_TABS = [
   { id: 'dashboard', label: 'Home' },
   { id: 'verifications', label: 'Verify' },
   { id: 'bookings', label: 'Bookings' },
+  { id: 'analytics', label: 'Analytics' },
+  { id: 'riders', label: 'Riders' },
   { id: 'drivers', label: 'Drivers' },
   { id: 'complaints', label: 'Support' },
+  { id: 'activity', label: 'Activity' },
+  { id: 'settings', label: 'Settings' },
 ];
 
 const COMPLAINT_STATUSES = ['pending', 'in_review', 'waiting_for_user', 'resolved'];
@@ -94,6 +98,14 @@ function formatDate(value) {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+function formatVehiclePlateInput(value) {
+  return String(value || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9 -]/g, '')
+    .replace(/\s+/g, ' ')
+    .slice(0, 40);
 }
 
 function StatusPill({ status }) {
@@ -436,6 +448,7 @@ export default function AdminPage() {
         fullName: data.user.fullName || '',
         phone: data.user.phone || '',
         vehicle: data.user.vehicle || '',
+        vehiclePlate: data.user.vehiclePlate || '',
         routes: Array.isArray(data.user.routes) ? data.user.routes.join(', ') : '',
         taxiStands: Array.isArray(data.user.taxiStands) ? data.user.taxiStands.join(', ') : '',
         rating: data.user.rating || 5,
@@ -1460,6 +1473,12 @@ function UserDetailDrawer({
                   <>
                     <AdminInput label="Vehicle" value={form.vehicle} onChange={(value) => setForm((current) => ({ ...current, vehicle: value }))} />
                     <AdminInput
+                      label="Number Plate"
+                      value={form.vehiclePlate}
+                      onChange={(value) => setForm((current) => ({ ...current, vehiclePlate: formatVehiclePlateInput(value) }))}
+                      placeholder="NL 01 AB 1234"
+                    />
+                    <AdminInput
                       label="Taxi stands"
                       value={form.taxiStands}
                       onChange={(value) => setForm((current) => ({ ...current, taxiStands: value }))}
@@ -1490,6 +1509,7 @@ function UserDetailDrawer({
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <InfoBlock label="Availability" value={user.isAvailable ? 'Online' : 'Offline'} />
+                  <InfoBlock label="Number Plate" value={user.vehiclePlate || 'Not added'} />
                   <InfoBlock
                     label="Subscription"
                     value={

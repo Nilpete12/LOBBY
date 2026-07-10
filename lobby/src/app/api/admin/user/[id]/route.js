@@ -246,6 +246,7 @@ export async function PATCH(request, context) {
       if (typeof body.fullName === 'string') updates.fullName = cleanString(body.fullName, 160);
       if (typeof body.phone === 'string') updates.phone = cleanString(body.phone, 40);
       if (typeof body.vehicle === 'string') updates.vehicle = cleanString(body.vehicle, 120);
+      if (typeof body.vehiclePlate === 'string') updates.vehiclePlate = cleanString(body.vehiclePlate, 40).toUpperCase();
       if (body.routes !== undefined) updates.routes = cleanRoutes(body.routes);
       if (body.taxiStands !== undefined) updates.taxiStands = cleanTaxiStands(body.taxiStands);
       if (typeof body.rating === 'number' && Number.isFinite(body.rating)) {
