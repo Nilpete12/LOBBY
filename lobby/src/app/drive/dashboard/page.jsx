@@ -286,6 +286,7 @@ export default function DriverDashboard() {
   const driverEmail = clerkUser.primaryEmailAddress?.emailAddress || driverDbData.email || '';
   const routeList = formData.routes.split(',').map(route => route.trim()).filter(Boolean);
   const selectedTaxiStands = Array.isArray(formData.taxiStands) ? formData.taxiStands : [];
+  const dashboardNotifications = Array.isArray(driverDbData.notifications) ? driverDbData.notifications : [];
   const setupItems = [
     {
       label: 'Phone number',
@@ -335,6 +336,7 @@ export default function DriverDashboard() {
           <DashboardNotice notice={notice} onDismiss={() => setNotice(null)} />
         )}
         <IncomingRideAlert />
+        <DriverDashboardReminders notifications={dashboardNotifications} />
 
         <header className="mb-5 flex items-center justify-between gap-3">
           <div className="min-w-0">
@@ -733,6 +735,41 @@ function QuickAction({ href, icon: Icon, label, detail }) {
         <span className="block truncate text-xs font-bold text-slate-400">{detail}</span>
       </span>
     </Link>
+  );
+}
+
+function DriverDashboardReminders({ notifications }) {
+  const reminders = (notifications || [])
+    .filter((notification) => notification.type === 'subscription_reminder' && notification.status !== 'archived')
+    .slice(0, 2);
+
+  if (!reminders.length) return null;
+
+  return (
+    <section className="mb-5 space-y-3">
+      {reminders.map((notification) => (
+        <article
+          key={notification.id}
+          className="rounded-3xl border border-amber-200 bg-amber-50 p-4 text-amber-950 shadow-sm"
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-amber-700">
+              <Wallet size={21} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-black uppercase tracking-wide text-amber-700/70">Admin reminder</p>
+              <h2 className="mt-1 text-base font-black">{notification.title || 'Subscription fee reminder'}</h2>
+              <p className="mt-1 text-sm font-semibold leading-relaxed text-amber-900/80">{notification.message}</p>
+              {notification.createdAt && (
+                <p className="mt-2 text-xs font-bold text-amber-700/70">
+                  Sent {new Date(notification.createdAt).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                </p>
+              )}
+            </div>
+          </div>
+        </article>
+      ))}
+    </section>
   );
 }
 

@@ -115,3 +115,14 @@ export function formatActivityLog(row = {}) {
     createdAt: row.created_at,
   };
 }
+
+export function formatDriverNotification(row = {}) {
+  return {
+    ...row,
+    _id: row.id,
+    driverId: row.driver_id,
+    clerkId: row.clerk_id,
+    readAt: row.read_at,
+    createdAt: row.created_at,
+  };
+}

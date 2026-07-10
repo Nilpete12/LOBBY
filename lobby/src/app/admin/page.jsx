@@ -147,6 +147,12 @@ export default function AdminPage() {
   const [notice, setNotice] = useState(null);
   const [resetState, setResetState] = useState({ status: 'idle', message: '' });
   const [syncState, setSyncState] = useState({ status: 'idle', message: '' });
+  const [subscriptionReminderState, setSubscriptionReminderState] = useState({
+    status: 'idle',
+    message: '',
+    links: [],
+    skippedWhatsappCount: 0,
+  });
   const [isManualRefreshing, setManualRefreshing] = useState(false);
   const [usersRefreshKey, setUsersRefreshKey] = useState(0);
   const [loading, setLoading] = useState({
@@ -322,6 +328,53 @@ export default function AdminPage() {
       showNotice('error', 'Could not sync Clerk users. Check Clerk secret key and try again.');
     }
   }, [refreshAdminWorkspace, showNotice]);
+
+  const sendSubscriptionReminders = useCallback(async () => {
+    if (subscriptionReminderState.status === 'loading') return;
+
+    setSubscriptionReminderState({
+      status: 'loading',
+      message: 'Creating dashboard reminders and preparing WhatsApp chats...',
+      links: [],
+      skippedWhatsappCount: 0,
+    });
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/subscription-reminders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) throw new Error(data.message || 'Subscription reminder failed');
+
+      const links = Array.isArray(data.whatsAppLinks) ? data.whatsAppLinks : [];
+      const message = data.targetedCount > 0
+        ? `${data.message} ${links.length} WhatsApp chat${links.length === 1 ? '' : 's'} ready.`
+        : data.message;
+
+      setSubscriptionReminderState({
+        status: 'success',
+        message,
+        links,
+        skippedWhatsappCount: data.skippedWhatsappCount || 0,
+      });
+      showNotice('success', message);
+      await Promise.all([refreshAdminData(), loadActivity()]);
+    } catch (error) {
+      console.error('Failed to send subscription reminders', error);
+      const message = error.message || 'Could not send subscription reminders.';
+      setSubscriptionReminderState({
+        status: 'error',
+        message,
+        links: [],
+        skippedWhatsappCount: 0,
+      });
+      showNotice('error', message);
+    }
+  }, [loadActivity, refreshAdminData, showNotice, subscriptionReminderState.status]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -753,7 +806,10 @@ export default function AdminPage() {
 
   if (!isAuthenticated) return <AdminLog onLogin={handleAdminLogin} />;
 
-  const renderDashboard = () => (
+  const renderDashboard = () => {
+    const unpaidDriverCount = Math.max(0, (stats.totalDrivers || 0) - (stats.paidSubscriptions || 0));
+
+    return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-6">
         <StatsCard title="Users" value={stats.totalUsers} icon={Users} color="blue" />
@@ -792,12 +848,18 @@ export default function AdminPage() {
             <QuickAction icon={Ban} label={`${stats.suspendedUsers || 0} suspended users`} onClick={() => setActiveTab('riders')} />
             <QuickAction icon={Activity} label="View activity log" onClick={() => setActiveTab('activity')} />
           </div>
+          <SubscriptionReminderPanel
+            unpaidCount={unpaidDriverCount}
+            state={subscriptionReminderState}
+            onSend={sendSubscriptionReminders}
+          />
         </section>
       </div>
 
       <UserTable limit={5} refreshKey={usersRefreshKey} onChanged={refreshAdminData} onSelectUser={openUserDetail} />
     </div>
-  );
+    );
+  };
 
   const renderVerifications = () => (
     <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
@@ -1215,6 +1277,81 @@ function QuickAction({ icon: Icon, label, onClick }) {
       <span>{label}</span>
       <Icon size={18} className="text-slate-400" />
     </button>
+  );
+}
+
+function SubscriptionReminderPanel({ unpaidCount, state, onSend }) {
+  const isLoading = state.status === 'loading';
+  const isError = state.status === 'error';
+  const isSuccess = state.status === 'success';
+  const links = Array.isArray(state.links) ? state.links : [];
+
+  return (
+    <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+      <div className="flex items-start gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-900 ring-1 ring-slate-100">
+          <CreditCard size={20} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-black text-slate-900">Subscription reminders</h3>
+          <p className="mt-1 text-sm font-semibold text-slate-500">
+            Send dashboard reminders and prepare WhatsApp chats for unpaid drivers.
+          </p>
+          <p className="mt-2 text-xs font-black uppercase tracking-wide text-slate-400">
+            {unpaidCount} unpaid driver{unpaidCount === 1 ? '' : 's'}
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onSend}
+        disabled={isLoading || unpaidCount === 0}
+        className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 text-sm font-black text-white transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+      >
+        {isLoading ? <RefreshCw size={16} className="animate-spin" /> : <MessageCircle size={16} />}
+        {isLoading ? 'Preparing reminders...' : 'Send Payment Reminder'}
+      </button>
+
+      {state.message && (
+        <div className={`mt-3 rounded-2xl border p-3 text-sm font-black ${
+          isError
+            ? 'border-red-100 bg-red-50 text-red-700'
+            : isSuccess
+              ? 'border-green-100 bg-green-50 text-green-700'
+              : 'border-blue-100 bg-blue-50 text-blue-700'
+        }`}>
+          {state.message}
+        </div>
+      )}
+
+      {links.length > 0 && (
+        <div className="mt-3 space-y-2">
+          <p className="text-xs font-black uppercase tracking-wide text-slate-400">
+            WhatsApp chats
+          </p>
+          <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
+            {links.slice(0, 25).map((link) => (
+              <a
+                key={`${link.driverId}-${link.phone}`}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-11 items-center justify-between gap-3 rounded-2xl bg-white px-3 text-sm font-black text-slate-700 ring-1 ring-slate-100 transition hover:bg-green-50 hover:text-green-700"
+              >
+                <span className="min-w-0 truncate">{link.driverName}</span>
+                <MessageCircle size={16} className="shrink-0" />
+              </a>
+            ))}
+          </div>
+          {state.skippedWhatsappCount > 0 && (
+            <p className="text-xs font-semibold text-slate-400">
+              {state.skippedWhatsappCount} driver{state.skippedWhatsappCount === 1 ? '' : 's'} need a phone number before WhatsApp can be opened.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
