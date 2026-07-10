@@ -161,6 +161,7 @@ export default function AdminPage() {
   const [rejectionByRequest, setRejectionByRequest] = useState({});
   const [selectedUserDetail, setSelectedUserDetail] = useState(null);
   const [detailForm, setDetailForm] = useState({});
+  const [profileSaveState, setProfileSaveState] = useState({ status: 'idle', message: '' });
   const [isExitPromptOpen, setExitPromptOpen] = useState(false);
   const isLoggingOutRef = useRef(false);
 
@@ -177,6 +178,16 @@ export default function AdminPage() {
     setNotice({ type, message });
     window.setTimeout(() => setNotice(null), 4500);
   }, []);
+
+  useEffect(() => {
+    if (!['success', 'error'].includes(profileSaveState.status)) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setProfileSaveState({ status: 'idle', message: '' });
+    }, 4500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [profileSaveState.status]);
 
   const loadStats = useCallback(async (silent = false) => {
     try {
@@ -444,6 +455,7 @@ export default function AdminPage() {
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || 'User lookup failed');
       setSelectedUserDetail(data);
+      setProfileSaveState({ status: 'idle', message: '' });
       setDetailForm({
         fullName: data.user.fullName || '',
         phone: data.user.phone || '',
@@ -466,6 +478,7 @@ export default function AdminPage() {
     const user = selectedUserDetail?.user;
     const identifier = user?.clerkId || user?.id;
     if (!identifier) return;
+    if (profileSaveState.status === 'saving') return;
 
     const payload = {
       action: 'update',
@@ -484,6 +497,8 @@ export default function AdminPage() {
       });
     }
 
+    setProfileSaveState({ status: 'saving', message: 'Saving profile changes...' });
+
     try {
       const res = await fetch(`${API_BASE_URL}/admin/user/${identifier}`, {
         method: 'PATCH',
@@ -493,12 +508,14 @@ export default function AdminPage() {
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || 'Profile update failed');
       setSelectedUserDetail((current) => ({ ...current, user: data.user }));
-      showNotice('success', 'Profile updated.');
+      setProfileSaveState({ status: 'success', message: 'Changes updated successfully.' });
+      showNotice('success', 'Changes updated successfully.');
       refreshUserTables();
       await Promise.all([refreshAdminData(), loadActivity()]);
     } catch (error) {
       console.error('Failed to save user detail', error);
-      showNotice('error', 'Could not update profile.');
+      setProfileSaveState({ status: 'error', message: 'Changes were not updated. Please try again.' });
+      showNotice('error', 'Changes were not updated. Please try again.');
     }
   };
 
@@ -1096,6 +1113,7 @@ export default function AdminPage() {
           form={detailForm}
           setForm={setDetailForm}
           loading={loading.detail}
+          saveState={profileSaveState}
           onClose={() => setSelectedUserDetail(null)}
           onSave={saveUserDetail}
           onSuspend={() => setUserSuspension('suspend')}
@@ -1443,6 +1461,7 @@ function UserDetailDrawer({
   form,
   setForm,
   loading,
+  saveState,
   onClose,
   onSave,
   onSuspend,
@@ -1455,6 +1474,7 @@ function UserDetailDrawer({
   const user = detail.user;
   const isSuspended = user.accountStatus === 'suspended';
   const subscriptionStatus = user.subscriptionStatus || 'unpaid';
+  const isSaving = saveState?.status === 'saving';
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-3 sm:items-center sm:p-4" onClick={onClose}>
@@ -1505,12 +1525,13 @@ function UserDetailDrawer({
               </div>
               <button
                 onClick={onSave}
-                disabled={loading}
-                className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-black text-white disabled:opacity-50"
+                disabled={loading || isSaving}
+                className="mt-4 inline-flex min-h-12 items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-black text-white transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <Save size={16} />
-                Save Changes
+                {isSaving ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
+              <ProfileSaveToast state={saveState} />
             </section>
 
             {user.role === 'driver' && (
@@ -1646,6 +1667,32 @@ function UserDetailDrawer({
           </aside>
         </div>
       </section>
+    </div>
+  );
+}
+
+function ProfileSaveToast({ state }) {
+  if (!state?.message || state.status === 'idle') return null;
+
+  const styles = {
+    saving: 'border-blue-100 bg-blue-50 text-blue-800',
+    success: 'border-green-100 bg-green-50 text-green-800',
+    error: 'border-red-100 bg-red-50 text-red-800',
+  };
+  const Icon = state.status === 'success'
+    ? CheckCircle2
+    : state.status === 'error'
+      ? AlertCircle
+      : RefreshCw;
+
+  return (
+    <div
+      className={`mt-3 flex items-center gap-2 rounded-2xl border p-3 text-sm font-black shadow-sm transition ${styles[state.status] || styles.saving}`}
+      role="status"
+      aria-live="polite"
+    >
+      <Icon size={16} className={state.status === 'saving' ? 'animate-spin' : ''} />
+      <span>{state.message}</span>
     </div>
   );
 }
