@@ -90,6 +90,8 @@ export default function SearchPage() {
   const [activeFilter, setActiveFilter] = useState('All Rides');
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [toast, setToast] = useState('');
+  const [leadFollowUp, setLeadFollowUp] = useState(null);
+  const [isSubmittingFollowUp, setSubmittingFollowUp] = useState(false);
   const activeFetchRef = useRef(0);
   const abortRef = useRef(null);
   const riderId = user?.id || null;
@@ -190,10 +192,10 @@ export default function SearchPage() {
   };
 
   const trackDriverEvent = useCallback(async (driver, type) => {
-    if (!driver?._id) return;
+    if (!driver?._id) return null;
 
     try {
-      await fetch(`${API_BASE_URL}/analytics/track`, {
+      const res = await fetch(`${API_BASE_URL}/analytics/track`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -202,19 +204,62 @@ export default function SearchPage() {
           riderId
         })
       });
+      return await res.json();
     } catch (err) {
       console.error("Tracking failed", err);
+      return null;
     }
   }, [riderId]);
 
   const trackCall = async (driver) => {
     setToast(`${driver.fullName || 'Driver'} added to recent contacts`);
-    await trackDriverEvent(driver, 'call_click');
+    const result = await trackDriverEvent(driver, 'call_click');
+    if (result?.leadId) {
+      setLeadFollowUp({
+        leadId: result.leadId,
+        type: 'call',
+        driverName: driver.fullName || 'Driver',
+      });
+    }
   };
 
   const trackWhatsApp = async (driver) => {
     setToast(`Opening WhatsApp for ${driver.fullName || 'driver'}`);
-    await trackDriverEvent(driver, 'whatsapp_click');
+    const result = await trackDriverEvent(driver, 'whatsapp_click');
+    if (result?.leadId) {
+      setLeadFollowUp({
+        leadId: result.leadId,
+        type: 'whatsapp',
+        driverName: driver.fullName || 'Driver',
+      });
+    }
+  };
+
+  const submitLeadFollowUp = async (outcome) => {
+    if (!leadFollowUp?.leadId || isSubmittingFollowUp) return;
+    setSubmittingFollowUp(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/analytics/lead-outcome`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          leadId: leadFollowUp.leadId,
+          riderId,
+          outcome,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Follow-up failed');
+
+      setToast(outcome === 'completed' ? 'Thanks. Ride completion noted.' : 'Thanks. We noted that no trip happened.');
+      setLeadFollowUp(null);
+    } catch (error) {
+      console.error('Lead follow-up failed', error);
+      setToast('Could not save ride follow-up.');
+    } finally {
+      setSubmittingFollowUp(false);
+    }
   };
 
   useEffect(() => {
@@ -383,6 +428,15 @@ export default function SearchPage() {
           onClose={() => setSelectedDriver(null)}
           onCall={() => trackCall(selectedDriver)}
           onWhatsApp={() => trackWhatsApp(selectedDriver)}
+        />
+      )}
+
+      {leadFollowUp && (
+        <LeadFollowUpPrompt
+          lead={leadFollowUp}
+          isSubmitting={isSubmittingFollowUp}
+          onSubmit={submitLeadFollowUp}
+          onDismiss={() => setLeadFollowUp(null)}
         />
       )}
 
@@ -719,6 +773,10 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
           )}
         </div>
 
+        <p className="mb-3 rounded-2xl bg-slate-50 px-4 py-3 text-xs font-semibold leading-relaxed text-slate-500">
+          THE LOBBY only tracks button taps and optional ride confirmations. Calls are never recorded.
+        </p>
+
         <div className="grid gap-3 sm:grid-cols-3">
           <button
             type="button"
@@ -768,6 +826,52 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
             </button>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function LeadFollowUpPrompt({ lead, isSubmitting, onSubmit, onDismiss }) {
+  return (
+    <div className="fixed inset-x-4 bottom-28 z-60 mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/15 md:bottom-8">
+      <div className="flex items-start gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#0F766E]">
+          {lead.type === 'whatsapp' ? <MessageCircle size={20} /> : <Phone size={20} />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-black uppercase tracking-wide text-slate-400">Optional follow-up</p>
+          <h2 className="mt-1 text-base font-black text-slate-950">Did this become a ride?</h2>
+          <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">
+            Your answer helps THE LOBBY understand completed trips without recording calls.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="rounded-full bg-slate-100 p-2 text-slate-500"
+          aria-label="Dismiss ride follow-up"
+        >
+          <X size={16} />
+        </button>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => onSubmit('completed')}
+          disabled={isSubmitting}
+          className="min-h-11 rounded-2xl bg-[#0F766E] px-3 text-sm font-black text-white disabled:opacity-60"
+        >
+          Ride completed
+        </button>
+        <button
+          type="button"
+          onClick={() => onSubmit('not_completed')}
+          disabled={isSubmitting}
+          className="min-h-11 rounded-2xl bg-slate-100 px-3 text-sm font-black text-slate-700 disabled:opacity-60"
+        >
+          No trip
+        </button>
       </div>
     </div>
   );

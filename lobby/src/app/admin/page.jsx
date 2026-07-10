@@ -28,6 +28,8 @@ const EMPTY_STATS = {
   totalCalls: 0,
   totalProfileViews: 0,
   totalWhatsAppClicks: 0,
+  reportedCompletedRides: 0,
+  riderConfirmedRides: 0,
   bookingStatus: {},
   topDestinations: [],
   recentActivity: [],
@@ -818,6 +820,7 @@ export default function AdminPage() {
         <StatsCard title="Calls" value={stats.totalCalls} icon={Phone} trend="Leads" color="green" />
         <StatsCard title="Reports" value={stats.activeDriverReports} icon={Flag} trend="Active" color="orange" />
         <StatsCard title="Paid" value={stats.paidSubscriptions} icon={CreditCard} trend="Drivers" color="blue" />
+        <StatsCard title="Confirmed" value={stats.reportedCompletedRides || 0} icon={CheckCircle2} trend="Rides" color="green" />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">

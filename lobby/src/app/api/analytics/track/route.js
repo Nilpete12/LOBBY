@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { rateLimit } from '@/lib/rateLimit';
+import { writeWithColumnFallback } from '@/lib/supabaseColumnFallback';
 
 const ALLOWED_EVENT_TYPES = new Set(['profile_view', 'call_click', 'whatsapp_click']);
+const CONTACT_EVENT_TYPES = new Set(['call_click', 'whatsapp_click']);
+const OPTIONAL_ANALYTICS_COLUMNS = new Set(['lead_status']);
 
 export async function POST(request) {
   const limited = rateLimit(request, {
@@ -24,15 +27,28 @@ export async function POST(request) {
       );
     }
 
-    const { error } = await supabase.from('analytics').insert({
+    const eventRow = {
       event_type: type,
       driver_id: body.driverId || null,
       rider_id: body.riderId || null,
-    });
+    };
 
-    if (error) throw error;
+    if (CONTACT_EVENT_TYPES.has(type)) eventRow.lead_status = 'pending';
 
-    return NextResponse.json({ success: true }, { status: 201 });
+    const event = await writeWithColumnFallback(
+      eventRow,
+      OPTIONAL_ANALYTICS_COLUMNS,
+      (row) => supabaseAdmin.from('analytics').insert(row).select('id').single()
+    );
+
+    return NextResponse.json(
+      {
+        success: true,
+        eventId: event?.id || null,
+        leadId: CONTACT_EVENT_TYPES.has(type) ? event?.id || null : null,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Analytics Tracking Error:', error);
     return NextResponse.json({ success: false, message: 'Failed to track event' }, { status: 200 });

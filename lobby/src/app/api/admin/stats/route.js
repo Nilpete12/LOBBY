@@ -87,6 +87,8 @@ export async function GET() {
       totalCalls,
       totalProfileViews,
       totalWhatsAppClicks,
+      reportedCompletedRides,
+      riderConfirmedRides,
       bookingsResult,
       recentActivityResult,
     ] = await Promise.all([
@@ -103,6 +105,8 @@ export async function GET() {
       safeCountRows('analytics', (query) => query.eq('event_type', 'call_click')),
       safeCountRows('analytics', (query) => query.eq('event_type', 'profile_view')),
       safeCountRows('analytics', (query) => query.eq('event_type', 'whatsapp_click')),
+      safeCountRows('analytics', (query) => query.in('lead_status', ['driver_reported_completed', 'confirmed_completed'])),
+      safeCountRows('analytics', (query) => query.in('lead_status', ['rider_confirmed_completed', 'confirmed_completed'])),
       (async () => {
         try {
           const result = await supabaseAdmin.from('bookings').select('status,destination');
@@ -145,6 +149,8 @@ export async function GET() {
         totalCalls,
         totalProfileViews,
         totalWhatsAppClicks,
+        reportedCompletedRides,
+        riderConfirmedRides,
         totalBookings: bookings.length,
         activeRides: bookings.filter((booking) => booking.status === 'accepted').length,
         bookingStatus: countByKey(bookings, 'status'),
