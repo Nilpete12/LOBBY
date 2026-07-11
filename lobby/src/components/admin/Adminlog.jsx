@@ -51,28 +51,28 @@ export default function AdminLogin({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#033b37] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[#edf0ec] flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-800 text-[#0F766E] mb-6 border border-slate-700 shadow-xl">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/70 text-[#627568] mb-6 border border-white/70 shadow-xl shadow-slate-900/5 backdrop-blur-xl">
             <Shield size={32} />
           </div>
 
-          <h1 className="text-3xl font-[Sailors_Slant_Normal] text-white tracking-tight">
+          <h1 className="text-3xl font-[Sailors_Slant_Normal] text-[#171d1a] tracking-tight">
             System Access
           </h1>
 
-          <p className="text-slate-400 mt-2 text-sm">
+          <p className="text-[#778079] mt-2 text-sm">
             Restricted area. Authorized personnel only.
           </p>
         </div>
 
-        <div className="bg-[#032a37]/50 backdrop-blur-sm border border-slate-700 rounded-3xl p-8 shadow-2xl">
+        <div className="bg-white/60 backdrop-blur-xl border border-white/70 rounded-3xl p-8 shadow-2xl shadow-slate-900/10">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="admin-email"
-                className="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1"
+                className="block text-xs font-bold text-[#778079] uppercase mb-2 ml-1"
               >
                 Admin ID
               </label>
@@ -85,7 +85,7 @@ export default function AdminLogin({ onLogin }) {
                 value={email}
                 disabled={isLoading}
                 onChange={(e) => setEmail(e.target.value)}
-                className="dark-autofill w-full bg-[#031a37] border border-slate-700 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#031a37_inset] px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                className="w-full bg-white/70 border border-white/70 text-[#171d1a] px-4 py-3.5 rounded-xl outline-none focus:border-[#8ea08e] focus:ring-2 focus:ring-[#8ea08e]/15 transition"
                 placeholder="admin@lobby.com"
               />
             </div>
@@ -93,7 +93,7 @@ export default function AdminLogin({ onLogin }) {
             <div>
               <label
                 htmlFor="admin-password"
-                className="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1"
+                className="block text-xs font-bold text-[#778079] uppercase mb-2 ml-1"
               >
                 Password
               </label>
@@ -107,13 +107,13 @@ export default function AdminLogin({ onLogin }) {
                   value={password}
                   disabled={isLoading}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="dark-autofill w-full bg-[#031a37] border border-slate-700 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#031a37_inset] px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono text-sm disabled:opacity-60"
+                  className="w-full bg-white/70 border border-white/70 text-[#171d1a] px-4 py-3.5 rounded-xl outline-none focus:border-[#8ea08e] focus:ring-2 focus:ring-[#8ea08e]/15 transition font-mono text-sm disabled:opacity-60"
                   placeholder="••••••••"
                 />
 
                 <Lock
                   size={16}
-                  className="absolute right-4 top-4 text-slate-500"
+                  className="absolute right-4 top-4 text-[#778079]"
                 />
               </div>
             </div>
@@ -127,7 +127,7 @@ export default function AdminLogin({ onLogin }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#0F766E] hover:bg-[#0d625b] text-white font-bold py-4 rounded-xl transition shadow-lg shadow-[#0F766E]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full bg-[#171d1a] hover:bg-[#27302b] text-white font-bold py-4 rounded-xl transition shadow-lg shadow-[#171d1a]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading ? "Verifying..." : "Authenticate"}
             </button>
@@ -137,7 +137,7 @@ export default function AdminLogin({ onLogin }) {
         <div className="text-center mt-8">
           <Link
             href="/"
-            className="text-slate-500 text-sm hover:text-white transition flex items-center justify-center gap-2"
+            className="text-[#778079] text-sm hover:text-[#171d1a] transition flex items-center justify-center gap-2"
           >
             <ArrowLeft size={16} /> Return to Website
           </Link>

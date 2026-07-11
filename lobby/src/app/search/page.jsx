@@ -292,7 +292,7 @@ export default function SearchPage() {
   }, [toast]);
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
+    <div className="min-h-screen bg-[#edf0ec] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-3xl">
 
         {/* Search Header */}
@@ -309,7 +309,7 @@ export default function SearchPage() {
                 autoCorrect="off"
                 spellCheck={false}
                 placeholder="Where do you want to go? (e.g. Dawki)"
-                className="w-full rounded-2xl border border-slate-200 py-4 pl-12 pr-14 text-base font-medium shadow-sm outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 sm:text-lg"
+                className="w-full rounded-2xl border border-white/70 bg-white/70 py-4 pl-12 pr-14 text-base font-medium shadow-sm outline-none transition focus:border-[#8ea08e] focus:ring-2 focus:ring-[#8ea08e]/15 sm:text-lg"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -317,7 +317,7 @@ export default function SearchPage() {
                 type="submit"
                 aria-label="Search drivers"
                 disabled={loading}
-                className="absolute right-2 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
+                className="absolute right-2 flex h-11 w-11 items-center justify-center rounded-xl bg-[#171d1a] text-white transition hover:bg-[#27302b] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} />}
               </button>
@@ -330,7 +330,7 @@ export default function SearchPage() {
             />
           </form>
           {selectedTaxiStand && (
-            <p className="mt-2 text-sm font-semibold text-[#0F766E]">
+            <p className="mt-2 text-sm font-semibold text-[#627568]">
               Showing drivers who park at {selectedTaxiStand}.
             </p>
           )}
@@ -345,8 +345,8 @@ export default function SearchPage() {
               onClick={() => setActiveFilter(filter)}
               className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-bold transition ${
                 activeFilter === filter
-                  ? 'border-[#0F766E] bg-[#DCFCE7] text-[#0F766E]'
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-900 hover:text-slate-900'
+                  ? 'border-[#8ea08e] bg-[#dce4d8] text-[#627568]'
+                  : 'border-white/70 bg-white/60 text-slate-600 hover:border-[#8ea08e] hover:text-slate-900'
               }`}
             >
               {filter}
@@ -355,7 +355,7 @@ export default function SearchPage() {
         </div>
 
         {/* --- INSTANT BOOK QUICK ACTION --- */}
-        <div className="mb-10 rounded-4xl bg-linear-to-br from-teal-50 to-emerald-50/30 p-1 sm:p-2 border border-teal-100/50 shadow-sm">
+        <div className="mb-10 rounded-4xl bg-linear-to-br from-[#eef2eb] to-[#dce4d8]/40 p-1 sm:p-2 border border-white/70 shadow-sm">
           <div className="px-4 pt-6 pb-2 text-center sm:px-6">
             <h2 className="text-xl font-[Sailors_Slant_Normal] text-slate-900 tracking-tight">In a hurry?</h2>
             <p className="text-sm font-medium text-slate-500 mt-1 mb-6">
@@ -401,7 +401,7 @@ export default function SearchPage() {
             {activeFilter !== 'All Rides' && (
               <button
                 onClick={() => setActiveFilter('All Rides')}
-                className="mt-5 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-black"
+                className="mt-5 rounded-2xl bg-[#171d1a] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#27302b]"
               >
                 Show All Rides
               </button>
@@ -441,7 +441,7 @@ export default function SearchPage() {
       )}
 
       {toast && (
-        <div className="fixed inset-x-4 bottom-28 z-60 mx-auto max-w-sm rounded-2xl border border-[#DCFCE7] bg-white px-4 py-3 text-center text-sm font-bold text-[#0F766E] shadow-xl shadow-slate-900/10 md:bottom-8">
+        <div className="fixed inset-x-4 bottom-28 z-60 mx-auto max-w-sm rounded-2xl border border-white/70 bg-white/85 px-4 py-3 text-center text-sm font-bold text-[#627568] shadow-xl shadow-slate-900/10 backdrop-blur-xl md:bottom-8">
           {toast}
         </div>
       )}
