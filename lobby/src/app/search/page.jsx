@@ -10,8 +10,9 @@ import InstantBook from '@/components/InstantBook';
 import TaxiStandDropdown from '@/components/TaxiStandDropdown';
 
 const FILTERS = ['All Rides', 'Hatchback', 'SUV', 'Top Rated'];
-const SEARCH_CACHE_VERSION = 'v3';
-const SEARCH_CACHE_TTL = 45 * 1000;
+const SEARCH_CACHE_VERSION = 'v4';
+const SEARCH_CACHE_TTL = 60 * 1000;
+const SEARCH_LIVE_REFRESH_INTERVAL = 30 * 1000;
 
 function getInitialSearchQuery() {
   if (typeof window === 'undefined') return '';
@@ -159,22 +160,46 @@ export default function SearchPage() {
     };
   }, [fetchDrivers]);
 
-  // --- NEW: 2. Silent Live Polling (Fix for Issue 5) ---
+  // Keep availability fresh without hammering the search API while riders linger.
   useEffect(() => {
-    const intervalId = setInterval(async () => {
+    let isRefreshing = false;
+    let controller;
+
+    const refreshDriversQuietly = async () => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      if (isRefreshing) return;
+
+      isRefreshing = true;
+      controller?.abort();
+      controller = new AbortController();
+
       try {
-        // Fetch quietly in the background without triggering loading skeletons
-        const updatedDrivers = await requestDrivers(searchQuery, selectedTaxiStand);
+        const updatedDrivers = await requestDrivers(searchQuery, selectedTaxiStand, {
+          signal: controller.signal,
+        });
 
-        // Instantly update UI. If a driver went offline, they are removed.
         setDrivers(updatedDrivers);
-        writeCachedDrivers(searchQuery, selectedTaxiStand, updatedDrivers); // Keep cache fresh
+        writeCachedDrivers(searchQuery, selectedTaxiStand, updatedDrivers);
       } catch (err) {
+        if (err.name === 'AbortError') return;
         console.error("Live update failed silently:", err);
+      } finally {
+        isRefreshing = false;
       }
-    }, 10000); // Polls every 10 seconds
+    };
 
-    return () => clearInterval(intervalId);
+    const handleVisibilityChange = () => {
+      if (!document.hidden) refreshDriversQuietly();
+    };
+
+    const intervalId = setInterval(refreshDriversQuietly, SEARCH_LIVE_REFRESH_INTERVAL);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      controller?.abort();
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [searchQuery, selectedTaxiStand]);
 
   const handleSearch = (e) => {
