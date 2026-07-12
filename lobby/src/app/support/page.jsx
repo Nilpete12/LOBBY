@@ -181,9 +181,9 @@ export default function ContactPage() {
             <div>
               <h3 className="font-bold text-slate-900"><span className="font-[Sailors_Slant_Normal] ">THE LOBBY</span> HQ</h3>
               <p className="text-slate-500 mt-1 font-[Proxima_Nova_Semibold] text-sm">
-                Laitumkhrah Main Road,<br />
-                Near Beat House, Shillong,<br />
-                Meghalaya - 793003
+                In Your Neighbourhood,<br />
+                Kohima, Nagaland<br />
+                797001
               </p>
             </div>
           </section>
