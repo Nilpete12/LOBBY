@@ -145,34 +145,33 @@ export default function TaxiStandDropdown({
       </button>
 
       {isOpen && panelStyle && typeof document !== 'undefined' && createPortal(
-        <div
-          ref={panelRef}
-          id={listId}
-          role="listbox"
-          style={panelStyle}
-          className="fixed z-[80] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-2 text-left shadow-2xl shadow-slate-900/15"
-        >
-          <TaxiStandOption
-            name="Taxi Stands"
-            location="All major stands"
-            isSelected={!selectedValue}
-            onSelect={() => selectStand('')}
-          />
-
-          {TAXI_STANDS.map((stand) => (
-            <TaxiStandOption
-              key={stand.id}
-              name={stand.name}
-              location={stand.location}
-              status={stand.status}
-              statusColor={stand.statusColor}
-              isSelected={selectedValue === stand.name}
-              onSelect={() => selectStand(stand.name)}
-            />
-          ))}
-        </div>,
-        document.body
-      )}
+         <div
+           ref={panelRef}
+           id={listId}
+           role="listbox"
+           style={panelStyle}
+           className="fixed z-80 overflow-y-auto rounded-3xl border border-slate-200 bg-white p-2 text-left shadow-2xl shadow-slate-900/15 md:min-w-87.5 scrollbar-none [&::-webkit-scrollbar]:hidden"
+         >
+           <TaxiStandOption
+             name="Taxi Stands"
+             location="All major stands"
+             isSelected={!selectedValue}
+             onSelect={() => selectStand('')}
+           />
+           {TAXI_STANDS.map((stand) => (
+             <TaxiStandOption
+               key={stand.id}
+               name={stand.name}
+               location={stand.location}
+               status={stand.status}
+               statusColor={stand.statusColor}
+               isSelected={selectedValue === stand.name}
+               onSelect={() => selectStand(stand.name)}
+             />
+           ))}
+         </div>,
+         document.body
+       )}
     </div>
   );
 }
