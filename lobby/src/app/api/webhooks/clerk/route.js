@@ -7,20 +7,21 @@ import { syncClerkUserToSupabase } from '@/lib/clerkUserSync';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req) {
-  const WEBHOOK_SECRET =
-    process.env.CLERK_WEBHOOK_SECRET ||
-    process.env.WEBHOOK_SECRET ||
-    process.env.CLERK_SECRET;
-
-  if (!WEBHOOK_SECRET) return new Response('Missing Secret', { status: 500 });
+  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+  
+  if (!WEBHOOK_SECRET) {
+    console.error('CRITICAL: Missing CLERK_WEBHOOK_SECRET env variable.');
+    return new Response('Webhook configuration error', { status: 500 });
+  }
 
   const headerPayload = await headers();
   const svix_id = headerPayload.get("svix-id");
   const svix_timestamp = headerPayload.get("svix-timestamp");
   const svix_signature = headerPayload.get("svix-signature");
 
+  // 1. Guard Clause: Block request immediately if headers are completely absent
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response('Error occured -- no svix headers', { status: 400 });
+    return new Response('Missing svix security signatures', { status: 400 });
   }
 
   const payload = await req.json();
@@ -28,6 +29,7 @@ export async function POST(req) {
   const wh = new Webhook(WEBHOOK_SECRET);
   let evt;
 
+  // 2. Strict Signature Verification Block
   try {
     evt = wh.verify(body, {
       "svix-id": svix_id,
@@ -35,12 +37,14 @@ export async function POST(req) {
       "svix-signature": svix_signature,
     });
   } catch (err) {
-    console.error('Error verifying webhook:', err);
-    return new Response('Error occured', { status: 400 });
+    console.error('CRITICAL: Webhook signature verification failed spoofing attempt blocked:', err.message);
+    // Explicitly return 400 to break execution. DO NOT let the user continue down the route!
+    return new Response('Invalid webhook token signature signature', { status: 400 });
   }
 
   const eventType = evt.type;
 
+  // 3. Authenticated Mutations Block
   if (eventType === 'user.created' || eventType === 'user.updated') {
     try {
       await syncClerkUserToSupabase(evt.data);
@@ -59,7 +63,7 @@ export async function POST(req) {
 
     const deleteError = deleteResults.find((result) => result.error)?.error;
     if (deleteError) {
-      console.error("Supabase user delete error:", deleteError);
+      console.error("Supabase user structural delete error:", deleteError);
       return NextResponse.json({ error: deleteError.message }, { status: 500 });
     }
   }
