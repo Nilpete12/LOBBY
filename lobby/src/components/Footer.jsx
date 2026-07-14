@@ -4,7 +4,7 @@ import { MapPin } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#033b37] text-slate-300 py-16 border-t border-[#3F4E4F] dark-section">
+    <footer className="bg-[#172033] text-slate-300 py-16 border-t border-[#3F4E4F] dark-section">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Top Section: Grid */}
@@ -31,10 +31,10 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-6">Platform</h4>
             <ul className="space-y-4 text-sm font-medium">
-              <li><Link href="/search" className="hover:text-[#BBF7D0] transition">Find a Ride</Link></li>
-              <li><Link href="/drive" className="hover:text-[#BBF7D0] transition">Driver Sign Up</Link></li>
-              <li><Link href="/sign-in" className="hover:text-[#BBF7D0] transition">Log In</Link></li>
-              <li><Link href="/search" className="hover:text-[#BBF7D0] transition">Popular Routes</Link></li>
+              <li><Link href="/search" className="hover:text-[#FFEDD5] transition">Find a Ride</Link></li>
+              <li><Link href="/drive" className="hover:text-[#FFEDD5] transition">Driver Sign Up</Link></li>
+              <li><Link href="/sign-in" className="hover:text-[#FFEDD5] transition">Log In</Link></li>
+              <li><Link href="/search" className="hover:text-[#FFEDD5] transition">Popular Routes</Link></li>
             </ul>
           </div>
 
@@ -42,10 +42,10 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-6">Company</h4>
             <ul className="space-y-4 text-sm font-medium">
-              <li><Link href="/about" className="hover:text-[#BBF7D0] transition">About Us</Link></li>
-              <li><Link href="/admin" className="hover:text-[#BBF7D0] transition">Admin Login</Link></li>
-              <li><Link href="/privacypolicy" className="hover:text-[#BBF7D0] transition">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-[#BBF7D0] transition">Terms of Service</Link></li>
+              <li><Link href="/about" className="hover:text-[#FFEDD5] transition">About Us</Link></li>
+              <li><Link href="/admin" className="hover:text-[#FFEDD5] transition">Admin Login</Link></li>
+              <li><Link href="/privacypolicy" className="hover:text-[#FFEDD5] transition">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-[#FFEDD5] transition">Terms of Service</Link></li>
             </ul>
           </div>
 

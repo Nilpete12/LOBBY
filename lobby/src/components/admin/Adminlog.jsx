@@ -51,10 +51,10 @@ export default function AdminLogin({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#033b37] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[#172033] flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-800 text-[#0F766E] mb-6 border border-slate-700 shadow-xl">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-800 text-[#2F80ED] mb-6 border border-slate-700 shadow-xl">
             <Shield size={32} />
           </div>
 
@@ -85,7 +85,7 @@ export default function AdminLogin({ onLogin }) {
                 value={email}
                 disabled={isLoading}
                 onChange={(e) => setEmail(e.target.value)}
-                className="dark-autofill w-full bg-[#031a37] border border-slate-700 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#031a37_inset] px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                className="dark-autofill w-full bg-[#172033] border border-slate-700 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#172033_inset] px-4 py-3.5 rounded-xl outline-none focus:border-[#58A6FF] focus:ring-1 focus:ring-[#58A6FF] transition"
                 placeholder="admin@lobby.com"
               />
             </div>
@@ -107,7 +107,7 @@ export default function AdminLogin({ onLogin }) {
                   value={password}
                   disabled={isLoading}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="dark-autofill w-full bg-[#031a37] border border-slate-700 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#031a37_inset] px-4 py-3.5 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono text-sm disabled:opacity-60"
+                  className="dark-autofill w-full bg-[#172033] border border-slate-700 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#172033_inset] px-4 py-3.5 rounded-xl outline-none focus:border-[#58A6FF] focus:ring-1 focus:ring-[#58A6FF] transition font-mono text-sm disabled:opacity-60"
                   placeholder="••••••••"
                 />
 
@@ -127,7 +127,7 @@ export default function AdminLogin({ onLogin }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#0F766E] hover:bg-[#0d625b] text-white font-bold py-4 rounded-xl transition shadow-lg shadow-[#0F766E]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full bg-[#58A6FF] hover:bg-[#2F80ED] text-slate-950 font-bold py-4 rounded-xl transition shadow-lg shadow-[#58A6FF]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading ? "Verifying..." : "Authenticate"}
             </button>

@@ -8,13 +8,13 @@ import { TAXI_STANDS } from '@/lib/taxiStands';
 const VARIANT_STYLES = {
   hero: {
     root: 'w-full md:w-64',
-    button: 'min-h-14 rounded-xl md:rounded-2xl bg-[#eef5f2] md:bg-transparent p-1 md:p-0',
-    iconWrap: 'h-10 w-10 md:h-14 md:w-14 rounded-lg md:rounded-2xl bg-white md:bg-[#eef5f2] shadow-sm md:shadow-none',
+    button: 'min-h-14 rounded-xl md:rounded-2xl bg-[#FFF3E3] md:bg-transparent p-1 md:p-0',
+    iconWrap: 'h-10 w-10 md:h-14 md:w-14 rounded-lg md:rounded-2xl bg-white md:bg-[#FFF3E3] shadow-sm md:shadow-none',
     label: 'text-base md:text-sm',
   },
   search: {
     root: 'w-full',
-    button: 'min-h-14 rounded-2xl border border-slate-200 bg-white px-4 shadow-sm focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10',
+    button: 'min-h-14 rounded-2xl border border-slate-200 bg-white px-4 shadow-sm focus:border-[#58A6FF] focus:ring-2 focus:ring-[#58A6FF]/10',
     iconWrap: 'h-9 w-9 rounded-xl bg-slate-50',
     label: 'text-base',
   },
@@ -123,7 +123,7 @@ export default function TaxiStandDropdown({
           setIsOpen((current) => !current);
         }}
       >
-        <span className={`flex shrink-0 items-center justify-center text-[#0F5A53] ${styles.iconWrap}`}>
+        <span className={`flex shrink-0 items-center justify-center text-[#2F80ED] ${styles.iconWrap}`}>
           <Car size={20} />
         </span>
 
@@ -140,7 +140,7 @@ export default function TaxiStandDropdown({
 
         <ChevronDown
           size={18}
-          className={`shrink-0 text-slate-400 transition ${isOpen ? 'rotate-180 text-[#0F766E]' : ''}`}
+          className={`shrink-0 text-slate-400 transition ${isOpen ? 'rotate-180 text-[#2F80ED]' : ''}`}
         />
       </button>
 
@@ -185,11 +185,11 @@ function TaxiStandOption({ name, location, status, statusColor, isSelected, onSe
       onClick={onSelect}
       className={`mb-1 flex w-full items-center gap-3 rounded-2xl p-3 text-left transition last:mb-0 ${
         isSelected
-          ? 'bg-emerald-50 text-[#0F766E]'
+          ? 'bg-[#EAF4FF] text-[#2F80ED]'
           : 'text-slate-700 hover:bg-slate-50'
       }`}
     >
-      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isSelected ? 'bg-white text-[#0F766E]' : 'bg-slate-100 text-slate-400'}`}>
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isSelected ? 'bg-white text-[#2F80ED]' : 'bg-slate-100 text-slate-400'}`}>
         {isSelected ? <Check size={18} /> : <MapPin size={18} />}
       </span>
 

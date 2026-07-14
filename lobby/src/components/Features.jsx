@@ -6,27 +6,27 @@ export default function Features() {
       icon: <MapPin size={24}/>,
       title: "Destination First",
       desc: "Find drivers who are already planning your route.",
-      color: "bg-[#DBEAFE] text-[#0F766E]",
-      grad: "bg-gradient-to-r from-[#DBEAFE]/30 to-[#DCFCE7]/20"
+      color: "bg-[#DCEBFF] text-[#2F80ED]",
+      grad: "bg-gradient-to-r from-[#DCEBFF]/30 to-[#FFEDD5]/20"
     },
     {
       icon: <Smartphone size={24}/>,
       title: "Direct Connection",
       desc: "One tap to call. Connect and Confirm, directly with the driver.",
-      color: "bg-[#DCFCE7] text-[#0F766E]",
-      grad: "bg-gradient-to-r from-[#DCFCE7]/30 to-[#DBEAFE]/20"
+      color: "bg-[#FFEDD5] text-[#2F80ED]",
+      grad: "bg-gradient-to-r from-[#FFEDD5]/30 to-[#DCEBFF]/20"
     },
     {
       icon: <ShieldCheck size={24}/>,
       title: "Verified Locals",
       desc: "Travel safely with known faces and community ratings.",
-      color: "bg-[#E0F2FE] text-[#0F766E]",
-      grad: "bg-gradient-to-r from-[#E0F2FE]/30 to-[#DBEAFE]/20"
+      color: "bg-[#E0F2FE] text-[#2F80ED]",
+      grad: "bg-gradient-to-r from-[#E0F2FE]/30 to-[#DCEBFF]/20"
     }
   ];
 
   return (
-    <section className="bg-[#F8FAFC] py-28 border-y border-slate-200">
+    <section className="bg-[#FFF7ED] py-28 border-y border-slate-200">
       <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-12">
         {items.map((item, i) => (
           <div

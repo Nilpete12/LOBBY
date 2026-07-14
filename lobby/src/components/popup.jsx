@@ -131,7 +131,7 @@ export default function InstallPopup() {
       </button>
 
       <div className="flex items-center gap-4 mb-5">
-        <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] shadow-md shrink-0">
+        <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br from-[#FFEDD5] to-[#DCEBFF] shadow-md shrink-0">
           <Image
             src="/favicon-512.png"
             alt="THE LOBBY"
@@ -166,7 +166,7 @@ export default function InstallPopup() {
       <button
         type="button"
         onClick={handleInstallClick}
-        className="w-full rounded-2xl bg-gradient-to-r from-[#0F766E] to-[#0891B2] py-3.5 text-white font-bold shadow-lg shadow-cyan-100 hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
+        className="w-full rounded-2xl bg-gradient-to-r from-[#58A6FF] to-[#FF6B6B] py-3.5 text-slate-950 font-bold shadow-lg shadow-[#58A6FF]/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
       >
         <Download size={18} />
         {isIOSMode ? "Got it" : "Install App"}

@@ -153,7 +153,7 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
       {/* UI STATE: IDLE */}
       {status === "idle" && (
         <div className="text-center">
-          <div className="w-14 h-14 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#0F766E]">
+          <div className="w-14 h-14 bg-[#EAF4FF] rounded-full flex items-center justify-center mx-auto mb-4 text-[#2F80ED]">
             <Car size={28} />
           </div>
           <h3 className="text-xl font-[Proxima_Nova_Semibold] text-slate-900 mb-2">Need a ride?</h3>
@@ -164,7 +164,7 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
             type="tel"
             value={phoneNumber}
             onChange={(event) => setPhoneNumber(event.target.value)}
-            className="mb-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10"
+            className="mb-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#58A6FF] focus:ring-2 focus:ring-[#58A6FF]/10"
             placeholder={profilePhone || "Your phone number"}
             aria-label="Phone number for driver callback"
           />
@@ -174,7 +174,7 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
           <button
             onClick={handleInstantBook}
             disabled={isBusy}
-            className="w-full bg-[#0F766E] text-white py-3.5 rounded-2xl font-bold hover:bg-[#0d625b] transition shadow-lg shadow-[#0F766E]/20 flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.99]"
+            className="w-full bg-[#58A6FF] text-slate-950 py-3.5 rounded-2xl font-bold hover:bg-[#2F80ED] transition shadow-lg shadow-[#58A6FF]/20 flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.99]"
           >
             <Navigation size={18} />
             {isSignedIn ? "Instant Book" : "Sign in to book"}
@@ -185,7 +185,7 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
       {/* UI STATE: LOCATING & BOOKING */}
       {(status === "locating" || status === "booking") && (
         <div className="text-center py-6">
-          <Loader2 size={36} className="text-[#0F766E] animate-spin mx-auto mb-4" />
+          <Loader2 size={36} className="text-[#2F80ED] animate-spin mx-auto mb-4" />
           <h3 className="text-lg font-bold text-slate-900 mb-1">
             {status === "locating" ? "Finding you..." : "Sending request..."}
           </h3>
@@ -197,8 +197,8 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
       {status === "waiting" && (
         <div className="text-center py-6">
           <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 bg-emerald-100 rounded-full animate-ping opacity-75"></div>
-            <div className="relative bg-emerald-50 rounded-full w-full h-full flex items-center justify-center text-emerald-600">
+            <div className="absolute inset-0 bg-[#DCEBFF] rounded-full animate-ping opacity-75"></div>
+            <div className="relative bg-[#EAF4FF] rounded-full w-full h-full flex items-center justify-center text-[#2F80ED]">
               <MapPin size={28} />
             </div>
           </div>
@@ -210,7 +210,7 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
       {/* UI STATE: ACCEPTED (Show Call Button) */}
       {status === "accepted" && (
         <div className="text-center">
-          <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600">
+          <div className="w-16 h-16 bg-[#EAF4FF] rounded-full flex items-center justify-center mx-auto mb-4 text-[#2F80ED]">
             <CheckCircle size={32} />
           </div>
           <h3 className="text-xl font-bold text-slate-900 mb-1">Ride Confirmed!</h3>

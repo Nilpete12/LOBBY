@@ -420,7 +420,7 @@ export default function DriverDashboard() {
                     ? 'cursor-not-allowed bg-white/10 text-white/45'
                     : isOnline
                       ? 'bg-white text-slate-950 hover:bg-slate-100'
-                      : 'bg-emerald-400 text-slate-950 hover:bg-emerald-300'
+                      : 'bg-[#58A6FF] text-slate-950 hover:bg-[#2F80ED]'
                 } disabled:opacity-70`}
               >
                 {isSaving ? <Loader2 size={21} className="animate-spin" /> : !isVerified ? <Lock size={21} /> : <Power size={22} />}
@@ -454,7 +454,7 @@ export default function DriverDashboard() {
           </div>
 
           <div className="mb-4 h-2 overflow-hidden rounded-full bg-slate-100">
-            <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${completionPercent}%` }} />
+            <div className="h-full rounded-full bg-[#58A6FF] transition-all" style={{ width: `${completionPercent}%` }} />
           </div>
 
           <div className="grid gap-2 sm:grid-cols-2">
@@ -558,8 +558,8 @@ export default function DriverDashboard() {
                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
                       {uploadingImageType === 'car' ? (
                         <>
-                          <Loader2 size={24} className="animate-spin text-blue-500" />
-                          <span className="text-xs font-bold mt-1 text-blue-500">Uploading...</span>
+                          <Loader2 size={24} className="animate-spin text-[#2F80ED]" />
+                          <span className="text-xs font-bold mt-1 text-[#2F80ED]">Uploading...</span>
                         </>
                       ) : (
                         <>
@@ -611,7 +611,7 @@ export default function DriverDashboard() {
                 <label className="relative flex min-h-36 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center transition hover:border-slate-300 hover:bg-slate-100">
                   <div className="flex flex-col items-center justify-center">
                     {uploadingLicense ? (
-                      <div className="flex flex-col items-center font-black text-blue-600">
+                      <div className="flex flex-col items-center font-black text-[#2F80ED]">
                         <Loader2 size={28} className="mb-2 animate-spin" />
                         <span className="text-sm">Uploading license...</span>
                       </div>
@@ -702,8 +702,8 @@ function DriverStatusPill({ isVerified, isOnline, status }) {
   const label = isVerified ? (isOnline ? 'Live' : 'Approved') : status || 'Pending';
   const tone = isVerified
     ? isOnline
-      ? 'bg-emerald-400 text-slate-950'
-      : 'bg-white/15 text-white'
+      ? 'bg-[#58A6FF] text-slate-950'
+      : 'bg-white/15 text-slate-950'
     : 'bg-yellow-300 text-slate-950';
 
   return (
@@ -776,7 +776,7 @@ function DriverDashboardReminders({ notifications }) {
 function SetupItem({ item }) {
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3">
-      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${item.done ? 'bg-emerald-100 text-emerald-700' : 'bg-white text-slate-400'}`}>
+      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${item.done ? 'bg-[#DCEBFF] text-[#2F80ED]' : 'bg-white text-slate-400'}`}>
         {item.done ? <CheckCircle2 size={19} /> : <Clock size={18} />}
       </div>
       <div className="min-w-0">
@@ -826,13 +826,13 @@ function TaxiStandSelector({ selected = [], onChange }) {
               onClick={() => toggleStand(stand.name)}
               className={`min-h-16 rounded-2xl border px-3 py-3 text-left transition ${
                 isSelected
-                  ? 'border-[#0F766E] bg-emerald-50 text-[#0F766E] shadow-sm'
+                  ? 'border-[#58A6FF] bg-[#EAF4FF] text-[#2F80ED] shadow-sm'
                   : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white'
               }`}
               aria-pressed={isSelected}
             >
               <span className="flex items-start gap-2">
-                <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isSelected ? 'bg-[#0F766E] text-white' : 'bg-white text-slate-400'}`}>
+                <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isSelected ? 'bg-[#58A6FF] text-slate-950' : 'bg-white text-slate-400'}`}>
                   {isSelected ? <CheckCircle2 size={14} /> : <MapPin size={14} />}
                 </span>
                 <span className="min-w-0">
@@ -879,13 +879,13 @@ function DashboardNotice({ notice, onDismiss }) {
   const tone = isSuccess
     ? 'border-green-200 bg-green-50 text-green-800'
     : isInfo
-      ? 'border-blue-200 bg-blue-50 text-blue-800'
+      ? 'border-[#CFE4FF] bg-[#EAF4FF] text-[#2F80ED]'
       : 'border-red-200 bg-red-50 text-red-800';
 
   const iconTone = isSuccess
     ? 'bg-green-100 text-green-700'
     : isInfo
-      ? 'bg-blue-100 text-blue-700'
+      ? 'bg-[#DCEBFF] text-[#2F80ED]'
       : 'bg-red-100 text-red-700';
 
   const Icon = isSuccess ? CheckCircle2 : AlertCircle;

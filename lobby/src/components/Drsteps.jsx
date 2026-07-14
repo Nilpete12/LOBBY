@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function JoinSteps() {
   return (
-    <section className="py-24 bg-[#F8FAFC] border-t border-slate-200">
+    <section className="py-24 bg-[#FFF7ED] border-t border-slate-200">
       <div className="max-w-7xl mx-auto px-6">
         
         <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -23,7 +23,7 @@ export default function JoinSteps() {
                 { num: "04", title: "Go Online", text: "Toggle your status to Green and start receiving calls." }
               ].map((step, i) => (
                 <div key={i} className="flex gap-6 font-[Proxima_Nova_Extrabold] items-start">
-                  <span className="text-3xl font-extrabold text-[#0F766E] opacity-80">
+                  <span className="text-3xl font-extrabold text-[#2F80ED] opacity-80">
                     {step.num}
                   </span>
 
@@ -48,12 +48,12 @@ export default function JoinSteps() {
             </h3>
 
             <p className="text-slate-500 font-[Proxima_Nova_Semibold] mb-8">
-              Join <span className="font-[Sailors_Slant_Normal] text-[#0F766E]">THE LOBBY</span> today!
+              Join <span className="font-[Sailors_Slant_Normal] text-[#2F80ED]">THE LOBBY</span> today!
             </p>
 
             <Link
               href="/sign-up"
-              className="block w-full rounded-2xl bg-[#0F766E] py-4 text-center font-semibold text-white shadow-lg shadow-cyan-100 transition hover:bg-[#115E59]"
+              className="block w-full rounded-2xl bg-[#58A6FF] py-4 text-center font-semibold text-slate-950 shadow-lg shadow-[#58A6FF]/20 transition hover:bg-[#2F80ED]"
             >
               Sign Up Now
             </Link>

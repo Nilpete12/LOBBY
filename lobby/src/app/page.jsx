@@ -26,7 +26,7 @@ export default async function HomePage() {
     const isOnline = driverDoc?.is_available || false;
 
     return (
-      <main className="min-h-screen bg-[#F8FAFC]">
+      <main className="min-h-screen bg-[#FFF7ED]">
         <IncomingRideAlert />
         <DriverHero 
           userName={user?.firstName || "Driver"} 

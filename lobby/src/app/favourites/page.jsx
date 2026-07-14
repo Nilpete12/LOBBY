@@ -52,14 +52,14 @@ export default function FavouritesPage() {
 
   if (!isLoaded) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] font-semibold text-slate-400">
+      <div className="flex min-h-screen items-center justify-center bg-[#FFF7ED] font-semibold text-slate-400">
         Loading favourites...
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#F8FAFC] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
+    <main className="min-h-screen bg-[#FFF7ED] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-4xl">
         <section className="mb-6 rounded-[1.5rem] border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-[2rem] sm:p-8">
           <div className="flex items-center gap-3">
@@ -90,7 +90,7 @@ export default function FavouritesPage() {
             </p>
             <Link
               href="/search"
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0F766E] px-6 py-3 font-bold text-white shadow-lg shadow-cyan-100 transition hover:bg-[#115E59] sm:w-auto"
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#58A6FF] px-6 py-3 font-bold text-slate-950 shadow-lg shadow-[#58A6FF]/20 transition hover:bg-[#2F80ED] sm:w-auto"
             >
               <Search size={18} />
               Find a Ride
@@ -171,7 +171,7 @@ export default function FavouritesPage() {
                       {driver.phone && (
                         <a
                           href={`tel:${driver.phone}`}
-                          className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-[#0F766E] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-100 transition hover:bg-[#115E59]"
+                          className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-[#58A6FF] px-4 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-[#58A6FF]/20 transition hover:bg-[#2F80ED]"
                         >
                           <Phone size={17} />
                           Call Driver

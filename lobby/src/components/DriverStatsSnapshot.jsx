@@ -34,7 +34,7 @@ export default function DriverStatsSnapshot() {
   }, []);
 
   return (
-    <section className="relative pb-16 bg-[#F8FAFC] -mt-8 z-20">
+    <section className="relative pb-16 bg-[#FFF7ED] -mt-8 z-20">
       <div className="max-w-7xl mx-auto px-5 md:px-6">
         
         {/* Section Header */}
@@ -50,10 +50,10 @@ export default function DriverStatsSnapshot() {
           
           <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow group">
             <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-[#0F766E] group-hover:bg-[#0F766E] group-hover:text-white transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-[#EAF4FF] flex items-center justify-center text-[#2F80ED] group-hover:bg-[#58A6FF] group-hover:text-slate-950 transition-colors">
                 <Eye size={24} />
               </div>
-              <div className="flex items-center gap-1 text-xs font-[Proxima_Nova_Extrabold] text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+              <div className="flex items-center gap-1 text-xs font-[Proxima_Nova_Extrabold] text-[#2F80ED] bg-[#EAF4FF] px-2.5 py-1 rounded-full">
                 <TrendingUp size={12} />
                 Visibility
               </div>
@@ -66,7 +66,7 @@ export default function DriverStatsSnapshot() {
 
           <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow group">
             <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-[#EAF4FF] flex items-center justify-center text-[#2F80ED] group-hover:bg-[#58A6FF] group-hover:text-slate-950 transition-colors">
                 <PhoneCall size={24} />
               </div>
               <div className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">

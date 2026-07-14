@@ -134,7 +134,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-slate-50 pt-20 pb-12">
       
       {/* Header */}
-      <div className="bg-[#033b37] text-white py-16 px-6 mb-12">
+      <div className="bg-[#172033] text-white py-16 px-6 mb-12">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl font-[Proxima_Nova_Extrabold] tracking-tight mb-4">How can we help?</h1>
           <p className="text-slate-400 text-lg font-[Proxima_Nova_Semibold]">
@@ -148,17 +148,17 @@ export default function ContactPage() {
         {/* --- LEFT COLUMN: Info & FAQ --- */}
         <div className="space-y-8">
           <section className="grid sm:grid-cols-2 gap-4 font-[Proxima_Nova_Extrabold]">
-            <div className="bg-linear-to-br from-blue-100/90 to-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4">
+            <div className="bg-linear-to-br from-[#DCEBFF]/90 to-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-[#EAF4FF] text-[#2F80ED] rounded-full flex items-center justify-center mb-4">
                 <Phone size={24} />
               </div>
               <h3 className="font-bold text-slate-900">Call Us</h3>
               <p className="text-slate-500 text-sm mt-1 mb-3">Mon-Fri from 9am to 6pm</p>
-              <a href="tel:+918413096076" className="text-blue-600 font-bold hover:underline">+91 84130 96076</a>
+              <a href="tel:+918413096076" className="text-[#2F80ED] font-bold hover:underline">+91 84130 96076</a>
             </div>
 
-            <div className="bg-linear-to-br from-purple-100/90 to-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-4">
+            <div className="bg-linear-to-br from-[#FFE4DF]/90 to-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-[#FFE4DF] text-[#FF6B6B] rounded-full flex items-center justify-center mb-4">
                 <Mail size={24} />
               </div>
               <h3 className="font-bold text-slate-900">Email Us</h3>
@@ -167,7 +167,7 @@ export default function ContactPage() {
                 href="mailto:thelobby500@gmail.com"
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-purple-600 font-bold hover:underline"
+                className="text-[#FF6B6B] font-bold hover:underline"
               >
                 thelobby500@gmail.com
               </a>
@@ -210,7 +210,7 @@ export default function ContactPage() {
         {/* --- RIGHT COLUMN: Contact Form (IMPROVED) --- */}
         <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-lg shadow-slate-200/50 h-fit">
           <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <MessageSquare className="text-blue-500" /> Send a message
+            <MessageSquare className="text-[#2F80ED]" /> Send a message
           </h2>
           
           {isSubmitted ? (
@@ -220,7 +220,7 @@ export default function ContactPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">Request received</h3>
               <p className="text-slate-500">Thank you for reaching out. Your message is saved in the support queue and our team will get back to you within 24 hours.</p>
-              <button onClick={() => setIsSubmitted(false)} className="mt-6 text-sm font-bold text-blue-600 hover:underline transition">
+              <button onClick={() => setIsSubmitted(false)} className="mt-6 text-sm font-bold text-[#2F80ED] hover:underline transition">
                 Send another message
               </button>
             </div>
@@ -246,7 +246,7 @@ export default function ContactPage() {
                     className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition focus:ring-2 ${
                       errors.firstName 
                         ? 'border-red-500 focus:border-red-500 ring-red-200' 
-                        : 'border-slate-200 focus:border-blue-500 ring-blue-100'
+                        : 'border-slate-200 focus:border-[#58A6FF] ring-[#CFE4FF]'
                     }`}
                     aria-invalid={!!errors.firstName}
                     aria-describedby={errors.firstName ? "firstName-error" : undefined}
@@ -270,7 +270,7 @@ export default function ContactPage() {
                     className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition focus:ring-2 ${
                       errors.lastName 
                         ? 'border-red-500 focus:border-red-500 ring-red-200' 
-                        : 'border-slate-200 focus:border-blue-500 ring-blue-100'
+                        : 'border-slate-200 focus:border-[#58A6FF] ring-[#CFE4FF]'
                     }`}
                     aria-invalid={!!errors.lastName}
                     aria-describedby={errors.lastName ? "lastName-error" : undefined}
@@ -295,7 +295,7 @@ export default function ContactPage() {
                   className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition focus:ring-2 ${
                     errors.email 
                       ? 'border-red-500 focus:border-red-500 ring-red-200' 
-                      : 'border-slate-200 focus:border-blue-500 ring-blue-100'
+                      : 'border-slate-200 focus:border-[#58A6FF] ring-[#CFE4FF]'
                   }`}
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
@@ -314,7 +314,7 @@ export default function ContactPage() {
                   name="topic"
                   value={formData.topic}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 focus:ring-2 ring-blue-100 transition text-slate-700"
+                  className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none focus:border-[#58A6FF] focus:ring-2 ring-[#CFE4FF] transition text-slate-700"
                 >
                   <option>General Inquiry</option>
                   <option>Lost Item</option>
@@ -341,7 +341,7 @@ export default function ContactPage() {
                   className={`w-full bg-slate-50 border p-3 rounded-xl outline-none transition focus:ring-2 resize-none ${
                     errors.message 
                       ? 'border-red-500 focus:border-red-500 ring-red-200' 
-                      : 'border-slate-200 focus:border-blue-500 ring-blue-100'
+                      : 'border-slate-200 focus:border-[#58A6FF] ring-[#CFE4FF]'
                   }`}
                   aria-invalid={!!errors.message}
                   aria-describedby={errors.message ? "message-error" : undefined}

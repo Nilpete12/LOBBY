@@ -15,7 +15,7 @@ export const TAXI_STANDS = [
     taxis: '40+',
     passengers: 'Steady',
     status: 'Moderate',
-    statusColor: 'text-emerald-700 bg-emerald-100 border-emerald-200',
+    statusColor: 'text-[#2F80ED] bg-[#DCEBFF] border-[#CFE4FF]',
   },
   {
     id: 'high-school-junction',
@@ -24,7 +24,7 @@ export const TAXI_STANDS = [
     taxis: '15+',
     passengers: 'Steady',
     status: 'Moderate',
-    statusColor: 'text-emerald-700 bg-emerald-100 border-emerald-200',
+    statusColor: 'text-[#2F80ED] bg-[#DCEBFF] border-[#CFE4FF]',
   },
   {
     id: 'razhu-point',
@@ -42,7 +42,7 @@ export const TAXI_STANDS = [
     taxis: '10+',
     passengers: 'Low',
     status: 'Quiet',
-    statusColor: 'text-blue-600 bg-blue-100 border-blue-200',
+    statusColor: 'text-[#2F80ED] bg-[#DCEBFF] border-[#CFE4FF]',
   },
   {
     id: 'phoolbari-stand',
@@ -51,7 +51,7 @@ export const TAXI_STANDS = [
     taxis: '15+',
     passengers: 'Steady',
     status: 'Moderate',
-    statusColor: 'text-emerald-700 bg-emerald-100 border-emerald-200',
+    statusColor: 'text-[#2F80ED] bg-[#DCEBFF] border-[#CFE4FF]',
   },
 ];
 

@@ -20,9 +20,9 @@ export default function TaxiStands({ isDriverView = false }) {
         <div className="mb-12 md:text-center max-w-2xl md:mx-auto">
           <h2 className="text-3xl md:text-4xl font-[Proxima_Nova_Semibold] text-slate-900 mb-4 tracking-tight">
             {isDriverView ? (
-              <>Current <span className="text-[#0F766E] font-[Sailors_Slant_Normal]">Demand Zones</span></>
+              <>Current <span className="text-[#2F80ED] font-[Sailors_Slant_Normal]">Demand Zones</span></>
             ) : (
-              <>Find Rides from <span className="text-[#0F766E] font-[Sailors_Slant_Normal]">Major Stands</span></>
+              <>Find Rides from <span className="text-[#2F80ED] font-[Sailors_Slant_Normal]">Major Stands</span></>
             )}
           </h2>
           <p className="text-slate-500 font-medium text-lg">
@@ -37,11 +37,11 @@ export default function TaxiStands({ isDriverView = false }) {
           {TAXI_STANDS.slice(0, visibleCount).map((stand) => (
             <div
               key={stand.id}
-              className="group bg-white rounded-3xl p-6 border border-[#DBEAFE] shadow-sm hover:shadow-[0_10px_40px_-10px_rgba(15,118,110,0.15)] hover:border-[#0F766E]/30 transition-all duration-300 relative overflow-hidden"
+              className="group bg-white rounded-3xl p-6 border border-[#DCEBFF] shadow-sm hover:shadow-[0_10px_40px_-10px_rgba(88,166,255,0.18)] hover:border-[#58A6FF]/30 transition-all duration-300 relative overflow-hidden"
             >
               <div className="flex justify-between items-start mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-teal-50 group-hover:border-teal-100 transition-colors">
-                  <MapPin className="text-slate-400 group-hover:text-[#0F766E] transition-colors" size={24} />
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-[#EAF4FF] group-hover:border-[#CFE4FF] transition-colors">
+                  <MapPin className="text-slate-400 group-hover:text-[#2F80ED] transition-colors" size={24} />
                 </div>
                 
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${stand.statusColor} flex items-center gap-1.5`}>
@@ -50,7 +50,7 @@ export default function TaxiStands({ isDriverView = false }) {
                 </span>
               </div>
 
-              <h3 className="text-xl font-[Proxima_Nova_Semibold] text-slate-900 mb-2 group-hover:text-[#0F766E] transition-colors">
+              <h3 className="text-xl font-[Proxima_Nova_Semibold] text-slate-900 mb-2 group-hover:text-[#2F80ED] transition-colors">
                 {stand.name}
               </h3>
               <p className="text-sm text-slate-500 font-medium mb-6 line-clamp-2">
@@ -62,25 +62,25 @@ export default function TaxiStands({ isDriverView = false }) {
                 <div className="flex items-center gap-2 text-slate-600 font-semibold text-sm">
                   {isDriverView ? (
                     <>
-                      <Users size={18} className="text-[#0F766E]" />
+                      <Users size={18} className="text-[#2F80ED]" />
                       {stand.passengers} Demand
                     </>
                   ) : (
                     <>
-                      <Car size={18} className="text-[#0F766E]" />
+                      <Car size={18} className="text-[#2F80ED]" />
                       {stand.taxis} Taxis
                     </>
                   )}
                 </div>
                 
                 {isDriverView ? (
-                  <span className="text-[#0F766E] p-2 rounded-full">
+                  <span className="text-[#2F80ED] p-2 rounded-full">
                     <ArrowRight size={20} />
                   </span>
                 ) : (
                   <Link
                     href={`/search?stand=${encodeURIComponent(stand.name)}`}
-                    className="text-[#0F766E] p-2 rounded-full hover:bg-teal-50 transition-colors"
+                    className="text-[#2F80ED] p-2 rounded-full hover:bg-[#EAF4FF] transition-colors"
                     aria-label={`Find drivers at ${stand.name}`}
                   >
                     <ArrowRight size={20} />

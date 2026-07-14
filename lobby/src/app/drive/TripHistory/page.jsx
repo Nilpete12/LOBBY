@@ -133,7 +133,7 @@ export default function DriverTripHistoryPage() {
 
   if (!isLoaded || loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] font-semibold text-slate-400">
+      <div className="flex min-h-screen items-center justify-center bg-[#FFF7ED] font-semibold text-slate-400">
         <Loader2 className="mr-2 animate-spin" />
         Loading trip history...
       </div>
@@ -141,12 +141,12 @@ export default function DriverTripHistoryPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F8FAFC] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
+    <main className="min-h-screen bg-[#FFF7ED] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-5xl">
         <section className="mb-6 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#0F766E]">
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#2F80ED]">
                 Trip History
               </p>
               <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
@@ -159,7 +159,7 @@ export default function DriverTripHistoryPage() {
 
             <Link
               href="/drive/dashboard"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0F766E] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-100 transition hover:bg-[#115E59]"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#58A6FF] px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-[#58A6FF]/20 transition hover:bg-[#2F80ED]"
             >
               Dashboard
               <ArrowRight size={17} />
@@ -168,7 +168,7 @@ export default function DriverTripHistoryPage() {
         </section>
 
         {notice && (
-          <div className="mb-4 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700">
+          <div className="mb-4 rounded-2xl border border-[#CFE4FF] bg-[#EAF4FF] px-4 py-3 text-sm font-black text-[#2F80ED]">
             {notice}
           </div>
         )}
@@ -229,7 +229,7 @@ function MonthlySurveyCard({
     <section className="mb-6 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#0F766E]">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#2F80ED]">
             Monthly driver survey
           </p>
           <h2 className="text-xl font-extrabold tracking-tight text-slate-900">
@@ -240,7 +240,7 @@ function MonthlySurveyCard({
           </p>
         </div>
         {submitted && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#EAF4FF] px-3 py-1 text-xs font-black text-[#2F80ED]">
             <CheckCircle2 size={14} />
             Submitted
           </span>
@@ -255,7 +255,7 @@ function MonthlySurveyCard({
             min="0"
             value={rides}
             onChange={(event) => onRidesChange(event.target.value)}
-            className="min-h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-black text-slate-900 outline-none focus:border-[#0F766E]"
+            className="min-h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-black text-slate-900 outline-none focus:border-[#58A6FF]"
             placeholder="0"
           />
         </label>
@@ -264,7 +264,7 @@ function MonthlySurveyCard({
           <input
             value={notes}
             onChange={(event) => onNotesChange(event.target.value)}
-            className="min-h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-900 outline-none focus:border-[#0F766E]"
+            className="min-h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-900 outline-none focus:border-[#58A6FF]"
             placeholder="Optional: busy stands, common routes, issues"
           />
         </label>
@@ -296,14 +296,14 @@ function HistoryItem({ event, working, onReport }) {
   return (
     <article className="rounded-3xl border border-slate-100 bg-white p-4">
       <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#DCFCE7] text-[#0F766E]">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FFEDD5] text-[#2F80ED]">
           <Icon size={21} />
         </div>
         <div className="min-w-0 flex-1">
           <h2 className="truncate font-bold tracking-tight text-slate-900">
             {event.rider?.fullName || 'Rider'}
           </h2>
-          <p className="mt-1 text-xs font-bold text-[#0F766E]">
+          <p className="mt-1 text-xs font-bold text-[#2F80ED]">
             {isWhatsApp ? 'WhatsApp click' : 'Call click'}
           </p>
           <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-slate-500">
@@ -321,7 +321,7 @@ function HistoryItem({ event, working, onReport }) {
           </span>
         )}
         {riderOutcomeLabel && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#EAF4FF] px-3 py-1 text-xs font-black text-[#2F80ED]">
             <CheckCircle2 size={13} />
             {riderOutcomeLabel}
           </span>
@@ -333,7 +333,7 @@ function HistoryItem({ event, working, onReport }) {
           type="button"
           onClick={() => onReport(event._id, 'completed')}
           disabled={working}
-          className="inline-flex min-h-10 items-center justify-center gap-1 rounded-2xl bg-emerald-50 px-2 text-xs font-black text-emerald-700 ring-1 ring-emerald-100 disabled:opacity-50"
+          className="inline-flex min-h-10 items-center justify-center gap-1 rounded-2xl bg-[#EAF4FF] px-2 text-xs font-black text-[#2F80ED] ring-1 ring-[#CFE4FF] disabled:opacity-50"
         >
           <CheckCircle2 size={14} />
           Completed

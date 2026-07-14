@@ -190,14 +190,14 @@ export default function IncomingRideAlert() {
     const riderPhone = activeRide?.riderPhone || activeRide?.rider_phone;
 
     return (
-      <div className="fixed bottom-24 inset-x-4 md:inset-x-auto md:right-8 md:bottom-8 md:w-96 bg-white border-2 border-[#0F766E] rounded-3xl p-6 shadow-2xl z-50 animate-in slide-in-from-bottom-5">
+      <div className="fixed bottom-24 inset-x-4 md:inset-x-auto md:right-8 md:bottom-8 md:w-96 bg-white border-2 border-[#58A6FF] rounded-3xl p-6 shadow-2xl z-50 animate-in slide-in-from-bottom-5">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-[#DCEBFF] text-[#2F80ED] rounded-full flex items-center justify-center">
             <CheckCircle size={24} />
           </div>
           <div>
             <h3 className="font-bold text-slate-900 text-lg">Ride Active</h3>
-            <p className="text-xs font-semibold text-emerald-600">Pick up the passenger</p>
+            <p className="text-xs font-semibold text-[#2F80ED]">Pick up the passenger</p>
           </div>
         </div>
 
@@ -219,7 +219,7 @@ export default function IncomingRideAlert() {
           {riderPhone ? (
             <a
               href={`tel:${riderPhone}`}
-              className="w-full bg-[#0F766E] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#0d625b] transition"
+              className="w-full bg-[#58A6FF] text-slate-950 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#2F80ED] transition"
             >
               <Phone size={16} />
               Call Rider
@@ -256,9 +256,9 @@ export default function IncomingRideAlert() {
 
           {/* Header with pulsing indicator */}
           <div className="bg-slate-900 p-6 text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-emerald-400 via-teal-500 to-emerald-400 animate-pulse"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-[#58A6FF] via-[#FF6B6B] to-[#58A6FF] animate-pulse"></div>
             <h2 className="text-white font-black text-2xl tracking-tight mb-1">Incoming Request</h2>
-            <div className="flex items-center justify-center gap-1.5 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+            <div className="flex items-center justify-center gap-1.5 text-[#2F80ED] text-xs font-bold uppercase tracking-wider">
               <Clock size={14} className="animate-pulse" /> Just now
             </div>
           </div>
@@ -277,7 +277,7 @@ export default function IncomingRideAlert() {
 
             <div className="space-y-4 mb-8 relative before:absolute before:inset-y-4 before:left-3.5 before:w-0.5 before:bg-slate-200">
               <div className="flex gap-4 relative z-10">
-                <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 ring-4 ring-white">
+                <div className="w-7 h-7 rounded-full bg-[#DCEBFF] text-[#2F80ED] flex items-center justify-center shrink-0 ring-4 ring-white">
                   <MapPin size={14} />
                 </div>
                 <div>
@@ -314,7 +314,7 @@ export default function IncomingRideAlert() {
               <button
                 onClick={handleAccept}
                 disabled={isAccepting}
-                className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm bg-[#0F766E] text-white shadow-lg shadow-teal-100 hover:bg-[#0d625b] transition disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm bg-[#58A6FF] text-slate-950 shadow-lg shadow-[#58A6FF]/20 hover:bg-[#2F80ED] transition disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <CheckCircle size={18} />
                 {isAccepting ? "Accepting..." : "Accept"}

@@ -334,7 +334,7 @@ export default function SearchPage() {
                 autoCorrect="off"
                 spellCheck={false}
                 placeholder="Where do you want to go? (e.g. Dawki)"
-                className="w-full rounded-2xl border border-slate-200 py-4 pl-12 pr-14 text-base font-medium shadow-sm outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/10 sm:text-lg"
+                className="w-full rounded-2xl border border-slate-200 py-4 pl-12 pr-14 text-base font-medium shadow-sm outline-none transition focus:border-[#58A6FF] focus:ring-2 focus:ring-[#58A6FF]/10 sm:text-lg"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -355,7 +355,7 @@ export default function SearchPage() {
             />
           </form>
           {selectedTaxiStand && (
-            <p className="mt-2 text-sm font-semibold text-[#0F766E]">
+            <p className="mt-2 text-sm font-semibold text-[#2F80ED]">
               Showing drivers who park at {selectedTaxiStand}.
             </p>
           )}
@@ -370,7 +370,7 @@ export default function SearchPage() {
               onClick={() => setActiveFilter(filter)}
               className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-bold transition ${
                 activeFilter === filter
-                  ? 'border-[#0F766E] bg-[#DCFCE7] text-[#0F766E]'
+                  ? 'border-[#58A6FF] bg-[#FFEDD5] text-[#2F80ED]'
                   : 'border-slate-200 bg-white text-slate-600 hover:border-slate-900 hover:text-slate-900'
               }`}
             >
@@ -380,7 +380,7 @@ export default function SearchPage() {
         </div>
 
         {/* --- INSTANT BOOK QUICK ACTION --- */}
-        <div className="mb-10 rounded-4xl bg-linear-to-br from-teal-50 to-emerald-50/30 p-1 sm:p-2 border border-teal-100/50 shadow-sm">
+        <div className="mb-10 rounded-4xl bg-linear-to-br from-[#EAF4FF] to-[#FFEDD5]/30 p-1 sm:p-2 border border-[#CFE4FF]/50 shadow-sm">
           <div className="px-4 pt-6 pb-2 text-center sm:px-6">
             <h2 className="text-xl font-[Sailors_Slant_Normal] text-slate-900 tracking-tight">In a hurry?</h2>
             <p className="text-sm font-medium text-slate-500 mt-1 mb-6">
@@ -466,7 +466,7 @@ export default function SearchPage() {
       )}
 
       {toast && (
-        <div className="fixed inset-x-4 bottom-28 z-60 mx-auto max-w-sm rounded-2xl border border-[#DCFCE7] bg-white px-4 py-3 text-center text-sm font-bold text-[#0F766E] shadow-xl shadow-slate-900/10 md:bottom-8">
+        <div className="fixed inset-x-4 bottom-28 z-60 mx-auto max-w-sm rounded-2xl border border-[#FFEDD5] bg-white px-4 py-3 text-center text-sm font-bold text-[#2F80ED] shadow-xl shadow-slate-900/10 md:bottom-8">
           {toast}
         </div>
       )}
@@ -533,7 +533,7 @@ function DriverResultCard({ driver, onSelect }) {
     <button
       type="button"
       onClick={onSelect}
-      className="group w-full rounded-3xl border border-slate-100 bg-white p-4 text-left shadow-sm transition hover:border-[#0F766E]/20 hover:shadow-lg sm:p-5"
+      className="group w-full rounded-3xl border border-slate-100 bg-white p-4 text-left shadow-sm transition hover:border-[#58A6FF]/20 hover:shadow-lg sm:p-5"
     >
       <div className="flex gap-3 sm:gap-4">
         <DriverAvatar driver={driver} size={60} />
@@ -541,7 +541,7 @@ function DriverResultCard({ driver, onSelect }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h3 className="truncate text-lg font-bold text-slate-900 transition group-hover:text-[#0F766E]">
+              <h3 className="truncate text-lg font-bold text-slate-900 transition group-hover:text-[#2F80ED]">
                 {driver.fullName || 'Driver'}
               </h3>
 
@@ -558,7 +558,7 @@ function DriverResultCard({ driver, onSelect }) {
                   </span>
                 )}
                 {taxiStands[0] && (
-                  <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-black text-[#0F766E]">
+                  <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-[#EAF4FF] px-2 py-0.5 text-xs font-black text-[#2F80ED]">
                     <MapPin size={11} />
                     <span className="truncate">{taxiStands[0]}</span>
                   </span>
@@ -566,7 +566,7 @@ function DriverResultCard({ driver, onSelect }) {
               </div>
             </div>
 
-            <span className="shrink-0 rounded-full bg-[#DCFCE7] px-3 py-1 text-xs font-bold text-[#0F766E]">
+            <span className="shrink-0 rounded-full bg-[#FFEDD5] px-3 py-1 text-xs font-bold text-[#2F80ED]">
               View
             </span>
           </div>
@@ -706,7 +706,7 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
 
         <div className="mb-5 grid grid-cols-2 gap-3">
           <div className="rounded-2xl bg-slate-50 p-4">
-            <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#0F766E] shadow-sm">
+            <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#2F80ED] shadow-sm">
               <Car size={18} />
             </div>
             <p className="text-xs font-bold uppercase text-slate-400">Vehicle</p>
@@ -714,7 +714,7 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
           </div>
 
           <div className="rounded-2xl bg-slate-50 p-4">
-            <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#0F766E] shadow-sm">
+            <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#2F80ED] shadow-sm">
               <Phone size={18} />
             </div>
             <p className="text-xs font-bold uppercase text-slate-400">Phone</p>
@@ -722,7 +722,7 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
           </div>
 
           <div className="rounded-2xl bg-slate-50 p-4">
-            <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#0F766E] shadow-sm">
+            <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#2F80ED] shadow-sm">
               <Hash size={18} />
             </div>
             <p className="text-xs font-bold uppercase text-slate-400">Number plate</p>
@@ -739,7 +739,7 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
               taxiStands.map((stand) => (
                 <span
                   key={stand}
-                  className="flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-bold text-[#0F766E]"
+                  className="flex items-center gap-1 rounded-full border border-[#CFE4FF] bg-[#EAF4FF] px-3 py-2 text-xs font-bold text-[#2F80ED]"
                 >
                   <MapPin size={12} />
                   {stand}
@@ -836,7 +836,7 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
             <a
               href={phoneHref}
               onClick={onCall}
-              className="flex items-center justify-center gap-2 rounded-2xl bg-[#0F766E] px-4 py-4 text-sm font-bold text-white shadow-lg shadow-cyan-100 transition hover:bg-[#115E59]"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-[#58A6FF] px-4 py-4 text-sm font-bold text-slate-950 shadow-lg shadow-[#58A6FF]/20 transition hover:bg-[#2F80ED]"
             >
               <Phone size={18} />
               Call Driver
@@ -860,7 +860,7 @@ function LeadFollowUpPrompt({ lead, isSubmitting, onSubmit, onDismiss }) {
   return (
     <div className="fixed inset-x-4 bottom-28 z-60 mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/15 md:bottom-8">
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#0F766E]">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EAF4FF] text-[#2F80ED]">
           {lead.type === 'whatsapp' ? <MessageCircle size={20} /> : <Phone size={20} />}
         </div>
         <div className="min-w-0 flex-1">
@@ -885,7 +885,7 @@ function LeadFollowUpPrompt({ lead, isSubmitting, onSubmit, onDismiss }) {
           type="button"
           onClick={() => onSubmit('completed')}
           disabled={isSubmitting}
-          className="min-h-11 rounded-2xl bg-[#0F766E] px-3 text-sm font-black text-white disabled:opacity-60"
+          className="min-h-11 rounded-2xl bg-[#58A6FF] px-3 text-sm font-black text-slate-950 disabled:opacity-60"
         >
           Ride completed
         </button>

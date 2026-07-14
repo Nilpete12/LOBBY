@@ -4,14 +4,14 @@ import { Shield, Lock, Eye, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen bg-linear-to-bl from-blue-200/70 to-white pt-24 pb-20">
+    <div className="min-h-screen bg-linear-to-bl from-[#DCEBFF]/70 to-white pt-24 pb-20">
       <div className="max-w-3xl mx-auto px-6">
         
         {/* Header */}
         <div className="mb-12 border-b border-slate-100 pb-8">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Privacy Policy</h1>
           <p className="text-slate-500 text-lg">Last updated: December 30, 2025</p>
-          <p className="text-sm text-slate-500 mt-2">For details about your rights and responsibilities when using our platform, see our <Link href="/terms" className="text-blue-600 underline">Terms of Service</Link>.</p>
+          <p className="text-sm text-slate-500 mt-2">For details about your rights and responsibilities when using our platform, see our <Link href="/terms" className="text-[#2F80ED] underline">Terms of Service</Link>.</p>
         </div>
 
         {/* Content */}
@@ -55,8 +55,8 @@ export default function PrivacyPolicy() {
               <li>To comply with legal obligations and regulatory requirements.</li>
               <li>To conduct safety investigations and address reported incidents.</li>
             </ul>
-            <div className="shadow p-4 rounded-xl border border-blue-100 mb-4 text-sm bg-blue-50">
-              <strong className="text-blue-900">Our Commitment:</strong> We do not sell your personal data to third-party advertisers or marketing companies. Your data is not shared with unaffiliated parties except as required by law or as necessary to provide our services.
+            <div className="shadow p-4 rounded-xl border border-[#CFE4FF] mb-4 text-sm bg-[#EAF4FF]">
+              <strong className="text-[#172033]">Our Commitment:</strong> We do not sell your personal data to third-party advertisers or marketing companies. Your data is not shared with unaffiliated parties except as required by law or as necessary to provide our services.
             </div>
           </section>
 
@@ -186,7 +186,7 @@ export default function PrivacyPolicy() {
               For questions about this privacy policy, data practices, or to exercise your data rights, contact our Data Protection Officer:
             </p>
             <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-sm"><strong>Email:</strong> <a href="mailto:thelobby500@gmail.com" className="text-blue-600 underline">thelobby500@gmail.com</a></p>
+              <p className="text-sm"><strong>Email:</strong> <a href="mailto:thelobby500@gmail.com" className="text-[#2F80ED] underline">thelobby500@gmail.com</a></p>
               <p className="text-sm mt-2"><strong>Mailing Address:</strong> Data Protection Officer, THE LOBBY, Shillong, Meghalaya, India</p>
               <p className="text-sm mt-2"><strong>Response Time:</strong> We aim to respond to all inquiries within 30 days.</p>
             </div>
@@ -226,8 +226,8 @@ export default function PrivacyPolicy() {
             <p className="text-sm mb-4">
               For information about your rights and responsibilities when using our platform, please review our:
             </p>
-            <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-              <p className="text-sm"><Link href="/terms" className="text-blue-600 font-bold underline">→ Terms of Service</Link></p>
+            <div className="p-4 rounded-lg bg-[#EAF4FF] border border-[#CFE4FF]">
+              <p className="text-sm"><Link href="/terms" className="text-[#2F80ED] font-bold underline">→ Terms of Service</Link></p>
               <p className="text-xs text-slate-600 mt-1">Learn about user responsibilities, service limitations, and dispute resolution procedures.</p>
             </div>
           </section>

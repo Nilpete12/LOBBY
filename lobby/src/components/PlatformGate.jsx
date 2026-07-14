@@ -70,7 +70,7 @@ export default function PlatformGate({ children }) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-center text-white">
         <div className="max-w-md">
-          <p className="text-xs font-black uppercase tracking-widest text-emerald-300">THE LOBBY</p>
+          <p className="text-xs font-black uppercase tracking-widest text-[#9CCBFF]">THE LOBBY</p>
           <h1 className="mt-3 text-3xl font-black tracking-tight">We will be back shortly</h1>
           <p className="mt-3 text-sm font-semibold leading-6 text-slate-300">
             {settings.notice || 'The platform is temporarily under maintenance. Please check again soon.'}

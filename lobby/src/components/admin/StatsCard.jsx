@@ -5,7 +5,7 @@ export default function StatsCard({ title, value, icon: Icon, trend, color }) {
   
   // Dynamic color classes based on the 'color' prop
   const colorClasses = {
-    blue: "bg-blue-50 text-blue-600",
+    blue: "bg-[#EAF4FF] text-[#2F80ED]",
     indigo: "bg-indigo-50 text-indigo-600",
     green: "bg-green-50 text-green-600",
     orange: "bg-orange-50 text-orange-600",

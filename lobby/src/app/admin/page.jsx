@@ -113,13 +113,13 @@ function formatVehiclePlateInput(value) {
 function StatusPill({ status }) {
   const styles = {
     pending: 'bg-yellow-50 text-yellow-700 ring-yellow-100',
-    accepted: 'bg-blue-50 text-blue-700 ring-blue-100',
+    accepted: 'bg-[#EAF4FF] text-[#2F80ED] ring-[#CFE4FF]',
     approved: 'bg-green-50 text-green-700 ring-green-100',
     completed: 'bg-green-50 text-green-700 ring-green-100',
     resolved: 'bg-green-50 text-green-700 ring-green-100',
     active: 'bg-green-50 text-green-700 ring-green-100',
-    in_review: 'bg-blue-50 text-blue-700 ring-blue-100',
-    waiting_for_user: 'bg-purple-50 text-purple-700 ring-purple-100',
+    in_review: 'bg-[#EAF4FF] text-[#2F80ED] ring-[#CFE4FF]',
+    waiting_for_user: 'bg-[#FFE4DF] text-[#FF6B6B] ring-[#FFE4DF]',
     rejected: 'bg-red-50 text-red-700 ring-red-100',
     cancelled: 'bg-red-50 text-red-700 ring-red-100',
     suspended: 'bg-red-50 text-red-700 ring-red-100',
@@ -1322,7 +1322,7 @@ function SubscriptionReminderPanel({ unpaidCount, state, onSend }) {
             ? 'border-red-100 bg-red-50 text-red-700'
             : isSuccess
               ? 'border-green-100 bg-green-50 text-green-700'
-              : 'border-blue-100 bg-blue-50 text-blue-700'
+              : 'border-[#CFE4FF] bg-[#EAF4FF] text-[#2F80ED]'
         }`}>
           {state.message}
         </div>
@@ -1497,7 +1497,7 @@ function BookingCard({ booking, drivers, selectedDriver, onSelectDriver, onUpdat
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => onUpdate('accepted')}
-            className="rounded-2xl bg-blue-600 px-3 py-3 text-sm font-black text-white"
+            className="rounded-2xl bg-[#58A6FF] px-3 py-3 text-sm font-black text-slate-950"
           >
             Assign
           </button>
@@ -1698,7 +1698,7 @@ function UserDetailDrawer({
                   <button
                     onClick={() => onAvailabilityChange(!user.isAvailable)}
                     disabled={isSuspended}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0F766E] px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#58A6FF] px-4 py-3 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
                   >
                     <ToggleRight size={16} />
                     {user.isAvailable ? 'Mark Offline' : 'Mark Online'}
@@ -1815,7 +1815,7 @@ function ProfileSaveToast({ state }) {
   if (!state?.message || state.status === 'idle') return null;
 
   const styles = {
-    saving: 'border-blue-100 bg-blue-50 text-blue-800',
+    saving: 'border-[#CFE4FF] bg-[#EAF4FF] text-[#2F80ED]',
     success: 'border-green-100 bg-green-50 text-green-800',
     error: 'border-red-100 bg-red-50 text-red-800',
   };

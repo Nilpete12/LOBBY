@@ -106,7 +106,7 @@ export default function RiderDashboard() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center font-semibold text-slate-400">
+      <div className="min-h-screen bg-[#FFF7ED] flex items-center justify-center font-semibold text-slate-400">
         Loading Dashboard...
       </div>
     );
@@ -115,7 +115,7 @@ export default function RiderDashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
+    <div className="min-h-screen bg-[#FFF7ED] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-4xl">
         {reportNotice && (
           <ReportNotice notice={reportNotice} onDismiss={() => setReportNotice(null)} />
@@ -124,7 +124,7 @@ export default function RiderDashboard() {
         {/* Header */}
         <div className="mb-6 flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:rounded-4xl sm:p-8">
           <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-[#DCFCE7] to-[#DBEAFE] text-xl font-bold text-[#0F766E] shadow-sm sm:h-16 sm:w-16 sm:text-2xl">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-[#FFEDD5] to-[#DCEBFF] text-xl font-bold text-[#2F80ED] shadow-sm sm:h-16 sm:w-16 sm:text-2xl">
               {user.imageUrl ? (
                 <Image
                   src={user.imageUrl}
@@ -161,7 +161,7 @@ export default function RiderDashboard() {
         {/* Recent Contacts */}
         <div className="min-h-104 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-8">
           <div className="mb-5 flex items-center gap-3 border-b border-slate-100 pb-5 sm:mb-6 sm:pb-6">
-            <div className="rounded-2xl bg-linear-to-br from-[#DCFCE7] to-[#DBEAFE] p-2.5 text-[#0F766E] shadow-sm sm:p-3">
+            <div className="rounded-2xl bg-linear-to-br from-[#FFEDD5] to-[#DCEBFF] p-2.5 text-[#2F80ED] shadow-sm sm:p-3">
               <History size={24} />
             </div>
 
@@ -182,7 +182,7 @@ export default function RiderDashboard() {
 
               <button
                 onClick={() => router.push('/search')}
-                className="w-full rounded-2xl bg-[#0F766E] px-7 py-3 font-semibold text-white shadow-lg shadow-cyan-100 transition hover:bg-[#115E59] sm:w-auto"
+                className="w-full rounded-2xl bg-[#58A6FF] px-7 py-3 font-semibold text-slate-950 shadow-lg shadow-[#58A6FF]/20 transition hover:bg-[#2F80ED] sm:w-auto"
               >
                 Find a Ride
               </button>
@@ -196,7 +196,7 @@ export default function RiderDashboard() {
                 >
                   <div className="flex items-center gap-3 sm:gap-4">
                     {/* Driver Pic */}
-                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-linear-to-br from-[#DCFCE7] to-[#DBEAFE] shadow-sm">
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-linear-to-br from-[#FFEDD5] to-[#DCEBFF] shadow-sm">
                       {driver.profilePic ? (
                         <Image
                           src={driver.profilePic}
@@ -207,7 +207,7 @@ export default function RiderDashboard() {
                           sizes="48px"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center font-bold text-[#0F766E]">
+                        <div className="w-full h-full flex items-center justify-center font-bold text-[#2F80ED]">
                           {driver.fullName[0]}
                         </div>
                       )}
@@ -241,7 +241,7 @@ export default function RiderDashboard() {
                     <a
                       href={`tel:${driver.phone}`}
                       aria-label={`Call ${driver.fullName}`}
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0F766E] text-white shadow-lg shadow-cyan-100 transition hover:scale-105"
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#58A6FF] text-slate-950 shadow-lg shadow-[#58A6FF]/20 transition hover:scale-105"
                     >
                       <Phone size={18} />
                     </a>
@@ -255,7 +255,7 @@ export default function RiderDashboard() {
         {/* Report Issue Button */}
         <button
           onClick={() => setShowComplaint(true)}
-          className="mx-auto mt-6 block rounded-full px-4 py-2 text-sm font-semibold text-slate-500 underline transition hover:text-[#0F766E]"
+          className="mx-auto mt-6 block rounded-full px-4 py-2 text-sm font-semibold text-slate-500 underline transition hover:text-[#2F80ED]"
         >
           Report an Issue
         </button>
@@ -269,7 +269,7 @@ export default function RiderDashboard() {
               </h3>
 
               <textarea
-                className="mb-4 h-32 w-full rounded-2xl border border-slate-200 bg-[#F8FAFC] p-4 text-sm outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
+                className="mb-4 h-32 w-full rounded-2xl border border-slate-200 bg-[#FFF7ED] p-4 text-sm outline-none focus:border-[#58A6FF] focus:ring-2 focus:ring-[#58A6FF]/20"
                 placeholder="Describe what happened..."
                 value={complaintText}
                 onChange={(e) => setComplaintText(e.target.value)}
@@ -287,7 +287,7 @@ export default function RiderDashboard() {
                 <button
                   onClick={handleReport}
                   disabled={!complaintText.trim() || isReporting}
-                  className="rounded-2xl bg-[#0F766E] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50 sm:py-2"
+                  className="rounded-2xl bg-[#58A6FF] px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-[#2F80ED] disabled:cursor-not-allowed disabled:opacity-50 sm:py-2"
                 >
                   {isReporting ? 'Submitting...' : 'Submit'}
                 </button>

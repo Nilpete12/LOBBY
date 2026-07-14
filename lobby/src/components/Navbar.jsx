@@ -75,7 +75,7 @@ export default function Navbar() {
   return (
     <>
       {/* --- TOP NAVBAR (Stays at top for both Mobile & PC) --- */}
-      <nav className="fixed top-0 w-full z-40 bg-[#F8FAFC]/80 backdrop-blur-xl border-b border-[#DBEAFE]/40 shadow-sm">
+      <nav className="fixed top-0 w-full z-40 bg-[#FFF7ED]/80 backdrop-blur-xl border-b border-[#DCEBFF]/40 shadow-sm">
         <div className="max-w-7xl mx-auto px-5 md:px-6 h-16 md:h-20 flex items-center justify-between">
           
           {/* Logo (Top Left) */}
@@ -84,36 +84,36 @@ export default function Navbar() {
             className="text-xl md:text-2xl font-['Sailors_Slant_Normal'] tracking-tight text-slate-900 relative z-50"
           >
             THE LOBBY
-            <span className="text-[#0F766E]">.</span>
+            <span className="text-[#2F80ED]">.</span>
           </Link>
 
           {/* --- DESKTOP NAVIGATION (Hidden on Mobile) --- */}
           <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-sm font-semibold text-slate-600">            
             {/* 1. VIEW: SIGNED OUT */}
             <Show when="signed-out">
-              <Link href="/search" className="hover:text-[#0F766E] transition">Find a Ride</Link>
-              <Link href="/drive" className="hover:text-[#0F766E] transition">For Drivers</Link>
-              <Link href="/support" className="hover:text-[#0F766E] transition">Support</Link>
+              <Link href="/search" className="hover:text-[#2F80ED] transition">Find a Ride</Link>
+              <Link href="/drive" className="hover:text-[#2F80ED] transition">For Drivers</Link>
+              <Link href="/support" className="hover:text-[#2F80ED] transition">Support</Link>
             </Show>
 
             <Show when="signed-in">
               {/* 2. VIEW: LOGGED IN AS RIDER (or no role yet) */}
               {userRole !== "driver" && (
                 <>
-                  <Link href="/search" className="hover:text-[#0F766E] transition">All Services</Link>
-                  <Link href="/favourites" className="hover:text-[#0F766E] transition">Favourites</Link>
-                  <Link href="/account" className="hover:text-[#0F766E] transition">Profile</Link>
-                  <Link href="/support" className="hover:text-[#0F766E] transition">Support</Link>
+                  <Link href="/search" className="hover:text-[#2F80ED] transition">All Services</Link>
+                  <Link href="/favourites" className="hover:text-[#2F80ED] transition">Favourites</Link>
+                  <Link href="/account" className="hover:text-[#2F80ED] transition">Profile</Link>
+                  <Link href="/support" className="hover:text-[#2F80ED] transition">Support</Link>
                 </>
               )}
 
               {/* 3. VIEW: LOGGED IN AS DRIVER */}
               {userRole === "driver" && (
                 <>
-                  <Link href="/drive/dashboard" className="hover:text-[#0F766E] transition">Profile</Link>
-                  <Link href="/drive/earnings" className="hover:text-[#0F766E] transition">Analytics</Link>
-                  <Link href="/drive/TripHistory" className="hover:text-[#0F766E] transition">Trip History</Link>
-                  <Link href="/support" className="hover:text-[#0F766E] transition">Support</Link>
+                  <Link href="/drive/dashboard" className="hover:text-[#2F80ED] transition">Profile</Link>
+                  <Link href="/drive/earnings" className="hover:text-[#2F80ED] transition">Analytics</Link>
+                  <Link href="/drive/TripHistory" className="hover:text-[#2F80ED] transition">Trip History</Link>
+                  <Link href="/support" className="hover:text-[#2F80ED] transition">Support</Link>
                 </>
               )}
             </Show>
@@ -130,7 +130,7 @@ export default function Navbar() {
 
             <Show when="signed-out">
               <SignInButton mode="modal">
-                <button className="text-sm font-bold text-slate-900 hover:text-[#0F766E] transition">
+                <button className="text-sm font-bold text-slate-900 hover:text-[#2F80ED] transition">
                   Log In
                 </button>
               </SignInButton>
@@ -139,9 +139,9 @@ export default function Navbar() {
                 href="/search"
                 className="
                   hidden md:block
-                  bg-linear-to-r from-[#0F766E] to-[#0891B2]
-                  text-white px-5 py-2.5 rounded-full text-sm font-bold
-                  shadow-lg shadow-cyan-100 hover:scale-105 transition
+                  bg-linear-to-r from-[#58A6FF] to-[#FF6B6B]
+                  text-slate-950 px-5 py-2.5 rounded-full text-sm font-bold
+                  shadow-lg shadow-[#58A6FF]/20 hover:scale-105 transition
                 "
               >
                 Book Now
@@ -157,7 +157,7 @@ export default function Navbar() {
           backdrop-blur-sm backdrop-saturate-200 border shadow-lg rounded-full px-4 py-1.5 flex items-center justify-around transition-colors duration-500
           ${isDarkBg 
             ? 'bg-slate-900/60 border-slate-700/80 shadow-black/20' // DARK MODE GLASS
-            : 'bg-white/60 border-[#0F5A53]/30 shadow-[#0F766E]/10' // LIGHT MODE GLASS
+            : 'bg-white/60 border-[#58A6FF]/30 shadow-[#58A6FF]/10' // LIGHT MODE GLASS
           }
         `}>         
           
@@ -199,9 +199,9 @@ export default function Navbar() {
 function BottomNavLink({ href, icon, label, isActive, isDarkBg }) {
   
   // Dynamic color logic based on the background!
-  const activeColor = isDarkBg ? "text-emerald-400" : "text-[#0F766E]";
+  const activeColor = isDarkBg ? "text-[#2F80ED]" : "text-[#2F80ED]";
   const inactiveColor = isDarkBg ? "text-slate-400 hover:text-slate-200" : "text-slate-500 hover:text-slate-800";
-  const activeBg = isDarkBg ? "bg-slate-800/80" : "bg-teal-50";
+  const activeBg = isDarkBg ? "bg-slate-800/80" : "bg-[#EAF4FF]";
 
   return (
     <Link

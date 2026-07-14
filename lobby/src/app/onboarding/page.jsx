@@ -54,7 +54,7 @@ export default function OnboardingPage() {
     }
   };
 
-  if (!isLoaded) return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" /></div>;
+  if (!isLoaded) return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><Loader2 className="animate-spin text-[#2F80ED]" /></div>;
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
@@ -68,7 +68,7 @@ export default function OnboardingPage() {
             onClick={() => setRole('rider')}
             className={`cursor-pointer border-2 rounded-2xl p-6 flex flex-col items-center gap-3 transition-all
               ${role === 'rider'
-                ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md scale-105'
+                ? 'border-[#58A6FF] bg-[#EAF4FF] text-[#2F80ED] shadow-md scale-105'
                 : 'border-slate-200 text-slate-400 hover:border-slate-300'
               }`}
           >
@@ -81,7 +81,7 @@ export default function OnboardingPage() {
             onClick={() => setRole('driver')}
             className={`cursor-pointer border-2 rounded-2xl p-6 flex flex-col items-center gap-3 transition-all
               ${role === 'driver'
-                ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md scale-105'
+                ? 'border-[#58A6FF] bg-[#EAF4FF] text-[#2F80ED] shadow-md scale-105'
                 : 'border-slate-200 text-slate-400 hover:border-slate-300'
               }`}
           >

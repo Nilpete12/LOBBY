@@ -48,7 +48,7 @@ export default function DriverEarningsPage() {
 
   if (!isLoaded || loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] font-semibold text-slate-400">
+      <div className="flex min-h-screen items-center justify-center bg-[#FFF7ED] font-semibold text-slate-400">
         <Loader2 className="mr-2 animate-spin" />
         Loading earnings...
       </div>
@@ -58,12 +58,12 @@ export default function DriverEarningsPage() {
   const stats = data?.stats || { totalCalls: 0, callsToday: 0, callsThisWeek: 0 };
 
   return (
-    <main className="min-h-screen bg-[#F8FAFC] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
+    <main className="min-h-screen bg-[#FFF7ED] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-5xl">
         <section className="mb-6 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#0F766E]">
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#2F80ED]">
                 Driver Analytics
               </p>
               <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
@@ -76,7 +76,7 @@ export default function DriverEarningsPage() {
 
             <Link
               href="/drive/dashboard"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0F766E] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-100 transition hover:bg-[#115E59]"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#58A6FF] px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-[#58A6FF]/20 transition hover:bg-[#2F80ED]"
             >
               Dashboard
               <ArrowRight size={17} />
@@ -98,7 +98,7 @@ export default function DriverEarningsPage() {
 
         <section className="mt-6 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-8">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#0F766E]">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF4FF] text-[#2F80ED]">
               <Banknote size={24} />
             </div>
             <div>
@@ -122,7 +122,7 @@ export default function DriverEarningsPage() {
 function StatCard({ icon: Icon, label, value }) {
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#DCFCE7] text-[#0F766E]">
+      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFEDD5] text-[#2F80ED]">
         <Icon size={22} />
       </div>
       <p className="text-3xl font-extrabold tracking-tight text-slate-900">{value}</p>

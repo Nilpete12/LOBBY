@@ -8,9 +8,9 @@ export default function RideCard({ driver }) {
         {/* Driver Info */}
         <div className="flex gap-4">
           {/* Avatar */}
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#DCFCE7] to-[#DBEAFE] overflow-hidden shrink-0 shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FFEDD5] to-[#DCEBFF] overflow-hidden shrink-0 shadow-sm">
             {/* Placeholder Image */}
-            <div className="w-full h-full flex items-center justify-center text-[#0F766E] font-bold text-xl">
+            <div className="w-full h-full flex items-center justify-center text-[#2F80ED] font-bold text-xl">
               {driver.name.charAt(0)}
             </div>
           </div>
@@ -21,7 +21,7 @@ export default function RideCard({ driver }) {
                 {driver.name}
               </h3>
 
-              <span className="bg-[#DCFCE7] text-[#0F766E] text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-[#FFEDD5] text-[#2F80ED] text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
                 <Star size={12} fill="currentColor" />
                 {driver.rating}
               </span>
@@ -42,7 +42,7 @@ export default function RideCard({ driver }) {
               {driver.routes.map((route, i) => (
                 <span
                   key={i}
-                  className="text-xs font-medium text-[#0F766E] bg-[#F8FAFC] border border-slate-200 px-3 py-1 rounded-xl flex items-center gap-1"
+                  className="text-xs font-medium text-[#2F80ED] bg-[#FFF7ED] border border-slate-200 px-3 py-1 rounded-xl flex items-center gap-1"
                 >
                   <MapPin size={10} />
                   {route}
@@ -56,7 +56,7 @@ export default function RideCard({ driver }) {
         <div className="flex flex-col items-end justify-center gap-4 min-w-35">
           <div className="text-right">
             {driver.isAvailable ? (
-              <span className="inline-flex items-center gap-2 text-xs font-semibold text-[#0F766E] bg-[#DCFCE7] px-3 py-1 rounded-full">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-[#2F80ED] bg-[#FFEDD5] px-3 py-1 rounded-full">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                 Available
               </span>
@@ -69,7 +69,7 @@ export default function RideCard({ driver }) {
 
           <a
             href={`tel:${driver.phone}`}
-            className="w-full bg-[#0F766E] text-white font-semibold py-3 px-7 rounded-2xl hover:bg-[#115E59] transition duration-300 flex items-center justify-center gap-2 group-hover:scale-105 shadow-lg shadow-cyan-100"
+            className="w-full bg-[#58A6FF] text-slate-950 font-semibold py-3 px-7 rounded-2xl hover:bg-[#2F80ED] transition duration-300 flex items-center justify-center gap-2 group-hover:scale-105 shadow-lg shadow-[#58A6FF]/20"
           >
             <Phone size={18} />
             Call Now

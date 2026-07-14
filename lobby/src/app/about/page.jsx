@@ -5,13 +5,13 @@ import Link from 'next/link';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-[#FFF7ED]">
 
       {/* --- HERO SECTION --- */}
-      <div className="relative overflow-hidden bg-linear-to-br from-[#DCFCE7]/40 via-[#F8FAFC] to-[#BFDBFE]/40 pt-32 pb-20 px-6">
+      <div className="relative overflow-hidden bg-linear-to-br from-[#FFEDD5]/40 via-[#FFF7ED] to-[#DCEBFF]/40 pt-32 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-[Proxima_Nova_Extrabold] tracking-tight text-slate-900 mb-6">
-            We are <span className="text-[#0F766E] font-[Sailors_Slant_Normal]">THE LOBBY.</span>
+            We are <span className="text-[#2F80ED] font-[Sailors_Slant_Normal]">THE LOBBY.</span>
           </h1>
 
           <p className="text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
@@ -96,7 +96,7 @@ export default function AboutPage() {
 
         <Link
           href="/support"
-          className="inline-flex items-center gap-2 bg-[#0F766E] text-white px-8 py-4 rounded-2xl font-semibold hover:bg-[#115E59] transition shadow-lg shadow-cyan-100"
+          className="inline-flex items-center gap-2 bg-[#58A6FF] text-slate-950 px-8 py-4 rounded-2xl font-semibold hover:bg-[#2F80ED] transition shadow-lg shadow-[#58A6FF]/20"
         >
           Contact Support <ArrowRight size={20} />
         </Link>
@@ -116,7 +116,7 @@ function FeatureCard({ icon: Icon, title, desc }) {
         <Icon size={100} />
       </div>
 
-      <div className="w-14 h-14 bg-linear-to-br from-[#DCFCE7] to-[#DBEAFE] text-[#0F766E] rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+      <div className="w-14 h-14 bg-linear-to-br from-[#FFEDD5] to-[#DCEBFF] text-[#2F80ED] rounded-2xl flex items-center justify-center mb-6 shadow-sm">
         <Icon size={24} />
       </div>
 
@@ -135,7 +135,7 @@ function CreatorCard({ name, role, image, imagePosition = "center", bio, links }
   return (
     <div className="bg-white/80 backdrop-blur-sm p-8 rounded-4xl border border-slate-200 shadow-sm hover:shadow-xl transition flex flex-col items-center text-center">
 
-      <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white mb-5 shadow-sm bg-[#F8FAFC]">
+      <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white mb-5 shadow-sm bg-[#FFF7ED]">
         <div
           role="img"
           aria-label={name}
@@ -151,7 +151,7 @@ function CreatorCard({ name, role, image, imagePosition = "center", bio, links }
         {name}
       </h3>
 
-      <p className="text-[#0F766E] font-[Proxima_Nova_Semibold] text-sm mb-5">
+      <p className="text-[#2F80ED] font-[Proxima_Nova_Semibold] text-sm mb-5">
         {role}
       </p>
 
@@ -165,7 +165,7 @@ function CreatorCard({ name, role, image, imagePosition = "center", bio, links }
           href={links.github}
           target="_blank"
           rel="noopener noreferrer"
-          className="p-3 text-slate-400 hover:text-[#0F766E] hover:bg-[#DCFCE7] rounded-full transition-all duration-300 flex items-center justify-center"
+          className="p-3 text-slate-400 hover:text-[#2F80ED] hover:bg-[#FFEDD5] rounded-full transition-all duration-300 flex items-center justify-center"
           aria-label={`${name}'s GitHub Profile`}
         >
           <svg 
@@ -189,7 +189,7 @@ function CreatorCard({ name, role, image, imagePosition = "center", bio, links }
           href={links.linkedin}
           target="_blank"
           rel="noopener noreferrer"
-          className="p-3 text-slate-400 hover:text-[#0F766E] hover:bg-[#DBEAFE] rounded-full transition-all duration-300 flex items-center justify-center"
+          className="p-3 text-slate-400 hover:text-[#2F80ED] hover:bg-[#DCEBFF] rounded-full transition-all duration-300 flex items-center justify-center"
           aria-label={`${name}'s LinkedIn Profile`}
         >
           <svg 

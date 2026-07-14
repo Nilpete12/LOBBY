@@ -4,14 +4,14 @@ import { FileText, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-linear-to-bl from-blue-200/70 to-white pt-24 pb-20">
+    <div className="min-h-screen bg-linear-to-bl from-[#DCEBFF]/70 to-white pt-24 pb-20">
       <div className="max-w-3xl mx-auto px-6">
         
         {/* Header */}
         <div className="mb-12 border-b border-slate-100 pb-8">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Terms of Service</h1>
           <p className="text-slate-500 text-lg">Effective Date: January 1, 2026</p>
-          <p className="text-sm text-slate-500 mt-2">For details about how we collect and use personal data, see our <Link href="/privacypolicy" className="text-blue-600 underline">Privacy Policy</Link>.</p>
+          <p className="text-sm text-slate-500 mt-2">For details about how we collect and use personal data, see our <Link href="/privacypolicy" className="text-[#2F80ED] underline">Privacy Policy</Link>.</p>
         </div>
 
         {/* Content */}
@@ -67,7 +67,7 @@ export default function TermsPage() {
               <AlertTriangle size={20} /> 3. Security, Data and Privacy
             </h3>
             <p className="mb-4">
-              We take the security and privacy of user data seriously. Our <Link href="/privacypolicy" className="text-blue-600 underline">Privacy Policy</Link> describes what Personal Data we collect, how we use it, how long we retain it, and how users can exercise their rights.
+              We take the security and privacy of user data seriously. Our <Link href="/privacypolicy" className="text-[#2F80ED] underline">Privacy Policy</Link> describes what Personal Data we collect, how we use it, how long we retain it, and how users can exercise their rights.
             </p>
             <h4 className="font-semibold">Data Security</h4>
             <p className="mb-4 text-sm">
@@ -89,7 +89,7 @@ export default function TermsPage() {
               Drivers must provide accurate verification documents and certify that they carry required insurance and licenses. THE LOBBY may perform identity and document verification checks and may suspend or remove Drivers who fail verification or who present safety risks.
             </p>
             <p className="mb-4 text-sm">
-             THE LOBBY is not a carrier and does not provide insurance for trips; Drivers are responsible for maintaining insurance as required by law. Riders and Drivers should report safety incidents immediately via our <a href="/support" className="text-blue-600 underline">support</a> channel so we can investigate.
+             THE LOBBY is not a carrier and does not provide insurance for trips; Drivers are responsible for maintaining insurance as required by law. Riders and Drivers should report safety incidents immediately via our <a href="/support" className="text-[#2F80ED] underline">support</a> channel so we can investigate.
             </p>
           </section>
 
@@ -142,14 +142,14 @@ export default function TermsPage() {
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">10. Recordings and Logs</h3>
             <p className="mb-4 text-sm">
-              We may record calls, messages, and trip data for quality assurance, safety investigations and fraud detection. By using the Service you consent to such recordings where permitted by law. We retain logs and trip records as described in our <Link href="/privacypolicy" className="text-blue-600 underline">Privacy Policy</Link>.
+              We may record calls, messages, and trip data for quality assurance, safety investigations and fraud detection. By using the Service you consent to such recordings where permitted by law. We retain logs and trip records as described in our <Link href="/privacypolicy" className="text-[#2F80ED] underline">Privacy Policy</Link>.
             </p>
           </section>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">11. Data Retention and Deletion</h3>
             <p className="mb-4 text-sm">
-              We retain Personal Data for as long as necessary to provide the Service, comply with legal obligations, resolve disputes, and enforce our agreements. You may request deletion of your account and data via <a href="/support" className="text-blue-600 underline">support</a>, subject to legal exceptions and our obligation to retain certain information for compliance and fraud prevention.
+              We retain Personal Data for as long as necessary to provide the Service, comply with legal obligations, resolve disputes, and enforce our agreements. You may request deletion of your account and data via <a href="/support" className="text-[#2F80ED] underline">support</a>, subject to legal exceptions and our obligation to retain certain information for compliance and fraud prevention.
             </p>
           </section>
 
@@ -184,7 +184,7 @@ export default function TermsPage() {
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">16. Contact</h3>
             <p className="mb-4 text-sm">
-              If you have questions about these Terms, data practices, or want to report a security or safety issue, contact us at <a href="mailto:thelobby500@gmail.com" className="text-blue-600 underline">thelobby500@gmail.com</a> or visit our <a href="/support" className="text-blue-600 underline">support center</a>.
+              If you have questions about these Terms, data practices, or want to report a security or safety issue, contact us at <a href="mailto:thelobby500@gmail.com" className="text-[#2F80ED] underline">thelobby500@gmail.com</a> or visit our <a href="/support" className="text-[#2F80ED] underline">support center</a>.
             </p>
           </section>
 
