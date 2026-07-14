@@ -260,7 +260,7 @@ export default function DriverDashboard() {
 
   if (dashboardError && !driverDbData) {
     return (
-      <div className="min-h-screen bg-slate-50 px-6 py-24">
+      <div className="lobby-dashboard-gradient min-h-screen px-6 py-24">
         <div className="mx-auto max-w-lg rounded-3xl border border-red-100 bg-white p-8 text-center shadow-sm">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-500">
             <AlertCircle size={28} />
@@ -330,7 +330,7 @@ export default function DriverDashboard() {
       : 'Upload your license to request approval.';
 
   return (    
-    <div className="min-h-screen bg-slate-50 px-4 pb-28 pt-20 sm:px-6 lg:pt-24">
+    <div className="lobby-dashboard-gradient min-h-screen px-4 pb-28 pt-20 sm:px-6 lg:pt-24">
       <div className="mx-auto max-w-5xl">
         {notice && (
           <DashboardNotice notice={notice} onDismiss={() => setNotice(null)} />
@@ -353,7 +353,7 @@ export default function DriverDashboard() {
           </button>
         </header>
 
-        <section className="mb-4 overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 text-white shadow-sm">
+        <section className="lobby-command-gradient mb-4 overflow-hidden rounded-3xl border border-white/20 text-white shadow-xl shadow-[#58A6FF]/20">
           <div className="p-5 sm:p-7">
             <div className="flex items-start gap-4">
               <div className="relative shrink-0">
@@ -442,7 +442,7 @@ export default function DriverDashboard() {
           <QuickAction href="/support" icon={MessageCircle} label="Support" detail="Help" />
         </div>
 
-        <section className="mb-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="mb-5 rounded-3xl border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-black uppercase tracking-wide text-slate-400">Setup checklist</p>
@@ -465,7 +465,7 @@ export default function DriverDashboard() {
         </section>
 
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.86fr)]">
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <section className="rounded-3xl border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl sm:p-6">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-wide text-slate-400">Ride profile</p>
@@ -527,7 +527,7 @@ export default function DriverDashboard() {
             </div>
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <section className="rounded-3xl border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl sm:p-6">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-wide text-slate-400">Documents</p>
@@ -660,7 +660,7 @@ export default function DriverDashboard() {
 
 function DriverDashboardSkeleton({ message }) {
   return (
-    <div className="min-h-screen bg-slate-50 px-6 pb-12 pt-24">
+    <div className="lobby-dashboard-gradient min-h-screen px-6 pb-12 pt-24">
       <div className="mx-auto max-w-5xl animate-pulse">
         <div className="mb-4 flex items-center justify-center gap-2 text-sm font-bold text-slate-400">
           <Loader2 className="animate-spin" size={18} />

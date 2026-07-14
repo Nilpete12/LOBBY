@@ -43,12 +43,14 @@ export default function DriverHero({ userName = "Nilesh", clerkId, initialIsOnli
   };
 
   return (
-    <section className="relative pt-28 md:pt-36 pb-16 min-h-[75vh] flex items-center justify-center bg-[#FFF7ED] overflow-hidden transition-colors duration-500">
+    <section className="lobby-dashboard-gradient relative pt-28 md:pt-36 pb-16 min-h-[75vh] flex items-center justify-center overflow-hidden transition-colors duration-500">
       
-      {/* Dynamic Background Glow */}
+      {/* Dynamic Background Wash */}
       <div 
-        className={`absolute top-0 right-1/4 w-96 h-96 rounded-full blur-[120px] transition-all duration-700 pointer-events-none ${
-          isOnline && isVerified ? "bg-[#58A6FF]/20 scale-110" : "bg-slate-200/50 scale-90"
+        className={`absolute inset-0 transition-all duration-700 pointer-events-none ${
+          isOnline && isVerified
+            ? "bg-linear-to-br from-[#58A6FF]/35 via-[#FFEDD5]/30 to-[#FF6B6B]/25"
+            : "bg-linear-to-br from-[#58A6FF]/20 via-[#FFF7ED]/40 to-[#FF6B6B]/15"
         }`}
       />
 
@@ -90,7 +92,7 @@ export default function DriverHero({ userName = "Nilesh", clerkId, initialIsOnli
           </p>
 
           {/* THE MASSIVE ONLINE / OFFLINE TOGGLE CARD */}
-          <div className="bg-white/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-slate-200/60 shadow-[0_20px_50px_-15px_rgba(15,23,42,0.07)] max-w-md mx-auto md:mx-0">
+          <div className="bg-white/85 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/75 shadow-[0_22px_60px_-18px_rgba(23,32,51,0.32)] max-w-md mx-auto md:mx-0">
             <div className="flex items-center justify-between gap-4">
               
               <div className="flex items-center gap-3.5 text-left">
@@ -142,7 +144,6 @@ export default function DriverHero({ userName = "Nilesh", clerkId, initialIsOnli
 
         {/* RIGHT COLUMN: 3D VISUAL */}
         <div className="hidden md:flex flex-1 justify-end items-center relative">
-          <div className="absolute w-72 h-72 bg-[#58A6FF]/10 rounded-full blur-3xl z-0" />
           <div className={`relative w-full max-w-115 h-90 transition-all duration-700 ease-out z-10 ${
             isOnline && isVerified ? "hover:-translate-y-3 drop-shadow-[0_25px_35px_rgba(88,166,255,0.25)]" : "opacity-60 grayscale-40"
           }`}>

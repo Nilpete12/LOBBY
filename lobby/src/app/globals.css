@@ -39,6 +39,33 @@ body {
   color: var(--lobby-ink);
 }
 
+.lobby-home-gradient {
+  background:
+    linear-gradient(135deg, rgb(88 166 255 / 0.82) 0%, rgb(255 107 107 / 0.62) 45%, rgb(255 237 213 / 0.96) 100%),
+    linear-gradient(180deg, rgb(255 247 237 / 0.12) 0%, rgb(255 247 237 / 0.76) 100%),
+    var(--lobby-papaya-soft);
+}
+
+.lobby-dashboard-gradient {
+  background:
+    linear-gradient(145deg, rgb(88 166 255 / 0.34) 0%, rgb(255 107 107 / 0.28) 44%, rgb(255 237 213 / 0.9) 100%),
+    linear-gradient(180deg, #fff7ed 0%, #eaf4ff 52%, #fff7ed 100%);
+}
+
+.lobby-command-gradient {
+  background: linear-gradient(135deg, #172033 0%, #244977 42%, #58a6ff 76%, #ff6b6b 100%);
+}
+
+.lobby-admin-gradient {
+  background:
+    linear-gradient(145deg, rgb(88 166 255 / 0.28) 0%, rgb(255 107 107 / 0.22) 48%, rgb(255 237 213 / 0.92) 100%),
+    linear-gradient(180deg, #fff7ed 0%, #eaf4ff 58%, #fff7ed 100%);
+}
+
+.lobby-admin-topbar-gradient {
+  background: linear-gradient(135deg, rgb(255 247 237 / 0.96) 0%, rgb(234 244 255 / 0.92) 52%, rgb(255 228 223 / 0.9) 100%);
+}
+
 :where(input, textarea, select) {
   color: #0f172a;
   caret-color: var(--lobby-blue-strong);

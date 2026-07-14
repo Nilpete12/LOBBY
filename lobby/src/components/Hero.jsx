@@ -3,15 +3,11 @@ import TaxiStandDropdown from '@/components/TaxiStandDropdown';
 
 export default function Hero() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#FFF7ED] pt-30 pb-28 md:pt-34">
+    <section className="lobby-home-gradient relative w-full overflow-hidden pt-30 pb-28 md:pt-34">
 
       {/* Background gradients */}
-      <div className="absolute inset-0 bg-linear-to-br from-[#FFEDD5]/20 via-[#FFF7ED]/80 to-[#DCEBFF]/20 md:from-[#FFEDD5]/40 md:via-[#FFF7ED] md:to-[#DCEBFF]/40"></div>
-      <div className="pointer-events-none absolute inset-0 bg-[url('/homepage-city.jpg')] bg-cover bg-center opacity-[0.15] mix-blend-multiply saturate-125"></div>
-
-      {/* Blur blobs */}
-      <div className="absolute top-20 -left-20 w-96 h-96 bg-[#FFEDD5]/30 rounded-full blur-3xl"></div>
-      <div className="absolute top-0 right-0 w-120 h-120 bg-[#DCEBFF]/30 rounded-full blur-3xl"></div>
+      <div className="absolute inset-0 bg-linear-to-b from-white/10 via-[#FFF7ED]/30 to-[#FFF7ED]/80"></div>
+      <div className="pointer-events-none absolute inset-0 bg-[url('/homepage-city.jpg')] bg-cover bg-center opacity-[0.18] mix-blend-overlay saturate-150"></div>
 
       {/* Content */}
       <div className="relative px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
@@ -41,7 +37,7 @@ export default function Hero() {
         </p>
 
         {/* Floating Search Container - Tighter padding on mobile */}
-        <form action="/search" className="bg-white/90 backdrop-blur-xl p-3 md:p-6 rounded-3xl md:rounded-4xl shadow-[0_20px_60px_-15px_rgba(88,166,255,0.18)] w-full max-w-3xl border border-white">
+        <form action="/search" className="bg-white/85 backdrop-blur-xl p-3 md:p-6 rounded-3xl md:rounded-4xl shadow-[0_24px_70px_-18px_rgba(23,32,51,0.28)] w-full max-w-3xl border border-white/80">
           
           {/* Input Row */}
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">

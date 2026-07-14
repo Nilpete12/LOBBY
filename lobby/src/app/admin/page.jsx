@@ -803,7 +803,7 @@ export default function AdminPage() {
   };
 
   if (isCheckingAuth) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-900 text-sm font-black text-slate-400">Checking access...</div>;
+    return <div className="lobby-command-gradient flex min-h-screen items-center justify-center text-sm font-black text-white/70">Checking access...</div>;
   }
 
   if (!isAuthenticated) return <AdminLog onLogin={handleAdminLogin} />;
@@ -1060,7 +1060,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans md:flex">
+    <div className="lobby-admin-gradient min-h-screen font-sans md:flex">
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -1071,7 +1071,7 @@ export default function AdminPage() {
       />
 
       <main className="min-w-0 flex-1 pb-24 md:h-screen md:overflow-y-auto md:pb-8">
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-slate-100/95 px-4 py-3 backdrop-blur md:static md:border-0 md:px-8 md:py-8">
+        <header className="lobby-admin-topbar-gradient sticky top-0 z-30 border-b border-white/60 px-4 py-3 backdrop-blur-xl md:static md:border-0 md:px-8 md:py-8">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <button
@@ -1135,7 +1135,7 @@ export default function AdminPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`shrink-0 rounded-full px-4 py-2 text-sm font-black ${
-                  activeTab === tab.id ? 'bg-slate-900 text-white' : 'bg-white text-slate-600'
+                  activeTab === tab.id ? 'bg-[#58A6FF] text-slate-950 shadow-sm shadow-[#58A6FF]/20' : 'bg-white/80 text-slate-600'
                 }`}
               >
                 {tab.label}

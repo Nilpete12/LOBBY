@@ -106,7 +106,7 @@ export default function RiderDashboard() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-[#FFF7ED] flex items-center justify-center font-semibold text-slate-400">
+      <div className="lobby-dashboard-gradient min-h-screen flex items-center justify-center font-semibold text-slate-400">
         Loading Dashboard...
       </div>
     );
@@ -115,7 +115,7 @@ export default function RiderDashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#FFF7ED] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
+    <div className="lobby-dashboard-gradient min-h-screen px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-4xl">
         {reportNotice && (
           <ReportNotice notice={reportNotice} onDismiss={() => setReportNotice(null)} />

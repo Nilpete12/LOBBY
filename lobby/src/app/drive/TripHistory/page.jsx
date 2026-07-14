@@ -133,7 +133,7 @@ export default function DriverTripHistoryPage() {
 
   if (!isLoaded || loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FFF7ED] font-semibold text-slate-400">
+      <div className="lobby-dashboard-gradient flex min-h-screen items-center justify-center font-semibold text-slate-400">
         <Loader2 className="mr-2 animate-spin" />
         Loading trip history...
       </div>
@@ -141,7 +141,7 @@ export default function DriverTripHistoryPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFF7ED] px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
+    <main className="lobby-dashboard-gradient min-h-screen px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-5xl">
         <section className="mb-6 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
