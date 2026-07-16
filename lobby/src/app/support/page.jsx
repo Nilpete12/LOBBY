@@ -356,7 +356,7 @@ export default function ContactPage() {
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-slate-800 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full cursor-pointer bg-[#1db954] text-white font-bold py-4 rounded-xl hover:bg-[#1ed760] transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 aria-busy={isSubmitting}
               >
                 {isSubmitting ? 'Sending...' : 'Send Message'}
@@ -377,7 +377,7 @@ function FaqItem({ question, answer }) {
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden transition-all">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center p-4 text-left font-bold text-slate-800 hover:bg-slate-50 transition"
+        className="w-full flex justify-between items-center p-4 text-left font-bold text-slate-800 hover:bg-black transition"
         aria-expanded={isOpen}
       >
         {question}

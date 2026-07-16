@@ -1,6 +1,6 @@
 import Link from 'next/link';
 // import { Facebook, Instagram, Twitter, Map-Pin } from 'lucide-react';
-import { MapPin } from 'lucide-react';
+import { MapPin, Heart } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -67,10 +67,10 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section: Copyright */}
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#b3b3b3] font-medium">
-          <p>&copy; {new Date().getFullYear()} <span className="font-[Sailors_Slant_Normal]">THE LOBBY</span> Platform. All rights reserved.</p>
-          <p>Made with ❤️ in the hills.</p>
+        <div className="pt-8 border-t border-white/10 flex flex-row justify-between items-center gap-3 text-xs text-[#b3b3b3] font-[proxima_nova_regular]"> <p>&copy; {new Date().getFullYear()} <span className="font-[Sailors_Slant_Normal]">THE LOBBY</span> Platform. All rights reserved.</p> 
+        <p className="flex items-center gap-1">Made with <Heart size={16} className="text-[#1ED760]" /> in the hills.</p> 
         </div>
+
 
       </div>
     </footer>

@@ -14,7 +14,7 @@ export default function Features() {
       title: "Direct Connection",
       desc: "One tap to call. Connect and Confirm, directly with the driver.",
       color: "bg-[#FFEDD5] text-[#2F80ED]",
-      grad: "bg-gradient-to-r from-[#FFEDD5]/30 to-[#DCEBFF]/20"
+      grad: "bg-gradient-to-r from-[#DCEBFF]/30 to-[#FFEDD5]/20"
     },
     {
       icon: <ShieldCheck size={24}/>,

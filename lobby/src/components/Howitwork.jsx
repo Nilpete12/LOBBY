@@ -41,7 +41,7 @@ export default function HowItWorks() {
           {steps.map((step, i) => (
             <div key={i} className="text-center relative pt-4">
 
-              <div className="w-24 h-24 mx-auto bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl shadow-[#58A6FF] border border-slate-200 mb-8 text-[#2F80ED]">
+              <div className="w-24 h-24 mx-auto bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl shadow-[#1db954] border border-slate-200 mb-8 text-[#2F80ED]">
                 {step.icon}
               </div>
 

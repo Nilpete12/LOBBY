@@ -342,7 +342,7 @@ export default function SearchPage() {
                 type="submit"
                 aria-label="Search drivers"
                 disabled={loading}
-                className="absolute right-2 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
+                className="absolute right-2 flex h-11 w-11 items-center justify-center rounded-xl bg-[#1db954] text-white transition hover:bg-[#1ed760] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} />}
               </button>
