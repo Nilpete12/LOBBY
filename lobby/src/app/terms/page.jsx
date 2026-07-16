@@ -1,193 +1,252 @@
 "use client";
+
 import Link from 'next/link';
-import { FileText, AlertTriangle, CheckCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, FileText, ShieldCheck } from 'lucide-react';
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-linear-to-bl from-[#DCEBFF]/70 to-white pt-24 pb-20">
       <div className="max-w-3xl mx-auto px-6">
-        
-        {/* Header */}
         <div className="mb-12 border-b border-slate-100 pb-8">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Terms of Service</h1>
-          <p className="text-slate-500 text-lg">Effective Date: January 1, 2026</p>
-          <p className="text-sm text-slate-500 mt-2">For details about how we collect and use personal data, see our <Link href="/privacypolicy" className="text-[#2F80ED] underline">Privacy Policy</Link>.</p>
+          <p className="text-slate-500 text-lg">Effective Date: July 16, 2026</p>
+          <p className="text-sm text-slate-500 mt-2">
+            These Terms apply to THE LOBBY platform. Our data practices are explained in the{' '}
+            <Link href="/privacypolicy" className="text-[#2F80ED] underline">Privacy Policy</Link>.
+          </p>
         </div>
 
-        {/* Content */}
         <div className="prose prose-slate prose-lg text-slate-600">
-          
           <p className="text-lg mb-8">
-            Welcome to THE LOBBY. By accessing or using our website and services, you agree to be bound by these terms. If you do not agree, please do not use our platform.
+            By accessing or using THE LOBBY, you agree to these Terms. Please read them carefully.
+            If you do not agree, do not use the platform.
           </p>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <FileText size={20} /> Definitions
+              <FileText size={20} /> 1. What THE LOBBY Is
             </h3>
-            <p className="mb-4">
-              For the purposes of these Terms:
-            </p>
-            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
-              <li><strong>&quot;Service&quot;</strong> means THE LOBBY website, mobile applications, APIs and related features that facilitate connections between Riders and Drivers.</li>
-              <li><strong>&quot;Rider&quot;</strong> means a user who requests transportation through the Service.</li>
-              <li><strong>&quot;Driver&quot;</strong> means a user who offers transportation through the Service.</li>
-              <li><strong>&quot;Account&quot;</strong> means a user account registered with THE LOBBY.</li>
-              <li><strong>&quot;Personal Data&quot;</strong> means information that identifies or can be used to identify an individual.</li>
-            </ul>
-          </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <FileText size={20} /> 1. The Service
-            </h3>
-            <p className="mb-4">
-             THE LOBBY is a <strong>directory service</strong> that connects independent drivers with potential passengers. We are not a transportation carrier.
+            <p className="mb-4 text-sm">
+              THE LOBBY is a technology platform and local driver directory that helps riders discover,
+              contact, and request rides from independent local drivers. THE LOBBY is not a taxi operator,
+              transport carrier, vehicle owner, employer, agent of drivers, or party to the ride agreement
+              between a rider and a driver.
             </p>
             <div className="shadow p-4 rounded-xl border border-slate-200 mb-4 text-sm">
-              <strong>Key Distinction:</strong> We do not employ drivers. The contract for transportation is directly between the Rider and the Driver. THE LOBBY is not a party to that agreement.
+              <strong>Important:</strong> Any ride, fare, route, waiting time, cancellation, pickup, drop-off,
+              or safety arrangement is agreed directly between the rider and the driver. We may provide tools
+              for discovery, verification, lead tracking, support, and admin review, but we do not guarantee
+              ride completion, driver availability, travel time, fare, or conduct.
             </div>
           </section>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <CheckCircle size={20} /> 2. User Responsibilities
+              <CheckCircle size={20} /> 2. Accounts and Eligibility
             </h3>
-            <ul className="list-disc pl-6 space-y-2 mb-4">
-              <li>You must be at least 18 years old to create a driver account.</li>
-              <li>You agree to provide accurate, current, and complete information during registration and to update that information promptly if it changes.</li>
-              <li>Riders agree to pay the fare as set by the ANTA and the NTWTA.</li>
-              <li>Drivers agree to maintain valid vehicle insurance, registration, and licenses required by their applicable jurisdiction (for example, the State of Nagaland).</li>
-              <li>Users must follow all local laws and regulations when using the Service.</li>
+            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
+              <li>You must provide accurate, current, and complete account information.</li>
+              <li>You are responsible for all activity under your account and for keeping your login secure.</li>
+              <li>Driver accounts are available only to persons legally allowed to drive commercially or offer rides under applicable laws and local rules.</li>
+              <li>Users under 18 may not create an account. A minor may use the service only through a parent or legal guardian where permitted by law.</li>
+              <li>We may reject, suspend, restrict, or remove an account if we reasonably believe it creates legal, security, fraud, payment, or safety risk.</li>
             </ul>
           </section>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <AlertTriangle size={20} /> 3. Security, Data and Privacy
+              <ShieldCheck size={20} /> 3. Driver Responsibilities
             </h3>
-            <p className="mb-4">
-              We take the security and privacy of user data seriously. Our <Link href="/privacypolicy" className="text-[#2F80ED] underline">Privacy Policy</Link> describes what Personal Data we collect, how we use it, how long we retain it, and how users can exercise their rights.
-            </p>
-            <h4 className="font-semibold">Data Security</h4>
+            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
+              <li>Drivers are independent service providers and are not employees, contractors, partners, or agents of THE LOBBY.</li>
+              <li>Drivers must maintain valid driving licences, permits, vehicle registration, insurance, fitness documents, tax documents, number plate details, and any other approvals required by law.</li>
+              <li>Drivers must keep profile details accurate, including name, phone number, vehicle model, number plate, taxi stands, availability, documents, and route information.</li>
+              <li>Drivers must comply with applicable fare rules, taxi-stand rules, road-safety laws, transport laws, and local association rules.</li>
+              <li>Drivers must not submit false documents, use another person&apos;s account, misrepresent availability, overcharge unlawfully, harass riders, or engage in unsafe conduct.</li>
+              <li>Drivers are responsible for taxes, insurance claims, accidents, traffic violations, penalties, disputes, and passenger safety during rides they provide.</li>
+            </ul>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">4. Rider Responsibilities</h3>
+            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
+              <li>Riders must use driver information responsibly and only for ride-related communication.</li>
+              <li>Riders should confirm the driver&apos;s name, vehicle, number plate, route, fare, and pickup details before starting a ride.</li>
+              <li>Riders must not abuse, threaten, defraud, spam, impersonate, or harass drivers or support staff.</li>
+              <li>Riders are responsible for deciding whether to accept a ride from a driver. In emergencies, contact local emergency services first.</li>
+              <li>Riders must pay fares, waiting charges, tolls, parking, or other lawful charges agreed directly with the driver.</li>
+            </ul>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">5. Verification and Safety</h3>
             <p className="mb-4 text-sm">
-              We implement reasonable administrative, technical, and physical safeguards designed to protect Personal Data against unauthorized access, disclosure, alteration, or destruction. These measures include access controls, encryption in transit (TLS) and where feasible at rest, logging, and regular security assessments.
+              We may review driver-submitted documents, profile details, complaints, lead reports, ride-completion
+              confirmations, and other signals to improve platform safety. Verification means only that a document
+              or profile passed our review at a point in time. It is not a guarantee of identity, fitness, legality,
+              insurance validity, driving skill, conduct, or ride safety.
             </p>
-            <h4 className="font-semibold">Breach Notification</h4>
             <p className="mb-4 text-sm">
-              If we learn of a security incident that affects Personal Data, we will follow our incident response procedures and notify affected users and regulators as required by applicable law. Where possible we will provide details about the data involved, steps we are taking, and recommendations to protect yourself.
-            </p>
-            <h4 className="font-semibold">Account Security</h4>
-            <p className="mb-4 text-sm">
-              You are responsible for maintaining the confidentiality of your account credentials. We strongly recommend enabling multi-factor authentication (MFA) where available and using a strong, unique password. Notify us immediately if you suspect unauthorized access to your account; we may suspend or lock access to protect users.
+              We may approve, reject, re-review, suspend, or remove drivers at our discretion where there is a
+              safety, legal, document, payment, fraud, or trust concern. Users should report incidents through
+              <Link href="/support" className="text-[#2F80ED] underline"> support</Link> as soon as possible.
             </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">4. Driver Verification, Safety and Insurance</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">6. Search, Calls, WhatsApp and Instant Booking</h3>
             <p className="mb-4 text-sm">
-              Drivers must provide accurate verification documents and certify that they carry required insurance and licenses. THE LOBBY may perform identity and document verification checks and may suspend or remove Drivers who fail verification or who present safety risks.
+              Search results, taxi-stand filters, driver cards, call buttons, WhatsApp buttons, and instant-book
+              requests are discovery and lead-generation tools. A ride is not confirmed until the driver and rider
+              directly agree or, where available, the driver accepts an instant-book request.
             </p>
             <p className="mb-4 text-sm">
-             THE LOBBY is not a carrier and does not provide insurance for trips; Drivers are responsible for maintaining insurance as required by law. Riders and Drivers should report safety incidents immediately via our <a href="/support" className="text-[#2F80ED] underline">support</a> channel so we can investigate.
+              THE LOBBY may track lead activity such as profile views, call-button clicks, WhatsApp-button clicks,
+              instant-book requests, driver responses, optional ride-completion confirmations, and driver lead
+              reports. We do not record the audio content of phone calls unless we introduce such a feature with
+              clear notice and any legally required consent.
+            </p>
+            <p className="mb-4 text-sm">
+              Live location features, where enabled, are intended only to help a driver locate a rider during an
+              active request. Location sharing may be inaccurate, delayed, unavailable, or interrupted by device,
+              browser, network, or permission settings.
             </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">5. Payments and Disputes</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">7. Payments, Fares and Subscriptions</h3>
+            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
+              <li>Unless the platform clearly states otherwise, rider fares are agreed and paid directly between riders and drivers.</li>
+              <li>THE LOBBY is not responsible for cash handling, fare negotiations, refunds, change, missed payments, or payment disputes between riders and drivers.</li>
+              <li>Drivers may be required to pay subscription or listing fees to remain visible, verified, boosted, or active on the platform.</li>
+              <li>Failure to pay subscription fees may result in reminders, reduced visibility, suspension, or removal from driver listings.</li>
+              <li>Any platform fee, subscription, refund, discount, or promotion is subject to the terms displayed at the time and applicable law.</li>
+            </ul>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">8. Prohibited Conduct</h3>
+            <p className="mb-4 text-sm">You must not:</p>
+            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
+              <li>use the platform for illegal, unsafe, fraudulent, abusive, discriminatory, or harmful activity;</li>
+              <li>submit forged, misleading, outdated, or third-party documents;</li>
+              <li>scrape, copy, sell, or misuse driver or rider contact information;</li>
+              <li>interfere with platform security, reverse engineer the service, or overload our systems;</li>
+              <li>post false complaints, false ride reports, fake reviews, or misleading profile information;</li>
+              <li>use THE LOBBY branding, data, or software without permission.</li>
+            </ul>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">9. User Content and Licence</h3>
             <p className="mb-4 text-sm">
-              Where THE LOBBY facilitates payments, payments are processed by third-party payment processors and are subject to their terms. We use industry-standard measures to protect payment information, but we do not store full payment card details ourselves unless explicitly stated and in compliance with applicable standards (e.g., PCI-DSS).
+              You may submit profile details, photos, documents, reviews, support messages, complaints, and other
+              content. You retain ownership of your content, but you grant THE LOBBY a non-exclusive, worldwide,
+              royalty-free licence to host, use, display, reproduce, modify, and process it as needed to operate,
+              secure, improve, investigate, and promote the platform. You must have the right to submit any content
+              you provide.
             </p>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">10. Privacy and Data</h3>
             <p className="mb-4 text-sm">
-              Fare disputes should be reported to support within 30 days of the trip. We may withhold driver payouts while investigating disputes that raise reasonable concerns.
+              Our <Link href="/privacypolicy" className="text-[#2F80ED] underline">Privacy Policy</Link> explains
+              what data we collect, how we use it, when we share it, how long we retain it, and how users can raise
+              privacy requests. By using the platform, you agree that we may process data as described there.
+            </p>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">11. Suspension, Removal and Investigations</h3>
+            <p className="mb-4 text-sm">
+              We may suspend, restrict, remove, de-rank, or refuse service to any user or driver if we reasonably
+              believe it is necessary to protect users, comply with law, investigate complaints, prevent fraud,
+              enforce these Terms, recover unpaid platform fees, or protect THE LOBBY. We may preserve account,
+              booking, support, verification, and analytics records where needed for legal, safety, audit, or dispute
+              purposes.
             </p>
           </section>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <AlertTriangle size={20} /> 6. Limitation of Liability
+              <AlertTriangle size={20} /> 12. Disclaimers
             </h3>
             <p className="mb-4 text-sm">
-              To the fullest extent permitted by law, THE LOBBY shall not be liable for any indirect, incidental, special, punitive, exemplary or consequential damages arising out of or related to these Terms or the use of the Service, even if THE LOBBY has been advised of the possibility of such damages.
+              THE LOBBY is provided on an &quot;as is&quot; and &quot;as available&quot; basis. To the fullest extent permitted
+              by law, we disclaim all warranties, including warranties of accuracy, availability, merchantability,
+              fitness for a particular purpose, non-infringement, uninterrupted operation, error-free operation,
+              driver availability, ride completion, safety, pricing accuracy, and route accuracy.
             </p>
             <p className="mb-4 text-sm">
-              Except where prohibited by law, THE LOBBY’s aggregate liability arising out of or related to these Terms will not exceed the total fees actually paid by you to THE LOBBY in the 12 months preceding the claim. Nothing in these Terms limits liability for death or personal injury caused by our negligence or for other liabilities that cannot be excluded or limited by applicable law.
+              We are not responsible for the acts, omissions, statements, delays, cancellations, pricing, driving,
+              documents, vehicles, insurance, or conduct of riders, drivers, taxi stands, payment providers, mapping
+              providers, messaging services, or other third parties.
             </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">7. Indemnification</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">13. Limitation of Liability</h3>
             <p className="mb-4 text-sm">
-              You agree to indemnify and hold harmless THE LOBBY, its affiliates, officers, directors, employees and agents from and against any and all claims, losses, liabilities, expenses (including reasonable attorneys’ fees) and damages arising out of or related to your breach of these Terms, your negligent or intentional acts, or your violation of any law or third-party rights.
+              To the fullest extent permitted by law, THE LOBBY and its founders, officers, employees, contractors,
+              service providers, and affiliates will not be liable for indirect, incidental, special, consequential,
+              exemplary, punitive, or loss-of-profit damages, or for disputes arising from rides arranged directly
+              between riders and drivers.
+            </p>
+            <p className="mb-4 text-sm">
+              Except where prohibited by law, our total liability for any claim relating to the platform will not
+              exceed the amount you paid directly to THE LOBBY for the service giving rise to the claim during the
+              six months before the claim, or INR 1,000, whichever is higher. Nothing in these Terms excludes liability
+              that cannot legally be excluded.
             </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">8. Termination and Suspension</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">14. Indemnity</h3>
             <p className="mb-4 text-sm">
-              We may suspend or terminate your access to the Service for violations of these Terms, for suspicious activity, or for actions we reasonably believe may harm other users or THE LOBBY. Where practicable, we will provide notice and an opportunity to cure; however, for serious or repeated violations we may suspend or terminate immediately. Upon termination, your right to use the Service stops and we may delete or anonymize your data in accordance with our retention policies.
-            </p>
-            <p className="mb-4 text-sm">
-              Termination does not relieve you of obligations incurred prior to termination, including outstanding payment obligations and indemnification obligations.
-            </p>
-          </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">9. Prohibited Conduct</h3>
-            <p className="mb-4 text-sm">
-              Users must not use the Service to harass, defraud, threaten, or engage in any illegal activity. Soliciting off-platform payments to avoid fees, sharing stolen or forged documents, and misrepresenting identity or trip details are prohibited and may result in account termination and referral to law enforcement.
+              You agree to indemnify and hold harmless THE LOBBY and its founders, officers, employees, contractors,
+              service providers, and affiliates from claims, losses, liabilities, penalties, damages, costs, and
+              expenses arising from your use of the platform, ride arrangements, breach of these Terms, violation of
+              law, submitted content, unpaid fees, negligence, fraud, misconduct, or violation of another person&apos;s
+              rights.
             </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">10. Recordings and Logs</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">15. Intellectual Property</h3>
             <p className="mb-4 text-sm">
-              We may record calls, messages, and trip data for quality assurance, safety investigations and fraud detection. By using the Service you consent to such recordings where permitted by law. We retain logs and trip records as described in our <Link href="/privacypolicy" className="text-[#2F80ED] underline">Privacy Policy</Link>.
+              THE LOBBY name, branding, design, software, content, data structure, and platform features are owned
+              by or licensed to THE LOBBY. You may not copy, modify, distribute, sell, scrape, or create derivative
+              works from the platform except as expressly permitted by us in writing.
             </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">11. Data Retention and Deletion</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">16. Changes to the Platform or Terms</h3>
             <p className="mb-4 text-sm">
-              We retain Personal Data for as long as necessary to provide the Service, comply with legal obligations, resolve disputes, and enforce our agreements. You may request deletion of your account and data via <a href="/support" className="text-[#2F80ED] underline">support</a>, subject to legal exceptions and our obligation to retain certain information for compliance and fraud prevention.
+              We may update, suspend, remove, or change features at any time. We may also update these Terms by
+              posting a new effective date. Where required by law, we will provide additional notice. Continued use
+              after changes means you accept the updated Terms.
             </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">12. Third-Party Services</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">17. Governing Law and Disputes</h3>
             <p className="mb-4 text-sm">
-              The Service may rely on third-party providers (for example, mapping services, payment processors, and identity verification providers). We do not control these third parties and are not responsible for their actions or omissions. Using the Service may also expose you to third-party terms and privacy practices.
+              These Terms are governed by the laws of India. The parties will first try to resolve disputes in good
+              faith through support. Subject to any mandatory consumer forum rights or other non-waivable rights,
+              disputes relating to these Terms or the platform will be subject to the courts at Kohima, Nagaland.
             </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">13. Intellectual Property</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">18. Contact</h3>
             <p className="mb-4 text-sm">
-              All content, branding and software provided by THE LOBBY are owned by or licensed to THE LOBBY. You may not copy, reproduce, or create derivative works except as expressly authorized. By submitting reviews, photos, or other content you grant THE LOBBY a non-exclusive, worldwide, royalty-free license to use that content to provide and promote the Service.
+              For support, safety reports, legal notices, subscription questions, or account concerns, contact{' '}
+              <a href="mailto:thelobby500@gmail.com" className="text-[#2F80ED] underline">thelobby500@gmail.com</a>{' '}
+              or visit the <Link href="/support" className="text-[#2F80ED] underline">support center</Link>.
             </p>
           </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">14. Governing Law and Dispute Resolution</h3>
-            <p className="mb-4 text-sm">
-              These Terms shall be governed by the laws of India without regard to conflicts of laws principles. Except where local consumer protection law provides otherwise, disputes will be subject to the exclusive jurisdiction of the courts located in Nagaland.
-            </p>
-          </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">15. Changes to These Terms</h3>
-            <p className="mb-4 text-sm">
-              We may modify these Terms from time to time. Material changes will be posted with an updated Effective Date and, where required by law, we will provide notice. Continued use of the Service after a change constitutes acceptance of the updated Terms.
-            </p>
-          </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">16. Contact</h3>
-            <p className="mb-4 text-sm">
-              If you have questions about these Terms, data practices, or want to report a security or safety issue, contact us at <a href="mailto:thelobby500@gmail.com" className="text-[#2F80ED] underline">thelobby500@gmail.com</a> or visit our <a href="/support" className="text-[#2F80ED] underline">support center</a>.
-            </p>
-          </section>
-
         </div>
       </div>
     </div>
