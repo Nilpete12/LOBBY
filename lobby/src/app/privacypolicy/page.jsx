@@ -1,237 +1,251 @@
 "use client";
+
 import Link from 'next/link';
-import { Shield, Lock, Eye, AlertTriangle, CheckCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Eye, Lock, Shield } from 'lucide-react';
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-linear-to-bl from-[#DCEBFF]/70 to-white pt-24 pb-20">
       <div className="max-w-3xl mx-auto px-6">
-        
-        {/* Header */}
         <div className="mb-12 border-b border-slate-100 pb-8">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Privacy Policy</h1>
-          <p className="text-slate-500 text-lg">Last updated: December 30, 2025</p>
-          <p className="text-sm text-slate-500 mt-2">For details about your rights and responsibilities when using our platform, see our <Link href="/terms" className="text-[#2F80ED] underline">Terms of Service</Link>.</p>
+          <p className="text-slate-500 text-lg">Last updated: July 16, 2026</p>
+          <p className="text-sm text-slate-500 mt-2">
+            This Privacy Policy should be read with our{' '}
+            <Link href="/terms" className="text-[#2F80ED] underline">Terms of Service</Link>.
+          </p>
         </div>
 
-        {/* Content */}
         <div className="prose prose-slate prose-lg text-slate-600">
-          
           <p className="text-lg mb-8 font-medium text-slate-800">
-            At THE LOBBY, we value your trust and are committed to transparency about how we collect, use, and protect your personal data. This policy explains our data practices when you use our platform to find rides in Shillong and across Meghalaya.
+            THE LOBBY is built for direct rider-driver discovery in Kohima and Nagaland. This policy explains what
+            personal data we collect, why we collect it, how we protect it, when we share it, and how you can raise
+            privacy requests.
           </p>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <Eye size={20} /> 1. Information We Collect
+              <Eye size={20} /> 1. Personal Data We Collect
             </h3>
-            <p className="mb-4">
-              We collect information necessary to provide our services and ensure platform safety. This includes:
+            <p className="mb-4 text-sm">
+              We collect only data that is reasonably needed to operate, protect, improve, and administer the
+              platform. Depending on how you use THE LOBBY, this may include:
             </p>
-            <ul className="list-disc pl-6 space-y-2 mb-4">
-              <li><strong>Account Data:</strong> Name, phone number, email address, and profile information provided during registration.</li>
-              <li><strong>Driver Verification Data:</strong> Vehicle details, driving license copies, government ID, insurance information, and vehicle registration documents (for verification purposes only).</li>
-              <li><strong>Usage Data:</strong> Search history (e.g., &quot;Shillong to Dawki&quot;), trip routes, pickup and drop-off locations, and app interaction patterns to improve our services.</li>
-              <li><strong>Communication Data:</strong> Messages, call logs, and support tickets exchanged through our platform.</li>
-              <li><strong>Device Information:</strong> Device type, operating system, IP address, and unique device identifiers for security and service optimization.</li>
-              <li><strong>Payment Information:</strong> Transaction history and payment method details (processed by third-party payment providers).</li>
+            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
+              <li><strong>Account data:</strong> name, email address, phone number, role, profile photo, login identifiers, and account status.</li>
+              <li><strong>Driver profile data:</strong> vehicle model, vehicle photo, number plate, taxi stands, routes, availability, ratings, lead reports, subscription status, and public profile details.</li>
+              <li><strong>Driver verification data:</strong> driving licence image, identity or vehicle documents, verification requests, admin decisions, rejection reasons, and related notes.</li>
+              <li><strong>Rider activity data:</strong> searches, taxi-stand filters, selected drivers, favourite drivers, instant-book requests, pickup/drop-off details, ride history, and optional ride-completion confirmations.</li>
+              <li><strong>Location data:</strong> approximate or precise location when you submit an instant-book request or choose to share live location during an active booking.</li>
+              <li><strong>Lead analytics:</strong> profile views, call-button clicks, WhatsApp-button clicks, booking status, driver responses, and aggregated performance statistics.</li>
+              <li><strong>Support and complaint data:</strong> messages, report categories, complaint details, attachments, internal notes, status updates, and responses.</li>
+              <li><strong>Device and log data:</strong> IP address, browser, device type, operating system, timestamps, error logs, security logs, and app interaction data.</li>
+              <li><strong>Payment and subscription data:</strong> driver subscription reminders, payment status, transaction references, and billing records where applicable.</li>
             </ul>
           </section>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <Lock size={20} /> 2. How We Use Your Data
+              <Lock size={20} /> 2. Why We Use Personal Data
             </h3>
-            <p className="mb-4">
-              Your data is used strictly for operational and safety purposes:
-            </p>
-            <ul className="list-disc pl-6 space-y-2 mb-4">
-              <li>To verify driver identities and maintain platform safety and integrity.</li>
-              <li>To enable direct communication between riders and drivers through our app.</li>
-              <li>To process payments and resolve payment disputes.</li>
-              <li>To prevent fraud, abuse, and violations of our community guidelines.</li>
-              <li>To improve our route suggestions and service recommendations.</li>
-              <li>To respond to your inquiries and provide customer support.</li>
-              <li>To comply with legal obligations and regulatory requirements.</li>
-              <li>To conduct safety investigations and address reported incidents.</li>
+            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
+              <li>To create accounts and let users sign in securely.</li>
+              <li>To show riders relevant driver listings, taxi stands, vehicle details, number plates, and contact options.</li>
+              <li>To let riders call, WhatsApp, favourite, report, or request drivers.</li>
+              <li>To verify drivers, review documents, prevent fake profiles, and manage platform trust.</li>
+              <li>To support instant booking, booking status updates, and optional live-location sharing.</li>
+              <li>To provide driver analytics such as profile views, call clicks, WhatsApp clicks, and lead reports.</li>
+              <li>To send operational notices, support responses, driver subscription reminders, and safety updates.</li>
+              <li>To investigate complaints, safety issues, fraud, abuse, unpaid fees, or violations of our Terms.</li>
+              <li>To comply with applicable law, lawful requests, audits, tax, accounting, security, and record-keeping obligations.</li>
+              <li>To improve reliability, performance, user experience, search quality, and abuse prevention.</li>
             </ul>
             <div className="shadow p-4 rounded-xl border border-[#CFE4FF] mb-4 text-sm bg-[#EAF4FF]">
-              <strong className="text-[#172033]">Our Commitment:</strong> We do not sell your personal data to third-party advertisers or marketing companies. Your data is not shared with unaffiliated parties except as required by law or as necessary to provide our services.
+              <strong className="text-[#172033]">Our commitment:</strong> We do not sell personal data to advertisers.
+              We do not record the audio content of direct phone calls unless a future feature clearly says so and
+              obtains any consent required by law.
             </div>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <Shield size={20} /> 3. Data Security and Protection
-            </h3>
-            <p className="mb-4">
-              We implement industry-standard security measures to protect your personal data:
-            </p>
-            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
-              <li>End-to-end encryption for sensitive communications and data transmission.</li>
-              <li>Secure servers with regular security audits and penetration testing.</li>
-              <li>Access controls limiting data access to authorized personnel only.</li>
-              <li>Multi-factor authentication (MFA) options for account protection.</li>
-            </ul>
-            <p className="text-sm mt-4 p-3 rounded-lg border border-amber-200 bg-amber-50">
-              <strong>Disclaimer:</strong> While no service is 100% secure, we continuously monitor and improve our security infrastructure. We cannot guarantee complete protection against all potential threats.
-            </p>
-          </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">4. Data Sharing and Third Parties</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">3. Legal Basis and Consent</h3>
             <p className="mb-4 text-sm">
-              We may share your data with third-party service providers who assist in our operations:
+              We process personal data where it is needed to provide the platform, where you have given consent,
+              where it is necessary for safety, fraud prevention, legal compliance, support, payment or subscription
+              administration, or where otherwise permitted under applicable law, including India&apos;s digital personal
+              data protection framework.
             </p>
-            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
-              <li><strong>Payment Processors:</strong> To process transactions securely.</li>
-              <li><strong>Identity Verification Providers:</strong> To verify driver credentials and documents.</li>
-              <li><strong>Mapping Services:</strong> To provide route optimization and location services.</li>
-              <li><strong>Customer Support Platforms:</strong> To manage inquiries and support tickets.</li>
-            </ul>
-            <p className="text-sm">
-              All third-party providers are contractually obligated to maintain data confidentiality and use your information solely for the purposes we specify. We do not control their systems and are not liable for their practices beyond our contractual obligations.
-            </p>
-          </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">5. Data Retention</h3>
-            <p className="text-sm">
-              We retain your personal data for as long as necessary to:
-            </p>
-            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
-              <li>Provide our services and maintain your account.</li>
-              <li>Comply with legal and regulatory obligations.</li>
-              <li>Resolve disputes and enforce our agreements.</li>
-              <li>Investigate and prevent fraud or safety incidents.</li>
-            </ul>
-            <p className="text-sm">
-              After you delete your account, we may retain certain data in anonymized or aggregated form as required by law. Driver verification documents may be retained for a period mandated by transportation regulations in Meghalaya.
+            <p className="mb-4 text-sm">
+              You may withdraw consent for optional processing, such as optional location sharing or marketing-style
+              communications. Some core processing is necessary to provide the platform; if you withdraw consent for
+              required processing, we may be unable to provide certain features or may need to close the account.
             </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">6. Your Data Rights</h3>
-            <p className="text-sm mb-4">
-              Depending on your location, you may have the following rights regarding your personal data:
-            </p>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">4. What Other Users Can See</h3>
             <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
-              <li><strong>Right to Access:</strong> Request a copy of the personal data we hold about you.</li>
-              <li><strong>Right to Correction:</strong> Correct inaccurate or incomplete information.</li>
-              <li><strong>Right to Deletion:</strong> Request deletion of your account and associated data (subject to legal retention requirements).</li>
-              <li><strong>Right to Opt-Out:</strong> Opt out of certain data processing activities, such as marketing communications.</li>
-              <li><strong>Right to Data Portability:</strong> Request your data in a portable format.</li>
+              <li>Riders may see driver names, profile photos or initials, vehicle photos, vehicle model, number plate, rating, routes, taxi stands, availability, and contact options.</li>
+              <li>Drivers may receive rider name, phone number, destination, pickup details, and live location when a rider submits an instant-book request and location sharing is enabled.</li>
+              <li>Support reports may include details needed to investigate a complaint, including reported driver or rider information.</li>
             </ul>
-            <p className="text-sm">
-              To exercise any of these rights, contact our Data Protection Officer at the address provided in the Contact section below.
-            </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">7. Cookies and Tracking</h3>
-            <p className="text-sm">
-              Our platform may use cookies and similar tracking technologies to:
+            <h3 className="text-xl font-bold text-slate-900 mb-3">5. Sharing With Service Providers and Authorities</h3>
+            <p className="mb-4 text-sm">
+              We share personal data only where needed to operate the platform, comply with law, protect users, or
+              enforce our Terms. This may include:
             </p>
             <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
-              <li>Maintain your session and remember your preferences.</li>
-              <li>Analyze platform usage and performance.</li>
-              <li>Detect and prevent fraudulent activity.</li>
+              <li><strong>Authentication providers</strong> that manage sign-in and account security.</li>
+              <li><strong>Database, hosting, storage, and deployment providers</strong> that store platform records and files.</li>
+              <li><strong>Email, WhatsApp, SMS, or notification providers</strong> used for operational messages and subscription reminders.</li>
+              <li><strong>Map, browser, and location services</strong> used for search, pickup, and live-location features.</li>
+              <li><strong>Payment or subscription providers</strong> if platform subscriptions or fees are processed digitally.</li>
+              <li><strong>Professional advisers, auditors, insurers, or legal representatives</strong> where reasonably necessary.</li>
+              <li><strong>Law enforcement, courts, regulators, or public authorities</strong> when required by law or where necessary for safety, fraud, or legal claims.</li>
             </ul>
             <p className="text-sm">
-              You can control cookie settings through your browser. However, disabling cookies may affect the functionality of certain features. Third-party analytics providers may also collect usage data subject to their privacy policies.
+              We require service providers to use personal data only for the services they provide to us, subject to
+              confidentiality, security, and lawful-processing obligations.
             </p>
           </section>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <AlertTriangle size={20} /> 8. Breach Notification
+              <Shield size={20} /> 6. Security
             </h3>
-            <p className="text-sm">
-              If we discover a security breach that may affect your personal data, we will follow our incident response procedures and notify affected users and regulators as required by applicable law. Where legally required, we will provide notice without unreasonable delay. Notifications will include information about the breach, the data affected, and steps you should take to protect yourself.
+            <p className="mb-4 text-sm">
+              We use reasonable technical and organisational safeguards, including access controls, HTTPS/TLS in
+              transit, least-privilege admin access, logging, credential protection, file access controls, and review
+              of sensitive admin actions. No platform can guarantee perfect security, but we work to reduce risk and
+              respond quickly to suspected misuse or incidents.
+            </p>
+            <p className="text-sm mt-4 p-3 rounded-lg border border-amber-200 bg-amber-50">
+              Please keep your login secure and report suspected unauthorised access immediately.
             </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">9. International Data Transfers</h3>
-            <p className="text-sm">
-              Your data is primarily stored and processed within India. If we transfer data internationally for service provision or backup purposes, we implement appropriate safeguards such as standard contractual clauses or your explicit consent to ensure adequate protection.
-            </p>
-          </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">10. Children&apos;s Privacy</h3>
-            <p className="text-sm">
-              THE LOBBY is not intended for users under 18 years of age. We do not knowingly collect personal data from children. If we discover we have collected data from a child, we will delete it promptly. Parents or guardians who believe their child has provided personal data should contact us immediately.
-            </p>
-          </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">11. Recordings and Monitoring</h3>
-            <p className="text-sm mb-4">
-              To ensure safety, prevent fraud, and maintain service quality, we may:
+            <h3 className="text-xl font-bold text-slate-900 mb-3">7. Data Retention</h3>
+            <p className="mb-4 text-sm">
+              We retain personal data only for as long as needed for platform operation, safety, legal compliance,
+              accounting, dispute resolution, fraud prevention, and enforcement of our Terms. Typical retention
+              periods may include:
             </p>
             <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
-              <li>Record calls and messages between riders and drivers (where legally permitted).</li>
-              <li>Monitor trip data, including routes and duration.</li>
-              <li>Log access to accounts and platform activities.</li>
+              <li><strong>Account records:</strong> while the account is active and for a reasonable period after closure.</li>
+              <li><strong>Driver verification records:</strong> while the driver is listed and for up to five years after removal, or longer if legally required or needed for disputes.</li>
+              <li><strong>Bookings, lead analytics, complaints, and support records:</strong> usually up to three years, unless a longer period is needed for safety, legal, payment, or fraud reasons.</li>
+              <li><strong>Live location updates:</strong> kept only as long as reasonably needed for the active booking, safety review, fraud prevention, or dispute handling.</li>
+              <li><strong>Aggregated or anonymised analytics:</strong> may be retained indefinitely because they do not reasonably identify a person.</li>
+            </ul>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">8. Your Privacy Rights</h3>
+            <p className="text-sm mb-4">
+              Subject to applicable law and verification of your identity, you may request:
+            </p>
+            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
+              <li>access to a summary of personal data we process about you;</li>
+              <li>correction or updating of inaccurate or incomplete data;</li>
+              <li>deletion of personal data, subject to legal, safety, fraud, accounting, and dispute-retention exceptions;</li>
+              <li>withdrawal of consent for optional processing;</li>
+              <li>grievance redressal for privacy concerns;</li>
+              <li>nomination of another person to exercise rights on your behalf where applicable law allows it.</li>
             </ul>
             <p className="text-sm">
-              By using THE LOBBY, you consent to such monitoring and recording as permitted by applicable laws in your jurisdiction.
+              To make a request, contact us using the details below. We may need to verify your identity before
+              acting on a request.
             </p>
           </section>
 
           <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">12. Data Protection Officer and Privacy Inquiries</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">9. Location Data</h3>
+            <p className="text-sm">
+              Location sharing is used for search, pickup, live-location updates, and active instant-book requests.
+              Your device or browser may ask for permission before sharing precise location. You can disable location
+              permissions in your device or browser settings, but some features may stop working or become less accurate.
+            </p>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">10. Cookies and Similar Technologies</h3>
             <p className="text-sm mb-4">
-              For questions about this privacy policy, data practices, or to exercise your data rights, contact our Data Protection Officer:
+              We may use cookies, local storage, and similar technologies to keep you signed in, remember preferences,
+              measure performance, detect abuse, and improve reliability. You can control cookies through your browser,
+              but disabling them may affect platform functionality.
+            </p>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">11. Children&apos;s Privacy</h3>
+            <p className="text-sm">
+              THE LOBBY is not intended for users under 18 to create accounts. We do not knowingly collect account
+              data from children. If you believe a child has provided personal data to us, contact us and we will
+              take appropriate steps to delete or restrict that data.
+            </p>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">12. Data Transfers</h3>
+            <p className="text-sm">
+              We primarily operate for users in India, but some service providers may process or store data in India
+              or other countries where they operate. When data is transferred or processed outside India, we rely on
+              lawful transfer mechanisms, contractual safeguards, and service-provider security commitments as required
+              by applicable law.
+            </p>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
+              <AlertTriangle size={20} /> 13. Breach Notification
+            </h3>
+            <p className="text-sm">
+              If we become aware of a personal data breach, we will investigate, take reasonable mitigation steps,
+              and notify affected users, regulators, or other authorities where required by applicable law. Notices
+              may include the nature of the incident, affected data categories where known, actions we are taking,
+              and steps you can take to protect yourself.
+            </p>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">14. Changes to This Policy</h3>
+            <p className="text-sm">
+              We may update this Privacy Policy to reflect platform, legal, or operational changes. Material changes
+              will be posted with an updated date and, where legally required, additional notice. Continued use of
+              THE LOBBY after an update means the updated policy applies.
+            </p>
+          </section>
+
+          <section className="mb-10">
+            <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
+              <CheckCircle size={20} /> 15. Privacy Contact and Grievance Redressal
+            </h3>
+            <p className="text-sm mb-4">
+              For privacy questions, correction or deletion requests, consent withdrawal, grievances, safety reports,
+              or data-protection concerns, contact:
             </p>
             <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
               <p className="text-sm"><strong>Email:</strong> <a href="mailto:thelobby500@gmail.com" className="text-[#2F80ED] underline">thelobby500@gmail.com</a></p>
-              <p className="text-sm mt-2"><strong>Mailing Address:</strong> Data Protection Officer, THE LOBBY, Shillong, Meghalaya, India</p>
-              <p className="text-sm mt-2"><strong>Response Time:</strong> We aim to respond to all inquiries within 30 days.</p>
+              <p className="text-sm mt-2"><strong>Location:</strong> THE LOBBY, Kohima, Nagaland, India</p>
+              <p className="text-sm mt-2"><strong>Response target:</strong> We aim to respond within 30 days, subject to verification and applicable law.</p>
             </div>
-          </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">13. Changes to This Privacy Policy</h3>
-            <p className="text-sm">
-              We may update this Privacy Policy from time to time to reflect changes in our practices, technology, or legal requirements. Material changes will be posted with an updated &quot;Last updated&quot; date. Where required by law, we will provide advance notice. Your continued use of THE LOBBY after any changes constitutes your acceptance of the updated policy.
-            </p>
-          </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <CheckCircle size={20} /> 14. Legal Basis for Processing (GDPR Compliance)
-            </h3>
-            <p className="text-sm">
-              For users subject to GDPR or similar regulations, we process your personal data based on:
-            </p>
-            <ul className="list-disc pl-6 space-y-2 mb-4 text-sm">
-              <li><strong>Contractual Necessity:</strong> To provide our services and fulfill our agreement with you.</li>
-              <li><strong>Legal Obligation:</strong> To comply with laws and regulatory requirements.</li>
-              <li><strong>Legitimate Interests:</strong> To prevent fraud, ensure security, and improve our platform.</li>
-              <li><strong>Consent:</strong> Where you have explicitly consented to specific processing activities.</li>
-            </ul>
-          </section>
-
-          <section className="mb-10">
-            <h3 className="text-xl font-bold text-slate-900 mb-3">15. Governing Law</h3>
-            <p className="text-sm">
-              This Privacy Policy is governed by the laws of India, including the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023. For matters related to data protection in Meghalaya, applicable state regulations will also apply.
-            </p>
           </section>
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">Related Documents</h3>
-            <p className="text-sm mb-4">
-              For information about your rights and responsibilities when using our platform, please review our:
-            </p>
             <div className="p-4 rounded-lg bg-[#EAF4FF] border border-[#CFE4FF]">
-              <p className="text-sm"><Link href="/terms" className="text-[#2F80ED] font-bold underline">→ Terms of Service</Link></p>
-              <p className="text-xs text-slate-600 mt-1">Learn about user responsibilities, service limitations, and dispute resolution procedures.</p>
+              <p className="text-sm">
+                <Link href="/terms" className="text-[#2F80ED] font-bold underline">Terms of Service</Link>
+              </p>
+              <p className="text-xs text-slate-600 mt-1">
+                Learn about user responsibilities, platform limitations, subscription rules, and dispute handling.
+              </p>
             </div>
           </section>
-
         </div>
       </div>
     </div>
