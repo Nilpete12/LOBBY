@@ -4,7 +4,7 @@ import { MapPin } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#172033] text-slate-300 py-16 border-t border-[#3F4E4F] dark-section">
+    <footer className="bg-[#050505] text-[#b3b3b3] py-16 border-t border-white/10 dark-section">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Top Section: Grid */}
@@ -13,7 +13,7 @@ export default function Footer() {
           {/* Column 1: Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="text-2xl font-[Sailors_Slant_Normal] tracking-tight text-white block mb-4">
-             THE LOBBY<span className="text-[#F08991]">.</span>
+             THE LOBBY<span className="text-[#1ED760]">.</span>
             </Link>
 
             <p className="text-sm font-medium text-slate-400 leading-relaxed mb-6">
@@ -31,10 +31,10 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-6">Platform</h4>
             <ul className="space-y-4 text-sm font-medium">
-              <li><Link href="/search" className="hover:text-[#FFEDD5] transition">Find a Ride</Link></li>
-              <li><Link href="/drive" className="hover:text-[#FFEDD5] transition">Driver Sign Up</Link></li>
-              <li><Link href="/sign-in" className="hover:text-[#FFEDD5] transition">Log In</Link></li>
-              <li><Link href="/search" className="hover:text-[#FFEDD5] transition">Popular Routes</Link></li>
+              <li><Link href="/search" className="hover:text-[#1ED760] transition">Find a Ride</Link></li>
+              <li><Link href="/drive" className="hover:text-[#1ED760] transition">Driver Sign Up</Link></li>
+              <li><Link href="/sign-in" className="hover:text-[#1ED760] transition">Log In</Link></li>
+              <li><Link href="/search" className="hover:text-[#1ED760] transition">Popular Routes</Link></li>
             </ul>
           </div>
 
@@ -42,10 +42,10 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-6">Company</h4>
             <ul className="space-y-4 text-sm font-medium">
-              <li><Link href="/about" className="hover:text-[#FFEDD5] transition">About Us</Link></li>
-              <li><Link href="/admin" className="hover:text-[#FFEDD5] transition">Admin Login</Link></li>
-              <li><Link href="/privacypolicy" className="hover:text-[#FFEDD5] transition">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-[#FFEDD5] transition">Terms of Service</Link></li>
+              <li><Link href="/about" className="hover:text-[#1ED760] transition">About Us</Link></li>
+              <li><Link href="/admin" className="hover:text-[#1ED760] transition">Admin Login</Link></li>
+              <li><Link href="/privacypolicy" className="hover:text-[#1ED760] transition">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-[#1ED760] transition">Terms of Service</Link></li>
             </ul>
           </div>
 
@@ -54,7 +54,7 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-6">Location</h4>
             <ul className="space-y-4 text-sm font-medium">
               <li className="flex items-start gap-3">
-                <MapPin size={18} className="text-[#F08991] mt-0.5" />
+                <MapPin size={18} className="text-[#1ED760] mt-0.5" />
                 <span>
                   In Your Neighbourhood,<br />
                   Kohima, Nagaland<br />
@@ -67,7 +67,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section: Copyright */}
-        <div className="pt-8 border-t border-[#3F4E4F] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#c7c5c5] font-medium">
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#b3b3b3] font-medium">
           <p>&copy; {new Date().getFullYear()} <span className="font-[Sailors_Slant_Normal]">THE LOBBY</span> Platform. All rights reserved.</p>
           <p>Made with ❤️ in the hills.</p>
         </div>

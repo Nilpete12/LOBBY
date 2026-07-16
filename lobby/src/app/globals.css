@@ -1,19 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fff7ed;
-  --foreground: #172033;
-  --lobby-papaya: #ffedd5;
-  --lobby-papaya-soft: #fff7ed;
-  --lobby-blue: #58a6ff;
-  --lobby-blue-strong: #2f80ed;
-  --lobby-blue-soft: #eaf4ff;
-  --lobby-pink: #ff6b6b;
-  --lobby-pink-soft: #ffe4df;
-  --lobby-ink: #172033;
-  --lobby-muted: #64748b;
-  --lobby-border: #f3d8b7;
-  --lobby-glass: rgb(255 255 255 / 0.78);
+  --background: #090909;
+  --foreground: #f5f5f5;
+  --lobby-papaya: #181818;
+  --lobby-papaya-soft: #121212;
+  --lobby-blue: #1db954;
+  --lobby-blue-strong: #1ed760;
+  --lobby-blue-soft: rgb(29 185 84 / 0.14);
+  --lobby-pink: #1db954;
+  --lobby-pink-soft: rgb(29 185 84 / 0.12);
+  --lobby-green: #1db954;
+  --lobby-green-bright: #1ed760;
+  --lobby-ink: #f5f5f5;
+  --lobby-muted: #b3b3b3;
+  --lobby-border: #2a2a2a;
+  --lobby-surface: #121212;
+  --lobby-card: #181818;
+  --lobby-elevated: #242424;
+  --lobby-glass: rgb(24 24 24 / 0.82);
 }
 
 :root {
@@ -25,8 +30,9 @@
 
 body {
   background:
-    radial-gradient(circle at top left, rgb(88 166 255 / 0.14), transparent 32rem),
-    radial-gradient(circle at top right, rgb(255 107 107 / 0.12), transparent 28rem),
+    radial-gradient(circle at top left, rgb(29 185 84 / 0.22), transparent 30rem),
+    radial-gradient(circle at top right, rgb(255 255 255 / 0.08), transparent 28rem),
+    linear-gradient(180deg, #121212 0%, #090909 58%, #050505 100%),
     var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
@@ -35,50 +41,261 @@ body {
 }
 
 ::selection {
-  background: rgb(88 166 255 / 0.25);
-  color: var(--lobby-ink);
+  background: rgb(30 215 96 / 0.34);
+  color: #ffffff;
 }
 
 .lobby-home-gradient {
   background:
-    linear-gradient(135deg, rgb(88 166 255 / 0.82) 0%, rgb(255 107 107 / 0.62) 45%, rgb(255 237 213 / 0.96) 100%),
-    linear-gradient(180deg, rgb(255 247 237 / 0.12) 0%, rgb(255 247 237 / 0.76) 100%),
-    var(--lobby-papaya-soft);
+    radial-gradient(circle at 18% 0%, rgb(29 185 84 / 0.32), transparent 30rem),
+    radial-gradient(circle at 88% 18%, rgb(255 255 255 / 0.1), transparent 24rem),
+    linear-gradient(145deg, #050505 0%, #121212 42%, #252525 72%, #0d2d19 100%);
 }
 
 .lobby-dashboard-gradient {
   background:
-    linear-gradient(145deg, rgb(88 166 255 / 0.34) 0%, rgb(255 107 107 / 0.28) 44%, rgb(255 237 213 / 0.9) 100%),
-    linear-gradient(180deg, #fff7ed 0%, #eaf4ff 52%, #fff7ed 100%);
+    radial-gradient(circle at top left, rgb(29 185 84 / 0.2), transparent 25rem),
+    radial-gradient(circle at bottom right, rgb(255 255 255 / 0.08), transparent 24rem),
+    linear-gradient(160deg, #0a0a0a 0%, #121212 44%, #1f1f1f 74%, #0e2618 100%);
 }
 
 .lobby-command-gradient {
-  background: linear-gradient(135deg, #172033 0%, #244977 42%, #58a6ff 76%, #ff6b6b 100%);
+  background:
+    radial-gradient(circle at top right, rgb(30 215 96 / 0.24), transparent 18rem),
+    linear-gradient(135deg, #050505 0%, #121212 42%, #252525 74%, #10391f 100%);
 }
 
 .lobby-admin-gradient {
   background:
-    linear-gradient(145deg, rgb(88 166 255 / 0.28) 0%, rgb(255 107 107 / 0.22) 48%, rgb(255 237 213 / 0.92) 100%),
-    linear-gradient(180deg, #fff7ed 0%, #eaf4ff 58%, #fff7ed 100%);
+    radial-gradient(circle at 10% 0%, rgb(29 185 84 / 0.18), transparent 28rem),
+    radial-gradient(circle at 100% 12%, rgb(255 255 255 / 0.07), transparent 24rem),
+    linear-gradient(180deg, #0b0b0b 0%, #121212 56%, #090909 100%);
 }
 
 .lobby-admin-topbar-gradient {
-  background: linear-gradient(135deg, rgb(255 247 237 / 0.96) 0%, rgb(234 244 255 / 0.92) 52%, rgb(255 228 223 / 0.9) 100%);
+  background: linear-gradient(135deg, rgb(18 18 18 / 0.96) 0%, rgb(31 31 31 / 0.92) 64%, rgb(29 185 84 / 0.14) 100%);
+}
+
+.lobby-home-sketch {
+  background-image: url('/homepage-city.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(1) contrast(2.45) brightness(0.52);
+  mix-blend-mode: screen;
+  opacity: 0.3;
+}
+
+.lobby-home-sketch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(105deg, rgb(255 255 255 / 0.1) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at center, transparent 0%, rgb(0 0 0 / 0.46) 78%);
+  mix-blend-mode: overlay;
+  opacity: 0.48;
 }
 
 :where(input, textarea, select) {
-  color: #0f172a;
+  color: #f5f5f5;
   caret-color: var(--lobby-blue-strong);
 }
 
 :where(input, textarea)::placeholder {
-  color: #64748b;
+  color: #8f8f8f;
   opacity: 1;
 }
 
 :where(select option) {
-  color: #0f172a;
-  background: #ffffff;
+  color: #f5f5f5;
+  background: #181818;
+}
+
+/* Spotify-style compatibility layer for older hard-coded utility colors. */
+[class~="bg-white"],
+[class~="bg-white/95"],
+[class~="bg-white/90"],
+[class~="bg-white/85"],
+[class~="bg-white/80"],
+[class~="bg-white/75"],
+[class~="bg-white/70"],
+[class~="bg-white/60"],
+[class~="bg-white/50"],
+[class~="bg-slate-50"],
+[class~="bg-slate-100"],
+[class~="bg-[#172033]"],
+[class~="bg-[#FFF7ED]"] {
+  background-color: rgb(24 24 24 / 0.9) !important;
+}
+
+[class~="bg-[#FFF3E3]"],
+[class~="bg-[#FFEDD5]"],
+[class~="bg-[#EAF4FF]"],
+[class~="bg-[#DCEBFF]"],
+[class~="bg-[#E0F2FE]"],
+[class~="bg-[#FFE4DF]"] {
+  background-color: rgb(40 40 40 / 0.88) !important;
+}
+
+[class~="bg-[#58A6FF]"],
+[class~="bg-[#2F80ED]"],
+[class~="bg-green-600"] {
+  background-color: var(--lobby-green) !important;
+  color: #06120a !important;
+}
+
+[class~="hover:bg-[#2F80ED]"]:hover,
+[class~="hover:bg-[#58A6FF]"]:hover,
+[class~="hover:bg-[#EAF4FF]"]:hover,
+[class~="hover:bg-[#FFEDD5]"]:hover,
+[class~="hover:bg-[#DCEBFF]"]:hover,
+[class~="hover:bg-green-600"]:hover,
+[class~="hover:bg-green-100"]:hover {
+  background-color: var(--lobby-green-bright) !important;
+  color: #06120a !important;
+}
+
+[class~="text-[#2F80ED]"],
+[class~="text-[#58A6FF]"],
+[class~="text-[#9CCBFF]"],
+[class~="text-[#F08991]"],
+[class~="text-[#0F172A]"] {
+  color: var(--lobby-green-bright) !important;
+}
+
+[class~="text-[#172033]"] {
+  color: #f5f5f5 !important;
+}
+
+[class~="hover:text-[#2F80ED]"]:hover,
+[class~="hover:text-[#58A6FF]"]:hover,
+.group:hover [class~="group-hover:text-[#2F80ED]"],
+.group:hover [class~="group-hover:text-[#58A6FF]"] {
+  color: var(--lobby-green-bright) !important;
+}
+
+[class~="text-[#FF6B6B]"] {
+  color: #ff6b6b !important;
+}
+
+[class~="text-slate-950"],
+[class~="text-slate-900"],
+[class~="text-slate-800"] {
+  color: #f5f5f5 !important;
+}
+
+[class~="text-slate-700"],
+[class~="text-slate-600"] {
+  color: #d4d4d4 !important;
+}
+
+[class~="text-slate-500"],
+[class~="text-slate-400"],
+[class~="text-slate-300"] {
+  color: #b3b3b3 !important;
+}
+
+[class~="border-white"],
+[class~="border-white/80"],
+[class~="border-white/75"],
+[class~="border-white/70"],
+[class~="border-white/60"],
+[class~="border-slate-100"],
+[class~="border-slate-200"],
+[class~="border-slate-300"],
+[class~="border-[#DCEBFF]"],
+[class~="border-[#CFE4FF]"],
+[class~="border-[#CFE4FF]/50"],
+[class~="border-[#FFEDD5]"],
+[class~="border-[#58A6FF]"] {
+  border-color: rgb(64 64 64 / 0.86) !important;
+}
+
+[class~="hover:border-[#DCEBFF]"]:hover,
+[class~="hover:border-[#58A6FF]/20"]:hover,
+[class~="hover:border-[#58A6FF]/30"]:hover,
+.group:hover [class~="group-hover:border-[#CFE4FF]"] {
+  border-color: rgb(29 185 84 / 0.42) !important;
+}
+
+[class~="ring-slate-100"],
+[class~="ring-[#CFE4FF]"],
+[class~="ring-green-100"] {
+  --tw-ring-color: rgb(29 185 84 / 0.26) !important;
+}
+
+[class~="focus:border-[#58A6FF]"]:focus,
+[class~="focus:border-[#2F80ED]"]:focus {
+  border-color: var(--lobby-green-bright) !important;
+}
+
+[class~="focus:ring-[#58A6FF]/10"]:focus,
+[class~="focus:ring-[#58A6FF]/20"]:focus {
+  --tw-ring-color: rgb(30 215 96 / 0.24) !important;
+}
+
+[class~="shadow-[#58A6FF]/10"],
+[class~="shadow-[#58A6FF]/20"],
+[class~="shadow-[#58A6FF]/30"] {
+  --tw-shadow-color: rgb(29 185 84 / 0.28) !important;
+}
+
+[class~="from-[#58A6FF]"] {
+  --tw-gradient-from: var(--lobby-green) !important;
+}
+
+[class~="from-[#58A6FF]/40"],
+[class~="from-[#58A6FF]/35"],
+[class~="from-[#58A6FF]/20"] {
+  --tw-gradient-from: rgb(29 185 84 / 0.24) !important;
+}
+
+[class~="to-[#FF6B6B]"] {
+  --tw-gradient-to: var(--lobby-green-bright) !important;
+}
+
+[class~="to-[#58A6FF]"],
+[class~="to-[#58A6FF]/20"] {
+  --tw-gradient-to: rgb(29 185 84 / 0.16) !important;
+}
+
+[class~="from-[#FFEDD5]"],
+[class~="from-[#FFEDD5]/40"],
+[class~="from-[#DCEBFF]"],
+[class~="from-[#DCEBFF]/70"],
+[class~="from-[#DCEBFF]/30"],
+[class~="from-[#EAF4FF]"],
+[class~="from-[#EAF4FF]/30"],
+[class~="from-[#E0F2FE]/30"],
+[class~="via-[#FFF7ED]"],
+[class~="via-white"],
+[class~="to-[#DCEBFF]"],
+[class~="to-[#DCEBFF]/40"],
+[class~="to-[#FFEDD5]"],
+[class~="to-[#FFEDD5]/30"],
+[class~="to-[#FFF1E7]"],
+[class~="to-white"] {
+  --tw-gradient-from: rgb(31 31 31 / 0.94) !important;
+  --tw-gradient-via: rgb(24 24 24 / 0.88) !important;
+  --tw-gradient-to: rgb(29 185 84 / 0.18) !important;
+}
+
+[class~="via-[#FF6B6B]"] {
+  --tw-gradient-via: rgb(29 185 84 / 0.32) !important;
+}
+
+.group:hover [class~="group-hover:bg-[#EAF4FF]"] {
+  background-color: rgb(29 185 84 / 0.16) !important;
+}
+
+[class~="bg-[#58A6FF]"][class~="text-slate-950"],
+[class~="bg-[#2F80ED]"][class~="text-slate-950"],
+[class~="bg-green-600"][class~="text-white"],
+[class~="bg-linear-to-r"][class~="from-[#58A6FF]"],
+[class~="bg-gradient-to-r"][class~="from-[#58A6FF]"],
+button[class~="bg-[#58A6FF]"],
+a[class~="bg-[#58A6FF]"] {
+  color: #06120a !important;
 }
 
 @font-face {
@@ -129,8 +346,8 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
-  -webkit-text-fill-color: #0f172a !important;
+  -webkit-box-shadow: 0 0 0 1000px #181818 inset !important;
+  -webkit-text-fill-color: #f5f5f5 !important;
   caret-color: var(--lobby-blue-strong);
   transition: background-color 5000s ease-in-out 0s;
 }
@@ -139,8 +356,8 @@ input.dark-autofill:-webkit-autofill,
 input.dark-autofill:-webkit-autofill:hover,
 input.dark-autofill:-webkit-autofill:focus,
 input.dark-autofill:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #172033 inset !important;
+  -webkit-box-shadow: 0 0 0 1000px #121212 inset !important;
   -webkit-text-fill-color: #ffffff !important;
-  caret-color: #ffffff;
+  caret-color: var(--lobby-green-bright);
 }
 
