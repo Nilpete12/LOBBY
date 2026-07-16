@@ -7,7 +7,8 @@ import {
 import { rateLimit } from '@/lib/rateLimit';
 
 export async function POST(request) {
-  const limited = rateLimit(request, {
+  // 1. FIX: Added 'await' because our updated rate limiter makes database requests!
+  const limited = await rateLimit(request, {
     keyPrefix: 'admin-login',
     limit: 5,
     windowMs: 15 * 60 * 1000,

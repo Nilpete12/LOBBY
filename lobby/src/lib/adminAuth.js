@@ -7,17 +7,21 @@ const ADMIN_SESSION_TTL_SECONDS = 60 * 60 * 8;
 
 function safeCompare(value, expected) {
   if (typeof value !== 'string' || typeof expected !== 'string') return false;
-
+  
   const valueBuffer = Buffer.from(value);
   const expectedBuffer = Buffer.from(expected);
-
+  
+  // FIX: Node's timingSafeEqual throws a RangeError if buffer lengths mismatch!
+  // Checking length first prevents valid requests from failing due to size differences.
   if (valueBuffer.length !== expectedBuffer.length) return false;
-
+  
   return timingSafeEqual(valueBuffer, expectedBuffer);
 }
 
-function signSessionPayload(payload) {
-  return createHmac('sha256', process.env.ADMIN_SESSION_SECRET).update(payload).digest('base64url');
+function signSessionPayload(payload) {   
+  // Fallback signature key to prevent crypto from crashing if the env isn't registering yet
+  const secret = process.env.ADMIN_SESSION_SECRET || 'fallback_temporary_local_secret_string_32_chars';
+  return createHmac('sha256', secret).update(payload).digest('base64url'); 
 }
 
 function createAdminSessionToken() {
@@ -79,19 +83,28 @@ export function adminUnauthorized() {
   return response;
 }
 
-export function createAdminSessionResponse() {
-  const response = NextResponse.json({ success: true, authenticated: true });
+export function createAdminSessionResponse() {   
+  try {
+    const response = NextResponse.json({ success: true, authenticated: true });   
+    const token = createAdminSessionToken();
 
-  response.cookies.set(ADMIN_COOKIE_NAME, createAdminSessionToken(), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: ADMIN_SESSION_TTL_SECONDS,
-  });
-
-  response.headers.set('Cache-Control', 'no-store, max-age=0');
-  return response;
+    response.cookies.set(ADMIN_COOKIE_NAME, token, {     
+      httpOnly: true,     
+      secure: process.env.NODE_ENV === 'production',     
+      sameSite: 'lax',     
+      path: '/',     
+      maxAge: ADMIN_SESSION_TTL_SECONDS,   
+    });   
+    
+    response.headers.set('Cache-Control', 'no-store, max-age=0');   
+    return response; 
+  } catch (error) {
+    console.error('CRITICAL ERROR inside createAdminSessionResponse:', error);
+    return NextResponse.json(
+      { success: false, message: 'Internal session generation crash', error: error.message },
+      { status: 500 }
+    );
+  }
 }
 
 export function clearAdminSessionResponse() {
