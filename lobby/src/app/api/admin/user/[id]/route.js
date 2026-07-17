@@ -11,11 +11,12 @@ import { writeWithColumnFallback } from '@/lib/supabaseColumnFallback';
 import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 import { deleteClerkUserAccount, updateClerkUserRole } from '@/lib/clerkUserSync';
 import { TAXI_STAND_NAMES } from '@/lib/taxiStands';
+import { normalizeVehicleType } from '@/lib/vehicleTypes';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const PROFILE_OPTIONAL_COLUMNS = new Set(['ai_notes', 'taxi_stands', 'vehicle_plate', 'current_stand', 'current_stand_updated_at']);
+const PROFILE_OPTIONAL_COLUMNS = new Set(['ai_notes', 'taxi_stands', 'vehicle_type', 'vehicle_plate', 'current_stand', 'current_stand_updated_at']);
 
 function cleanString(value, maxLength = 500) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -261,6 +262,7 @@ export async function PATCH(request, context) {
       if (typeof body.fullName === 'string') updates.fullName = cleanString(body.fullName, 160);
       if (typeof body.phone === 'string') updates.phone = cleanString(body.phone, 40);
       if (typeof body.vehicle === 'string') updates.vehicle = cleanString(body.vehicle, 120);
+      if (body.vehicleType !== undefined) updates.vehicleType = normalizeVehicleType(body.vehicleType) || null;
       if (typeof body.vehiclePlate === 'string') updates.vehiclePlate = cleanString(body.vehiclePlate, 40).toUpperCase();
       if (body.routes !== undefined) updates.routes = cleanRoutes(body.routes);
       if (body.taxiStands !== undefined) updates.taxiStands = cleanTaxiStands(body.taxiStands);

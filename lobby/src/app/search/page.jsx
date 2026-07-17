@@ -8,9 +8,18 @@ import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
 import API_BASE_URL from '@/config';
 import InstantBook from '@/components/InstantBook';
 import TaxiStandDropdown from '@/components/TaxiStandDropdown';
+import { normalizeVehicleType, vehicleTypeLabel } from '@/lib/vehicleTypes';
 
-const FILTERS = ['All Rides', 'Hatchback', 'SUV', 'Top Rated'];
-const SEARCH_CACHE_VERSION = 'v5';
+const FILTERS = [
+  { id: 'all', label: 'All Rides' },
+  { id: 'hatchback', label: 'Hatchbacks' },
+  { id: 'sedan', label: 'Sedans' },
+  { id: 'suv', label: 'SUVs' },
+  { id: 'two_wheeler', label: 'Two Wheelers' },
+  { id: 'top_rated', label: 'Top Rated' },
+];
+const FILTER_LABELS = new Map(FILTERS.map((filter) => [filter.id, filter.label]));
+const SEARCH_CACHE_VERSION = 'v6';
 const SEARCH_CACHE_TTL = 60 * 1000;
 const SEARCH_LIVE_REFRESH_INTERVAL = 30 * 1000;
 
@@ -88,7 +97,7 @@ export default function SearchPage() {
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeFilter, setActiveFilter] = useState('All Rides');
+  const [activeFilter, setActiveFilter] = useState('all');
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [toast, setToast] = useState('');
   const [leadFollowUp, setLeadFollowUp] = useState(null);
@@ -98,18 +107,17 @@ export default function SearchPage() {
   const riderId = user?.id || null;
 
   const visibleDrivers = useMemo(() => {
-    if (activeFilter === 'Top Rated') {
+    if (activeFilter === 'top_rated') {
       return [...drivers].sort((a, b) => (b.rating || 5) - (a.rating || 5));
     }
 
-    if (activeFilter === 'Hatchback' || activeFilter === 'SUV') {
-      return drivers.filter((driver) =>
-        (driver.vehicle || '').toLowerCase().includes(activeFilter.toLowerCase())
-      );
+    if (activeFilter !== 'all') {
+      return drivers.filter((driver) => getDriverVehicleTypeId(driver) === activeFilter);
     }
 
     return drivers;
   }, [activeFilter, drivers]);
+  const activeFilterLabel = FILTER_LABELS.get(activeFilter) || 'Drivers';
 
   const fetchDrivers = useCallback(async (query = '', taxiStand = '', options = {}) => {
     const cachedDrivers = options.preferCache ? readCachedDrivers(query, taxiStand) : null;
@@ -366,15 +374,15 @@ export default function SearchPage() {
           {FILTERS.map((filter) => (
             <button
               type="button"
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
+              key={filter.id}
+              onClick={() => setActiveFilter(filter.id)}
               className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-bold transition ${
-                activeFilter === filter
+                activeFilter === filter.id
                   ? 'border-[#58A6FF] bg-[#FFEDD5] text-[#2F80ED]'
                   : 'border-slate-200 bg-white text-slate-600 hover:border-slate-900 hover:text-slate-900'
               }`}
             >
-              {filter}
+              {filter.label}
             </button>
           ))}
         </div>
@@ -414,7 +422,7 @@ export default function SearchPage() {
               <Search size={32} />
             </div>
             <h3 className="text-lg font-bold text-slate-900">
-              {drivers.length === 0 ? 'No active drivers found' : `No ${activeFilter.toLowerCase()} drivers found`}
+              {drivers.length === 0 ? 'No active drivers found' : `No ${activeFilterLabel.toLowerCase()} found`}
             </h3>
             <p className="mx-auto mt-1 max-w-xs text-slate-500">
               {drivers.length === 0
@@ -423,9 +431,9 @@ export default function SearchPage() {
                   : 'Try searching for a different location or check back later.'
                 : 'Try another search or switch back to all rides.'}
             </p>
-            {activeFilter !== 'All Rides' && (
+            {activeFilter !== 'all' && (
               <button
-                onClick={() => setActiveFilter('All Rides')}
+                onClick={() => setActiveFilter('all')}
                 className="mt-5 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-black"
               >
                 Show All Rides
@@ -504,6 +512,14 @@ function getDriverVehiclePlate(driver = {}) {
   ).trim();
 }
 
+function getDriverVehicleTypeId(driver = {}) {
+  return normalizeVehicleType(driver.vehicleType || driver.vehicle_type || '');
+}
+
+function getDriverVehicleType(driver = {}) {
+  return vehicleTypeLabel(driver.vehicleType || driver.vehicle_type || '');
+}
+
 function DriverAvatar({ driver, size = 64 }) {
   return (
     <div
@@ -530,6 +546,7 @@ function DriverAvatar({ driver, size = 64 }) {
 function DriverResultCard({ driver, onSelect }) {
   const vehicle = driver.vehicle || 'Standard Taxi';
   const vehiclePlate = getDriverVehiclePlate(driver);
+  const vehicleType = getDriverVehicleType(driver);
   const routes = getDriverRoutes(driver);
   const taxiStands = getDriverTaxiStands(driver);
   const currentStand = getDriverCurrentStand(driver);
@@ -556,6 +573,12 @@ function DriverResultCard({ driver, onSelect }) {
                   {driver.rating || 5.0}
                 </span>
                 <span className="truncate">• {vehicle}</span>
+                {vehicleType && (
+                  <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-[#EAF4FF] px-2 py-0.5 text-xs font-black text-[#2F80ED]">
+                    <Car size={11} />
+                    <span className="truncate">{vehicleType}</span>
+                  </span>
+                )}
                 {vehiclePlate && (
                   <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-slate-700">
                     <Hash size={11} />
@@ -612,6 +635,7 @@ function getWhatsAppHref(phone) {
 function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
   const vehicle = driver.vehicle || 'Standard Taxi';
   const vehiclePlate = getDriverVehiclePlate(driver);
+  const vehicleType = getDriverVehicleType(driver);
   const routes = getDriverRoutes(driver);
   const taxiStands = getDriverTaxiStands(driver);
   const currentStand = getDriverCurrentStand(driver);
@@ -690,6 +714,12 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
                 </span>
                 <span>•</span>
                 <span>{vehicle}</span>
+                {vehicleType && (
+                  <>
+                    <span>•</span>
+                    <span>{vehicleType}</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -723,6 +753,16 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
             </div>
             <p className="text-xs font-bold uppercase text-slate-400">Vehicle</p>
             <p className="mt-1 truncate text-sm font-bold text-slate-900">{vehicle}</p>
+          </div>
+
+          <div className="rounded-2xl bg-slate-50 p-4">
+            <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#2F80ED] shadow-sm">
+              <Car size={18} />
+            </div>
+            <p className="text-xs font-bold uppercase text-slate-400">Type</p>
+            <p className={`mt-1 truncate text-sm font-bold ${vehicleType ? 'text-slate-900' : 'text-slate-400'}`}>
+              {vehicleType || 'Not added'}
+            </p>
           </div>
 
           <div className="rounded-2xl bg-slate-50 p-4">

@@ -14,6 +14,7 @@ import AdminLog from '@/components/admin/Adminlog';
 import Sidebar from '@/components/admin/Sidebar';
 import API_BASE_URL from '@/config';
 import { TAXI_STANDS } from '@/lib/taxiStands';
+import { VEHICLE_TYPES, vehicleTypeLabel } from '@/lib/vehicleTypes';
 
 const EMPTY_STATS = {
   totalUsers: 0,
@@ -515,6 +516,7 @@ export default function AdminPage() {
         fullName: data.user.fullName || '',
         phone: data.user.phone || '',
         vehicle: data.user.vehicle || '',
+        vehicleType: data.user.vehicleType || '',
         vehiclePlate: data.user.vehiclePlate || '',
         routes: Array.isArray(data.user.routes) ? data.user.routes.join(', ') : '',
         taxiStands: Array.isArray(data.user.taxiStands) ? data.user.taxiStands.join(', ') : '',
@@ -545,6 +547,7 @@ export default function AdminPage() {
     if (user.role === 'driver') {
       Object.assign(payload, {
         vehicle: detailForm.vehicle,
+        vehicleType: detailForm.vehicleType,
         vehiclePlate: detailForm.vehiclePlate,
         routes: detailForm.routes,
         taxiStands: detailForm.taxiStands,
@@ -1447,6 +1450,7 @@ function VerificationList({
 
               <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-slate-500">
                 <InfoBlock label="Vehicle" value={request.vehicle || 'Not added'} />
+                <InfoBlock label="Type" value={vehicleTypeLabel(request.vehicleType) || 'Not added'} />
                 <InfoBlock label="Submitted" value={formatDate(request.createdAt)} />
               </div>
 
@@ -1690,6 +1694,13 @@ function UserDetailDrawer({
                 {user.role === 'driver' && (
                   <>
                     <AdminInput label="Vehicle" value={form.vehicle} onChange={(value) => setForm((current) => ({ ...current, vehicle: value }))} />
+                    <AdminSelect
+                      label="Vehicle Type"
+                      value={form.vehicleType}
+                      onChange={(value) => setForm((current) => ({ ...current, vehicleType: value }))}
+                      options={VEHICLE_TYPES}
+                      placeholder="Select vehicle type"
+                    />
                     <AdminInput
                       label="Number Plate"
                       value={form.vehiclePlate}
@@ -1735,6 +1746,7 @@ function UserDetailDrawer({
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <InfoBlock label="Availability" value={user.isAvailable ? 'Online' : 'Offline'} />
                   <InfoBlock label="Checked In" value={user.currentStand || 'Not set'} />
+                  <InfoBlock label="Vehicle Type" value={vehicleTypeLabel(user.vehicleType) || 'Not added'} />
                   <InfoBlock label="Number Plate" value={user.vehiclePlate || 'Not added'} />
                   <InfoBlock
                     label="Subscription"
@@ -1899,6 +1911,26 @@ function AdminInput({ label, value, onChange, placeholder = '' }) {
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:border-slate-400"
       />
+    </label>
+  );
+}
+
+function AdminSelect({ label, value, onChange, options = [], placeholder = 'Select' }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs font-black uppercase text-slate-500">{label}</span>
+      <select
+        value={value || ''}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:border-slate-400"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </label>
   );
 }

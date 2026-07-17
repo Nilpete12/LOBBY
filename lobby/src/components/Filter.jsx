@@ -1,5 +1,5 @@
 export default function FilterBar() {
-  const filters = ["All", "Sedan", "SUV", "Hatchback", "Top Rated", "Available Now"];
+  const filters = ["All", "Hatchbacks", "Sedans", "SUVs", "Two Wheelers", "Top Rated", "Available Now"];
 
   return (
     <div className="bg-[#FFF7ED] border-b border-slate-200 py-4 overflow-x-auto no-scrollbar">

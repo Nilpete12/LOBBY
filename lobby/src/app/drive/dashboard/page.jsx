@@ -8,6 +8,7 @@ import { Power, MapPin, Phone, Car, Save, LogOut, Lock, Clock, Camera, UploadClo
 import API_BASE_URL from '@/config';
 import IncomingRideAlert from '@/components/IncomingRideAlert';
 import { TAXI_STANDS } from '@/lib/taxiStands';
+import { VEHICLE_TYPES, vehicleTypeLabel } from '@/lib/vehicleTypes';
 
 const DRIVER_PROFILE_CACHE_TTL = 60 * 1000;
 const CLIENT_UPLOAD_TARGET_BYTES = 3.5 * 1024 * 1024;
@@ -57,7 +58,7 @@ export default function DriverDashboard() {
   // 2. MONGODB DRIVER STATE (Vehicle, Routes, Verification, etc.)
   const [driverDbData, setDriverDbData] = useState(null);
   
-  const [formData, setFormData] = useState({ vehicle: '', vehiclePlate: '', phone: '', routes: '', taxiStands: [], currentStand: '' });
+  const [formData, setFormData] = useState({ vehicle: '', vehicleType: '', vehiclePlate: '', phone: '', routes: '', taxiStands: [], currentStand: '' });
   const [isOnline, setIsOnline] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingLicense, setUploadingLicense] = useState(false);
@@ -75,6 +76,7 @@ export default function DriverDashboard() {
 
     setFormData({
       vehicle: driver.vehicle || '',
+      vehicleType: driver.vehicleType || '',
       vehiclePlate: driver.vehiclePlate || '',
       phone: driver.phone || '',
       routes,
@@ -172,6 +174,7 @@ export default function DriverDashboard() {
         body: JSON.stringify({
           clerkId: clerkUser.id,
           vehicle: formData.vehicle,
+          vehicleType: formData.vehicleType,
           vehiclePlate: formData.vehiclePlate,
           phone: formData.phone,
           routes: formData.routes.split(',').map(s => s.trim()).filter(Boolean),
@@ -186,7 +189,7 @@ export default function DriverDashboard() {
         applyDriverProfile(data.driver);
         writeCachedDriverProfile(clerkUser.id, data.driver);
         if (newStatus === undefined) {
-          showNotice('success', 'Profile saved', 'Your vehicle, stand, phone, and route details were updated.');
+          showNotice('success', 'Profile saved', 'Your vehicle type, stand, phone, and route details were updated.');
         } else {
           showNotice(
             'success',
@@ -320,8 +323,14 @@ export default function DriverDashboard() {
   const routeList = formData.routes.split(',').map(route => route.trim()).filter(Boolean);
   const selectedTaxiStands = Array.isArray(formData.taxiStands) ? formData.taxiStands : [];
   const currentStand = formData.currentStand || '';
+  const selectedVehicleTypeLabel = vehicleTypeLabel(formData.vehicleType);
   const dashboardNotifications = Array.isArray(driverDbData.notifications) ? driverDbData.notifications : [];
   const setupItems = [
+    {
+      label: 'Vehicle type',
+      detail: selectedVehicleTypeLabel || 'Choose hatchback, sedan, SUV, or two wheeler',
+      done: Boolean(selectedVehicleTypeLabel),
+    },
     {
       label: 'Phone number',
       detail: formData.phone ? 'Added' : 'Add a number riders can call',
@@ -522,6 +531,11 @@ export default function DriverDashboard() {
                 value={formData.vehicle}
                 placeholder="e.g. Maruti 800"
                 onChange={(value) => setFormData({ ...formData, vehicle: value })}
+              />
+
+              <VehicleTypeSelector
+                value={formData.vehicleType}
+                onChange={(vehicleType) => setFormData({ ...formData, vehicleType })}
               />
 
               <LabeledInput
@@ -859,6 +873,50 @@ function formatVehiclePlateInput(value) {
     .replace(/[^A-Z0-9 -]/g, '')
     .replace(/\s+/g, ' ')
     .slice(0, 40);
+}
+
+function VehicleTypeSelector({ value = '', onChange }) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <span className="block text-xs font-black uppercase tracking-wide text-slate-400">Vehicle type</span>
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${value ? 'bg-[#EAF4FF] text-[#2F80ED]' : 'bg-slate-100 text-slate-500'}`}>
+          {value ? vehicleTypeLabel(value) : 'Select one'}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        {VEHICLE_TYPES.map((type) => {
+          const isSelected = value === type.id;
+
+          return (
+            <button
+              key={type.id}
+              type="button"
+              onClick={() => onChange(type.id)}
+              className={`min-h-14 rounded-2xl border px-3 py-3 text-left transition ${
+                isSelected
+                  ? 'border-[#58A6FF] bg-[#EAF4FF] text-[#2F80ED] shadow-sm'
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white'
+              }`}
+              aria-pressed={isSelected}
+            >
+              <span className="flex items-center gap-2">
+                <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isSelected ? 'bg-[#58A6FF] text-slate-950' : 'bg-white text-slate-400'}`}>
+                  {isSelected ? <CheckCircle2 size={16} /> : <Car size={16} />}
+                </span>
+                <span className="text-sm font-black">{type.label}</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="mt-2 text-xs font-semibold text-slate-400">
+        Riders can filter drivers by this type in search.
+      </p>
+    </div>
+  );
 }
 
 function TaxiStandSelector({ selected = [], onChange }) {

@@ -8,7 +8,7 @@ const EXPORTS = {
   drivers: {
     table: 'users',
     fileName: 'lobby-drivers.csv',
-    columns: ['id', 'clerk_id', 'full_name', 'email', 'phone', 'vehicle', 'vehicle_plate', 'taxi_stands', 'current_stand', 'is_available', 'is_verified', 'account_status', 'subscription_status', 'subscription_paid_until', 'created_at'],
+    columns: ['id', 'clerk_id', 'full_name', 'email', 'phone', 'vehicle', 'vehicle_type', 'vehicle_plate', 'taxi_stands', 'current_stand', 'is_available', 'is_verified', 'account_status', 'subscription_status', 'subscription_paid_until', 'created_at'],
     apply: (query) => query.eq('role', 'driver'),
   },
   riders: {

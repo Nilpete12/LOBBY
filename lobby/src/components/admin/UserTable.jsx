@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { CheckCircle, Clock, Download, Eye, Trash2, Search, RefreshCw } from 'lucide-react';
 import API_BASE_URL from '@/config';
+import { vehicleTypeLabel } from '@/lib/vehicleTypes';
 
 function getStatus(user) {
   if (user.accountStatus === 'suspended') return { label: 'Suspended', tone: 'red', icon: Clock };
@@ -118,12 +119,14 @@ export default function UserTable({ role, limit, refreshKey = 0, exportType, onC
       const email = user.email?.toLowerCase() || '';
       const phone = user.phone?.toLowerCase() || '';
       const plate = user.vehiclePlate?.toLowerCase() || '';
+      const type = vehicleTypeLabel(user.vehicleType).toLowerCase();
       const stand = user.currentStand?.toLowerCase() || '';
       return !normalizedSearch
         || name.includes(normalizedSearch)
         || email.includes(normalizedSearch)
         || phone.includes(normalizedSearch)
         || plate.includes(normalizedSearch)
+        || type.includes(normalizedSearch)
         || stand.includes(normalizedSearch);
     })
     .slice(0, limit || users.length);
@@ -200,6 +203,7 @@ export default function UserTable({ role, limit, refreshKey = 0, exportType, onC
                   {user.role === 'driver' ? (
                     <div>
                       <div className="font-semibold text-slate-700">{user.vehicle || 'No vehicle'}</div>
+                      <div className="text-xs font-black text-slate-500">Type: {vehicleTypeLabel(user.vehicleType) || 'Not added'}</div>
                       <div className="text-xs font-black text-slate-500">Plate: {user.vehiclePlate || 'Not added'}</div>
                       <div className="text-xs font-black text-slate-500">Stand: {user.currentStand || 'Not checked in'}</div>
                       <div className="text-xs font-black text-slate-500">{user.isAvailable ? 'Online' : 'Offline'}</div>
@@ -255,6 +259,10 @@ export default function UserTable({ role, limit, refreshKey = 0, exportType, onC
                 </div>
                 {user.role === 'driver' && (
                   <>
+                    <div className="rounded-2xl bg-slate-50 p-3">
+                      <span className="block font-black uppercase text-slate-400">Vehicle Type</span>
+                      <span className="mt-1 block break-words text-sm font-black text-slate-800">{vehicleTypeLabel(user.vehicleType) || 'Not added'}</span>
+                    </div>
                     <div className="rounded-2xl bg-slate-50 p-3">
                       <span className="block font-black uppercase text-slate-400">Number Plate</span>
                       <span className="mt-1 block break-words text-sm font-black text-slate-800">{user.vehiclePlate || 'Not added'}</span>

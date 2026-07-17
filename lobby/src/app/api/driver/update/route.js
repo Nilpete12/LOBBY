@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { formatUser } from '@/lib/supabaseFormat';
 import { TAXI_STAND_NAMES } from '@/lib/taxiStands';
+import { normalizeVehicleType } from '@/lib/vehicleTypes';
 
 function cleanString(value, maxLength = 500) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -32,7 +33,7 @@ export async function POST(req) {
   try {
     const { userId } = await auth();
     const body = await req.json();
-    const { clerkId, vehicle, vehiclePlate, phone, routes, taxiStands, currentStand, isAvailable } = body;
+    const { clerkId, vehicle, vehicleType, vehiclePlate, phone, routes, taxiStands, currentStand, isAvailable } = body;
     const cleanClerkId = cleanString(clerkId, 120);
 
     if (!userId || userId !== cleanClerkId) {
@@ -41,6 +42,7 @@ export async function POST(req) {
 
     const updates = {};
     if (vehicle !== undefined) updates.vehicle = cleanString(vehicle, 120);
+    if (vehicleType !== undefined) updates.vehicle_type = normalizeVehicleType(vehicleType) || null;
     if (vehiclePlate !== undefined) updates.vehicle_plate = cleanString(vehiclePlate, 40).toUpperCase();
     if (phone !== undefined) updates.phone = cleanString(phone, 40);
     if (routes !== undefined) {
@@ -69,7 +71,9 @@ export async function POST(req) {
     console.error("Update failed:", error);
     const errorText = [error.message, error.details, error.hint].filter(Boolean).join(' ').toLowerCase();
     let message = 'Update failed';
-    if (errorText.includes('vehicle_plate') && errorText.includes('does not exist')) {
+    if (errorText.includes('vehicle_type') && errorText.includes('does not exist')) {
+      message = 'Vehicle type storage is not set up yet. Please run the vehicle_type database migration.';
+    } else if (errorText.includes('vehicle_plate') && errorText.includes('does not exist')) {
       message = 'Vehicle plate storage is not set up yet. Please run the vehicle_plate database migration.';
     } else if (errorText.includes('taxi_stands') && errorText.includes('does not exist')) {
       message = 'Taxi stand storage is not set up yet. Please run the taxi_stands database migration.';
