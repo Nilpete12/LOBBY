@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { MapPin, Phone, Loader2, Navigation, CheckCircle, Car } from "lucide-react";
 
-export default function InstantBook({ destination = "Kohima Town Center" }) {
+export default function InstantBook({ destination = "Kohima Town Center", taxiStand = "" }) {
   const { isLoaded, isSignedIn, user } = useUser();
   const router = useRouter();
   const [status, setStatus] = useState("idle"); // idle | locating | booking | waiting | accepted
@@ -67,6 +67,7 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
         body: JSON.stringify({
           pickupLocation: { lat, lng, address: "Current Location" },
           destination: destination,
+          requestedStand: taxiStand,
           riderPhone: (phoneNumber || profilePhone).trim(),
         }),
       });
@@ -158,7 +159,7 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
           </div>
           <h3 className="text-xl font-[Proxima_Nova_Semibold] text-slate-900 mb-2">Need a ride?</h3>
           <p className="text-sm text-slate-500 mb-6">
-            Instantly broadcast your location to nearby drivers.
+            Instantly broadcast your location{taxiStand ? ` near ${taxiStand}` : ''} to available drivers.
           </p>
           <input
             type="tel"
@@ -204,6 +205,11 @@ export default function InstantBook({ destination = "Kohima Town Center" }) {
           </div>
           <h3 className="text-lg font-bold text-slate-900 mb-1">Connecting...</h3>
           <p className="text-sm text-slate-500">Broadcasting your live pickup location</p>
+          {taxiStand && (
+            <p className="mt-2 text-xs font-black uppercase tracking-wide text-[#2F80ED]">
+              Requested stand: {taxiStand}
+            </p>
+          )}
         </div>
       )}
 

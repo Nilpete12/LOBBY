@@ -15,7 +15,7 @@ import { TAXI_STAND_NAMES } from '@/lib/taxiStands';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const PROFILE_OPTIONAL_COLUMNS = new Set(['ai_notes', 'taxi_stands', 'vehicle_plate']);
+const PROFILE_OPTIONAL_COLUMNS = new Set(['ai_notes', 'taxi_stands', 'vehicle_plate', 'current_stand', 'current_stand_updated_at']);
 
 function cleanString(value, maxLength = 500) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -53,6 +53,14 @@ function cleanTaxiStands(value) {
       .map((stand) => allowed.get(stand.toLowerCase()))
       .filter(Boolean)
   )].slice(0, TAXI_STAND_NAMES.length);
+}
+
+function cleanTaxiStand(value) {
+  const stand = cleanString(value, 80);
+  if (!stand) return '';
+
+  const allowed = new Map(TAXI_STAND_NAMES.map((name) => [name.toLowerCase(), name]));
+  return allowed.get(stand.toLowerCase()) || '';
 }
 
 function addMonths(date, months) {
@@ -198,6 +206,10 @@ export async function PATCH(request, context) {
       }
 
       updates.isAvailable = Boolean(body.isAvailable);
+      if (!updates.isAvailable) {
+        updates.currentStand = null;
+        updates.currentStandUpdatedAt = null;
+      }
     } else if (action === 'mark_subscription_paid') {
       if (user.role !== 'driver') {
         return adminJson(
@@ -252,6 +264,11 @@ export async function PATCH(request, context) {
       if (typeof body.vehiclePlate === 'string') updates.vehiclePlate = cleanString(body.vehiclePlate, 40).toUpperCase();
       if (body.routes !== undefined) updates.routes = cleanRoutes(body.routes);
       if (body.taxiStands !== undefined) updates.taxiStands = cleanTaxiStands(body.taxiStands);
+      if (body.currentStand !== undefined) {
+        const currentStand = cleanTaxiStand(body.currentStand);
+        updates.currentStand = currentStand || null;
+        updates.currentStandUpdatedAt = currentStand ? new Date().toISOString() : null;
+      }
       if (typeof body.rating === 'number' && Number.isFinite(body.rating)) {
         updates.rating = Math.min(5, Math.max(1, body.rating));
       }

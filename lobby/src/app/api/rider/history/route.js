@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
+import { formatBooking } from '@/lib/supabaseFormat';
 
 export async function GET(req) {
   try {
-    // 1. Securely get the logged-in driver's ID from Clerk
-    const { userId } = auth();
+    // 1. Securely get the logged-in rider's ID from Clerk
+    const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
-    // 2. Fetch all bookings assigned to this driver, newest first
+    // 2. Fetch all bookings requested by this rider, newest first
     const { data: history, error } = await supabase
       .from('bookings')
       .select('*')
@@ -19,24 +20,7 @@ export async function GET(req) {
 
     if (error) throw error;
 
-    // 3. Format the Postgres flat rows back into the nested JSON your React frontend expects
-    const formattedHistory = history.map(ride => ({
-      ...ride,
-      _id: ride.id,
-      riderId: ride.rider_id,
-      driverId: ride.driver_id,
-      riderName: ride.rider_name,
-      riderPhone: ride.rider_phone,
-      // Re-pack the coordinates into the object structure your frontend uses
-      pickupLocation: {
-        lat: ride.pickup_lat,
-        lng: ride.pickup_lng,
-        address: ride.pickup_address
-      },
-      createdAt: ride.created_at
-    }));
-
-    return NextResponse.json({ success: true, history: formattedHistory });
+    return NextResponse.json({ success: true, history: (history || []).map((ride) => formatBooking(ride)) });
 
   } catch (error) {
     console.error("History fetch error:", error);

@@ -18,6 +18,8 @@ const SEARCH_DRIVER_COLUMNS = [
   'car_pic',
   'vehicle_plate',
   'taxi_stands',
+  'current_stand',
+  'current_stand_updated_at',
   'rating',
   'created_at',
   'updated_at',
@@ -48,6 +50,8 @@ function publicDriver(driver = {}) {
     carPic: formatted.carPic,
     vehiclePlate: formatted.vehiclePlate,
     taxiStands: formatted.taxiStands,
+    currentStand: formatted.currentStand,
+    currentStandUpdatedAt: formatted.currentStandUpdatedAt,
     isAvailable: formatted.isAvailable,
     isVerified: formatted.isVerified,
     accountStatus: formatted.accountStatus,
@@ -97,9 +101,17 @@ export async function GET(req) {
       drivers = drivers.filter((driver) => {
         const stands = Array.isArray(driver.taxi_stands) ? driver.taxi_stands : [];
         const routes = Array.isArray(driver.routes) ? driver.routes : [];
+        const currentStand = String(driver.current_stand || '').toLowerCase();
 
-        return stands.some((stand) => String(stand).toLowerCase() === taxiStand) ||
+        return currentStand === taxiStand ||
+          stands.some((stand) => String(stand).toLowerCase() === taxiStand) ||
           routes.some((route) => String(route).toLowerCase().includes(taxiStand));
+      });
+
+      drivers = drivers.sort((a, b) => {
+        const aLiveMatch = String(a.current_stand || '').toLowerCase() === taxiStand;
+        const bLiveMatch = String(b.current_stand || '').toLowerCase() === taxiStand;
+        return Number(bLiveMatch) - Number(aLiveMatch);
       });
     }
 

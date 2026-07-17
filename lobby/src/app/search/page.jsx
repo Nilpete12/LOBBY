@@ -10,7 +10,7 @@ import InstantBook from '@/components/InstantBook';
 import TaxiStandDropdown from '@/components/TaxiStandDropdown';
 
 const FILTERS = ['All Rides', 'Hatchback', 'SUV', 'Top Rated'];
-const SEARCH_CACHE_VERSION = 'v4';
+const SEARCH_CACHE_VERSION = 'v5';
 const SEARCH_CACHE_TTL = 60 * 1000;
 const SEARCH_LIVE_REFRESH_INTERVAL = 30 * 1000;
 
@@ -387,7 +387,7 @@ export default function SearchPage() {
               Skip the manual search. Let us find the nearest available driver for you.
             </p>
           </div>
-          <InstantBook destination={searchQuery || selectedTaxiStand || "Kohima"} />
+          <InstantBook destination={searchQuery || selectedTaxiStand || "Kohima"} taxiStand={selectedTaxiStand} />
         </div>
 
         {/* Divider before manual results */}
@@ -486,6 +486,10 @@ function getDriverTaxiStands(driver = {}) {
       : [];
 }
 
+function getDriverCurrentStand(driver = {}) {
+  return String(driver.currentStand || driver.current_stand || '').trim();
+}
+
 function getDriverInitial(driver) {
   return driver.fullName?.charAt(0) || 'D';
 }
@@ -528,6 +532,7 @@ function DriverResultCard({ driver, onSelect }) {
   const vehiclePlate = getDriverVehiclePlate(driver);
   const routes = getDriverRoutes(driver);
   const taxiStands = getDriverTaxiStands(driver);
+  const currentStand = getDriverCurrentStand(driver);
 
   return (
     <button
@@ -557,7 +562,13 @@ function DriverResultCard({ driver, onSelect }) {
                     <span className="truncate">{vehiclePlate}</span>
                   </span>
                 )}
-                {taxiStands[0] && (
+                {currentStand && (
+                  <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-black text-green-700">
+                    <MapPin size={11} />
+                    <span className="truncate">At {currentStand}</span>
+                  </span>
+                )}
+                {!currentStand && taxiStands[0] && (
                   <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-[#EAF4FF] px-2 py-0.5 text-xs font-black text-[#2F80ED]">
                     <MapPin size={11} />
                     <span className="truncate">{taxiStands[0]}</span>
@@ -603,6 +614,7 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
   const vehiclePlate = getDriverVehiclePlate(driver);
   const routes = getDriverRoutes(driver);
   const taxiStands = getDriverTaxiStands(driver);
+  const currentStand = getDriverCurrentStand(driver);
   const phoneHref = driver.phone ? `tel:${driver.phone}` : undefined;
   const whatsappHref = getWhatsAppHref(driver.phone);
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -733,6 +745,20 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
         </div>
 
         <div className="mb-6">
+          <p className="mb-3 text-xs font-bold uppercase text-slate-400">Checked in now</p>
+          <div className="mb-5">
+            {currentStand ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-green-100 bg-green-50 px-3 py-2 text-xs font-bold text-green-700">
+                <MapPin size={12} />
+                {currentStand}
+              </span>
+            ) : (
+              <span className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-400">
+                No live stand selected
+              </span>
+            )}
+          </div>
+
           <p className="mb-3 text-xs font-bold uppercase text-slate-400">Daily stands</p>
           <div className="mb-5 flex flex-wrap gap-2">
             {taxiStands.length > 0 ? (

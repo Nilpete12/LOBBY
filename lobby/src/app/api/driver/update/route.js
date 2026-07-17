@@ -20,11 +20,19 @@ function cleanTaxiStands(value) {
   )];
 }
 
+function cleanTaxiStand(value) {
+  const stand = cleanString(value, 80);
+  if (!stand) return '';
+
+  const allowed = new Map(TAXI_STAND_NAMES.map((name) => [name.toLowerCase(), name]));
+  return allowed.get(stand.toLowerCase()) || '';
+}
+
 export async function POST(req) {
   try {
     const { userId } = await auth();
     const body = await req.json();
-    const { clerkId, vehicle, vehiclePlate, phone, routes, taxiStands, isAvailable } = body;
+    const { clerkId, vehicle, vehiclePlate, phone, routes, taxiStands, currentStand, isAvailable } = body;
     const cleanClerkId = cleanString(clerkId, 120);
 
     if (!userId || userId !== cleanClerkId) {
@@ -39,6 +47,10 @@ export async function POST(req) {
       updates.routes = Array.isArray(routes) ? routes.map((route) => cleanString(route, 80)).filter(Boolean) : [];
     }
     if (taxiStands !== undefined) updates.taxi_stands = cleanTaxiStands(taxiStands);
+    if (currentStand !== undefined) {
+      updates.current_stand = cleanTaxiStand(currentStand) || null;
+      updates.current_stand_updated_at = updates.current_stand ? new Date().toISOString() : null;
+    }
     if (isAvailable !== undefined) updates.is_available = Boolean(isAvailable);
 
     // Update the row in Supabase
@@ -61,6 +73,8 @@ export async function POST(req) {
       message = 'Vehicle plate storage is not set up yet. Please run the vehicle_plate database migration.';
     } else if (errorText.includes('taxi_stands') && errorText.includes('does not exist')) {
       message = 'Taxi stand storage is not set up yet. Please run the taxi_stands database migration.';
+    } else if ((errorText.includes('current_stand') || errorText.includes('current_stand_updated_at')) && errorText.includes('does not exist')) {
+      message = 'Live stand check-in storage is not set up yet. Please run the current_stand database migration.';
     }
 
     return NextResponse.json({ success: false, message }, { status: 500 });

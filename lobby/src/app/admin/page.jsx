@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Activity, AlertCircle, Ban, Bell, BookOpenCheck, Car, CheckCircle2, Clock, 
   CreditCard, Eye, Flag, Menu, MessageCircle, Phone, RefreshCw, RotateCcw, 
-  Save, ShieldCheck, ToggleRight, Users, X, XCircle,
+  Download, Save, ShieldCheck, ToggleRight, Users, X, XCircle,
 } from 'lucide-react';
 
 import UserTable from '@/components/admin/UserTable';
@@ -518,6 +518,7 @@ export default function AdminPage() {
         vehiclePlate: data.user.vehiclePlate || '',
         routes: Array.isArray(data.user.routes) ? data.user.routes.join(', ') : '',
         taxiStands: Array.isArray(data.user.taxiStands) ? data.user.taxiStands.join(', ') : '',
+        currentStand: data.user.currentStand || '',
         rating: data.user.rating || 5,
         aiNotes: data.user.aiNotes || '',
       });
@@ -547,6 +548,7 @@ export default function AdminPage() {
         vehiclePlate: detailForm.vehiclePlate,
         routes: detailForm.routes,
         taxiStands: detailForm.taxiStands,
+        currentStand: detailForm.currentStand,
         rating: Number(detailForm.rating) || 5,
         aiNotes: detailForm.aiNotes,
       });
@@ -776,6 +778,17 @@ export default function AdminPage() {
     }
   };
 
+  const downloadExport = useCallback((type) => {
+    const anchor = document.createElement('a');
+    anchor.href = `${API_BASE_URL}/admin/export?type=${encodeURIComponent(type)}`;
+    anchor.rel = 'noopener noreferrer';
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    showNotice('success', 'Export started.');
+  }, [showNotice]);
+
   const handleResetAnalytics = async () => {
     if (!window.confirm('Are you sure you want to wipe all analytics data? This cannot be undone.')) return;
 
@@ -870,6 +883,8 @@ export default function AdminPage() {
         title="Driver Verification"
         subtitle={`${stats.pendingVerificationRequests} pending requests`}
         onRefresh={loadVerificationRequests}
+        actionLabel="Export CSV"
+        onAction={() => downloadExport('verifications')}
       >
         <VerificationList
           requests={verificationRequests}
@@ -885,7 +900,13 @@ export default function AdminPage() {
 
   const renderBookings = () => (
     <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <SectionShell title="Booking Oversight" subtitle="Assign drivers and update ride states" onRefresh={loadBookings}>
+      <SectionShell
+        title="Booking Oversight"
+        subtitle="Assign drivers and update ride states"
+        onRefresh={loadBookings}
+        actionLabel="Export CSV"
+        onAction={() => downloadExport('bookings')}
+      >
         {loading.bookings ? (
           <EmptyState label="Loading bookings..." />
         ) : bookings.length === 0 ? (
@@ -927,7 +948,7 @@ export default function AdminPage() {
       </div>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <SectionHeader title="Top Destinations" subtitle="Based on instant booking requests" />
+        <SectionHeader title="Top Destinations" subtitle="Based on instant booking requests" actionLabel="Export CSV" onAction={() => downloadExport('analytics')} />
         <div className="mt-4 space-y-3">
           {stats.topDestinations?.length ? (
             stats.topDestinations.map((item) => (
@@ -946,7 +967,13 @@ export default function AdminPage() {
 
   const renderComplaints = () => (
     <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <SectionShell title="Complaints & Support" subtitle={`${stats.pendingComplaints} active tickets`} onRefresh={loadComplaints}>
+      <SectionShell
+        title="Complaints & Support"
+        subtitle={`${stats.pendingComplaints} active tickets`}
+        onRefresh={loadComplaints}
+        actionLabel="Export CSV"
+        onAction={() => downloadExport('complaints')}
+      >
         {loading.complaints ? (
           <EmptyState label="Loading messages..." />
         ) : complaints.length === 0 ? (
@@ -1030,7 +1057,13 @@ export default function AdminPage() {
 
   const renderActivity = () => (
     <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <SectionShell title="Admin Activity Log" subtitle="Recent operational changes" onRefresh={loadActivity}>
+      <SectionShell
+        title="Admin Activity Log"
+        subtitle="Recent operational changes"
+        onRefresh={loadActivity}
+        actionLabel="Export CSV"
+        onAction={() => downloadExport('activity')}
+      >
         <ActivityFeed logs={activityLogs} loading={loading.activity} />
       </SectionShell>
     </section>
@@ -1039,9 +1072,9 @@ export default function AdminPage() {
   const renderContent = () => {
     switch (activeTab) {
       case 'riders':
-        return <UserTable role="rider" refreshKey={usersRefreshKey} onChanged={refreshAdminData} onSelectUser={openUserDetail} />;
+        return <UserTable role="rider" exportType="riders" refreshKey={usersRefreshKey} onChanged={refreshAdminData} onSelectUser={openUserDetail} />;
       case 'drivers':
-        return <UserTable role="driver" refreshKey={usersRefreshKey} onChanged={refreshAdminData} onSelectUser={openUserDetail} />;
+        return <UserTable role="driver" exportType="drivers" refreshKey={usersRefreshKey} onChanged={refreshAdminData} onSelectUser={openUserDetail} />;
       case 'verifications':
         return renderVerifications();
       case 'bookings':
@@ -1244,7 +1277,7 @@ function SectionHeader({ title, subtitle, actionLabel, onAction }) {
   );
 }
 
-function SectionShell({ title, subtitle, onRefresh, children }) {
+function SectionShell({ title, subtitle, onRefresh, actionLabel, onAction, children }) {
   return (
     <>
       <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
@@ -1252,15 +1285,26 @@ function SectionShell({ title, subtitle, onRefresh, children }) {
           <h2 className="text-xl font-black text-slate-900">{title}</h2>
           {subtitle && <p className="text-sm font-semibold text-slate-500">{subtitle}</p>}
         </div>
-        {onRefresh && (
-          <button
-            onClick={onRefresh}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-700"
-          >
-            <RefreshCw size={16} />
-            Refresh
-          </button>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {actionLabel && (
+            <button
+              onClick={onAction}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-black text-white"
+            >
+              <Download size={16} />
+              {actionLabel}
+            </button>
+          )}
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-700"
+            >
+              <RefreshCw size={16} />
+              Refresh
+            </button>
+          )}
+        </div>
       </div>
       <div className="p-4 sm:p-6">{children}</div>
     </>
@@ -1476,6 +1520,7 @@ function BookingCard({ booking, drivers, selectedDriver, onSelectDriver, onUpdat
 
       <div className="grid gap-2 text-sm text-slate-600">
         <InfoBlock label="Destination" value={booking.destination} />
+        <InfoBlock label="Requested Stand" value={booking.requestedStand || 'Any stand'} />
         <InfoBlock label="Pickup" value={booking.pickupLocation?.address || 'Current Location'} />
         <InfoBlock label="Driver" value={booking.driver?.fullName || 'Unassigned'} />
       </div>
@@ -1657,6 +1702,12 @@ function UserDetailDrawer({
                       onChange={(value) => setForm((current) => ({ ...current, taxiStands: value }))}
                       placeholder={TAXI_STANDS.map((stand) => stand.name).slice(0, 2).join(', ')}
                     />
+                    <AdminInput
+                      label="Checked in now"
+                      value={form.currentStand}
+                      onChange={(value) => setForm((current) => ({ ...current, currentStand: value }))}
+                      placeholder="Current stand, or leave blank"
+                    />
                     <AdminInput label="Routes" value={form.routes} onChange={(value) => setForm((current) => ({ ...current, routes: value }))} />
                     <AdminInput label="Rating" value={String(form.rating)} onChange={(value) => setForm((current) => ({ ...current, rating: value }))} />
                     <AdminInput label="Admin Notes" value={form.aiNotes} onChange={(value) => setForm((current) => ({ ...current, aiNotes: value }))} />
@@ -1683,6 +1734,7 @@ function UserDetailDrawer({
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <InfoBlock label="Availability" value={user.isAvailable ? 'Online' : 'Offline'} />
+                  <InfoBlock label="Checked In" value={user.currentStand || 'Not set'} />
                   <InfoBlock label="Number Plate" value={user.vehiclePlate || 'Not added'} />
                   <InfoBlock
                     label="Subscription"

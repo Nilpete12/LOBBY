@@ -29,7 +29,7 @@ export default function IncomingRideAlert() {
 
       if (!error && data && data.length > 0) {
         // Map DB 'id' to '_id' for frontend compatibility
-        setIncomingRide({ ...data[0], _id: data[0].id });
+        setIncomingRide({ ...data[0], _id: data[0].id, requestedStand: data[0].requested_stand });
       }
     };
 
@@ -57,7 +57,8 @@ export default function IncomingRideAlert() {
               address: payload.new.pickup_address
             },
             riderName: payload.new.rider_name,
-            riderPhone: payload.new.rider_phone
+            riderPhone: payload.new.rider_phone,
+            requestedStand: payload.new.requested_stand
           });
         }
       )
@@ -243,6 +244,7 @@ export default function IncomingRideAlert() {
   // --- UI: INCOMING RIDE ALERT (Pending) ---
   if (incomingRide) {
     const pickupAddress = incomingRide?.pickupLocation?.address || incomingRide?.pickup_address;
+    const requestedStand = incomingRide?.requestedStand || incomingRide?.requested_stand;
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
@@ -270,6 +272,17 @@ export default function IncomingRideAlert() {
             </div>
 
             <div className="space-y-4 mb-8 relative before:absolute before:inset-y-4 before:left-3.5 before:w-0.5 before:bg-slate-200">
+              {requestedStand && (
+                <div className="flex gap-4 relative z-10">
+                  <div className="w-7 h-7 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0 ring-4 ring-white">
+                    <MapPin size={14} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-400">Requested stand</p>
+                    <p className="text-sm font-semibold text-slate-900">{requestedStand}</p>
+                  </div>
+                </div>
+              )}
               <div className="flex gap-4 relative z-10">
                 <div className="w-7 h-7 rounded-full bg-[#DCEBFF] text-[#2F80ED] flex items-center justify-center shrink-0 ring-4 ring-white">
                   <MapPin size={14} />

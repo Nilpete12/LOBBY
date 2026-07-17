@@ -57,7 +57,7 @@ export default function DriverDashboard() {
   // 2. MONGODB DRIVER STATE (Vehicle, Routes, Verification, etc.)
   const [driverDbData, setDriverDbData] = useState(null);
   
-  const [formData, setFormData] = useState({ vehicle: '', vehiclePlate: '', phone: '', routes: '', taxiStands: [] });
+  const [formData, setFormData] = useState({ vehicle: '', vehiclePlate: '', phone: '', routes: '', taxiStands: [], currentStand: '' });
   const [isOnline, setIsOnline] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingLicense, setUploadingLicense] = useState(false);
@@ -79,6 +79,7 @@ export default function DriverDashboard() {
       phone: driver.phone || '',
       routes,
       taxiStands: Array.isArray(driver.taxiStands) ? driver.taxiStands : [],
+      currentStand: driver.currentStand || '',
     });
     setIsOnline(driver.isAvailable || false);
   }, []);
@@ -175,6 +176,7 @@ export default function DriverDashboard() {
           phone: formData.phone,
           routes: formData.routes.split(',').map(s => s.trim()).filter(Boolean),
           taxiStands: formData.taxiStands,
+          currentStand: formData.currentStand,
           isAvailable: statusToSend
         })
       });
@@ -317,6 +319,7 @@ export default function DriverDashboard() {
   const driverEmail = clerkUser.primaryEmailAddress?.emailAddress || driverDbData.email || '';
   const routeList = formData.routes.split(',').map(route => route.trim()).filter(Boolean);
   const selectedTaxiStands = Array.isArray(formData.taxiStands) ? formData.taxiStands : [];
+  const currentStand = formData.currentStand || '';
   const dashboardNotifications = Array.isArray(driverDbData.notifications) ? driverDbData.notifications : [];
   const setupItems = [
     {
@@ -328,6 +331,11 @@ export default function DriverDashboard() {
       label: 'Taxi stands',
       detail: selectedTaxiStands.length ? `${selectedTaxiStands.length} stand${selectedTaxiStands.length === 1 ? '' : 's'} selected` : 'Select where you park daily',
       done: selectedTaxiStands.length > 0,
+    },
+    {
+      label: 'Live check-in',
+      detail: currentStand ? `Checked in at ${currentStand}` : 'Choose your stand for today',
+      done: Boolean(currentStand),
     },
     {
       label: 'Routes',
@@ -354,7 +362,9 @@ export default function DriverDashboard() {
   const completionPercent = Math.round((completedSetupCount / setupItems.length) * 100);
   const nextStep = isVerified
     ? isOnline
-      ? 'You are visible to riders now.'
+      ? currentStand
+        ? `You are visible to riders near ${currentStand}.`
+        : 'You are visible to riders now. Check in to a stand for better matching.'
       : 'Go online when you are ready to accept rides.'
     : driverDbData.licenseUrl
       ? 'Your documents are with admin for review.'
@@ -462,7 +472,7 @@ export default function DriverDashboard() {
 
           <div className="grid border-t border-white/10 sm:grid-cols-3">
             <MetricStrip label="Setup" value={`${completionPercent}%`} />
-            <MetricStrip label="Stands" value={selectedTaxiStands.length || '0'} />
+            <MetricStrip label="Checked in" value={currentStand || 'Not set'} />
             <MetricStrip label="Plate" value={formData.vehiclePlate || 'Not set'} />
           </div>
         </section>
@@ -536,6 +546,12 @@ export default function DriverDashboard() {
               <TaxiStandSelector
                 selected={selectedTaxiStands}
                 onChange={(taxiStands) => setFormData({ ...formData, taxiStands })}
+              />
+
+              <CurrentStandSelector
+                value={currentStand}
+                selectedDailyStands={selectedTaxiStands}
+                onChange={(currentStandValue) => setFormData({ ...formData, currentStand: currentStandValue })}
               />
 
               <LabeledInput
@@ -897,6 +913,45 @@ function TaxiStandSelector({ selected = [], onChange }) {
 
       <p className="mt-2 text-xs font-semibold text-slate-400">
         Riders can filter by these stands from the homepage.
+      </p>
+    </div>
+  );
+}
+
+function CurrentStandSelector({ value = '', selectedDailyStands = [], onChange }) {
+  const dailySet = new Set(selectedDailyStands);
+  const preferredStands = [
+    ...TAXI_STANDS.filter((stand) => dailySet.has(stand.name)),
+    ...TAXI_STANDS.filter((stand) => !dailySet.has(stand.name)),
+  ];
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <span className="block text-xs font-black uppercase tracking-wide text-slate-400">Checked in today</span>
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${value ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+          {value ? 'Live stand set' : 'Not set'}
+        </span>
+      </div>
+
+      <div className="flex min-h-12 items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 transition focus-within:border-slate-300 focus-within:bg-white">
+        <MapPin size={18} className="mr-3 shrink-0 text-slate-400" />
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="min-w-0 flex-1 bg-transparent py-3 text-base font-bold text-slate-950 outline-none"
+        >
+          <option value="">No live stand selected</option>
+          {preferredStands.map((stand) => (
+            <option key={stand.id} value={stand.name}>
+              {dailySet.has(stand.name) ? 'Daily: ' : ''}{stand.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <p className="mt-2 text-xs font-semibold text-slate-400">
+        This tells riders where you are parked right now. Clear it when you leave the stand.
       </p>
     </div>
   );

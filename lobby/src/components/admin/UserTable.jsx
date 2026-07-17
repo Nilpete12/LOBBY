@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { CheckCircle, Clock, Eye, Trash2, Search, RefreshCw } from 'lucide-react';
+import { CheckCircle, Clock, Download, Eye, Trash2, Search, RefreshCw } from 'lucide-react';
 import API_BASE_URL from '@/config';
 
 function getStatus(user) {
@@ -44,7 +44,7 @@ function Avatar({ user, size = 44 }) {
   );
 }
 
-export default function UserTable({ role, limit, refreshKey = 0, onChanged, onSelectUser }) {
+export default function UserTable({ role, limit, refreshKey = 0, exportType, onChanged, onSelectUser }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -118,11 +118,13 @@ export default function UserTable({ role, limit, refreshKey = 0, onChanged, onSe
       const email = user.email?.toLowerCase() || '';
       const phone = user.phone?.toLowerCase() || '';
       const plate = user.vehiclePlate?.toLowerCase() || '';
+      const stand = user.currentStand?.toLowerCase() || '';
       return !normalizedSearch
         || name.includes(normalizedSearch)
         || email.includes(normalizedSearch)
         || phone.includes(normalizedSearch)
-        || plate.includes(normalizedSearch);
+        || plate.includes(normalizedSearch)
+        || stand.includes(normalizedSearch);
     })
     .slice(0, limit || users.length);
 
@@ -140,11 +142,21 @@ export default function UserTable({ role, limit, refreshKey = 0, onChanged, onSe
             <Search size={16} className="mr-2 text-slate-400" />
             <input
               className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
-              placeholder="Search name, email, phone"
+              placeholder="Search name, email, phone, stand"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
             />
           </div>
+
+          {exportType && (
+            <a
+              href={`${API_BASE_URL}/admin/export?type=${encodeURIComponent(exportType)}`}
+              className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-3 text-slate-700 transition hover:bg-slate-50"
+              title="Export CSV"
+            >
+              <Download size={16} />
+            </a>
+          )}
 
           <button
             onClick={refreshUsers}
@@ -189,6 +201,7 @@ export default function UserTable({ role, limit, refreshKey = 0, onChanged, onSe
                     <div>
                       <div className="font-semibold text-slate-700">{user.vehicle || 'No vehicle'}</div>
                       <div className="text-xs font-black text-slate-500">Plate: {user.vehiclePlate || 'Not added'}</div>
+                      <div className="text-xs font-black text-slate-500">Stand: {user.currentStand || 'Not checked in'}</div>
                       <div className="text-xs font-black text-slate-500">{user.isAvailable ? 'Online' : 'Offline'}</div>
                     </div>
                   ) : <span className="text-xs font-semibold text-slate-400">Rider</span>}
@@ -248,7 +261,9 @@ export default function UserTable({ role, limit, refreshKey = 0, onChanged, onSe
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-3">
                       <span className="block font-black uppercase text-slate-400">Availability</span>
-                      <span className="mt-1 block text-sm font-black text-slate-800">{user.isAvailable ? 'Online' : 'Offline'}</span>
+                      <span className="mt-1 block text-sm font-black text-slate-800">
+                        {user.isAvailable ? 'Online' : 'Offline'}{user.currentStand ? ` at ${user.currentStand}` : ''}
+                      </span>
                     </div>
                   </>
                 )}
