@@ -52,6 +52,7 @@ export default function DriverDashboard() {
   // 1. CLERK AUTHENTICATION STATE
   const { isLoaded, isSignedIn, user: clerkUser } = useUser();
   const { signOut } = useClerk();
+  const clerkUserId = clerkUser?.id;
   
   // 2. MONGODB DRIVER STATE (Vehicle, Routes, Verification, etc.)
   const [driverDbData, setDriverDbData] = useState(null);
@@ -255,6 +256,36 @@ export default function DriverDashboard() {
 
   const handleLogout = () => { signOut(() => router.push('/')); };
 
+  const handleDismissNotification = useCallback(async (notificationId) => {
+    if (!notificationId || !driverDbData || !clerkUserId) return;
+
+    const previousDriver = driverDbData;
+    const nextDriver = {
+      ...driverDbData,
+      notifications: (driverDbData.notifications || []).filter((notification) => (
+        (notification.id || notification._id) !== notificationId
+      )),
+    };
+
+    setDriverDbData(nextDriver);
+    writeCachedDriverProfile(clerkUserId, nextDriver);
+
+    try {
+      const res = await fetch(`/api/driver/notifications/${encodeURIComponent(notificationId)}`, {
+        method: 'PATCH',
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Could not close this reminder.');
+      }
+    } catch (error) {
+      setDriverDbData(previousDriver);
+      writeCachedDriverProfile(clerkUserId, previousDriver);
+      showNotice('error', 'Reminder stayed open', error.message || 'Could not close this reminder. Please try again.');
+    }
+  }, [clerkUserId, driverDbData, showNotice]);
+
   // Show loading while Clerk initializes OR while MongoDB data fetches
   if (!isLoaded) return <DriverDashboardSkeleton message="Loading dashboard..." />;
 
@@ -336,7 +367,7 @@ export default function DriverDashboard() {
           <DashboardNotice notice={notice} onDismiss={() => setNotice(null)} />
         )}
         <IncomingRideAlert />
-        <DriverDashboardReminders notifications={dashboardNotifications} />
+        <DriverDashboardReminders notifications={dashboardNotifications} onDismiss={handleDismissNotification} />
 
         <header className="mb-5 flex items-center justify-between gap-3">
           <div className="min-w-0">
@@ -738,7 +769,7 @@ function QuickAction({ href, icon: Icon, label, detail }) {
   );
 }
 
-function DriverDashboardReminders({ notifications }) {
+function DriverDashboardReminders({ notifications, onDismiss }) {
   const reminders = (notifications || [])
     .filter((notification) => notification.type === 'subscription_reminder' && notification.status !== 'archived')
     .slice(0, 2);
@@ -749,9 +780,17 @@ function DriverDashboardReminders({ notifications }) {
     <section className="mb-5 space-y-3">
       {reminders.map((notification) => (
         <article
-          key={notification.id}
-          className="rounded-3xl border border-amber-200 bg-amber-50 p-4 text-amber-950 shadow-sm"
+          key={notification.id || notification._id}
+          className="relative rounded-3xl border border-amber-200 bg-amber-50 p-4 pr-12 text-amber-950 shadow-sm"
         >
+          <button
+            type="button"
+            onClick={() => onDismiss?.(notification.id || notification._id)}
+            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-amber-800 shadow-sm transition hover:bg-white"
+            aria-label="Close reminder"
+          >
+            <X size={17} />
+          </button>
           <div className="flex items-start gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-amber-700">
               <Wallet size={21} />
@@ -759,7 +798,7 @@ function DriverDashboardReminders({ notifications }) {
             <div className="min-w-0 flex-1">
               <p className="text-xs font-black uppercase tracking-wide text-amber-700/70">Admin reminder</p>
               <h2 className="mt-1 text-base font-black">{notification.title || 'Subscription fee reminder'}</h2>
-              <p className="mt-1 text-sm font-semibold leading-relaxed text-amber-900/80">{notification.message}</p>
+              <p className="mt-1 text-sm font-semibold leading-relaxed text-amber-900/80">{formatReminderMessage(notification.message)}</p>
               {notification.createdAt && (
                 <p className="mt-2 text-xs font-bold text-amber-700/70">
                   Sent {new Date(notification.createdAt).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
@@ -771,6 +810,17 @@ function DriverDashboardReminders({ notifications }) {
       ))}
     </section>
   );
+}
+
+function formatReminderMessage(message) {
+  const fallback = 'Your driver subscription fee for THE LOBBY is pending. Please complete your payment to keep your profile active and visible to riders. Thank you.';
+  const text = typeof message === 'string' ? message.trim() : '';
+
+  if (!text) return fallback;
+
+  return text
+    .replace(/^this is THE LOBBY\./i, 'This is THE LOBBY.')
+    .replace(/Please pay it to keep your profile active and visible to riders\./i, 'Please complete your payment to keep your profile active and visible to riders.');
 }
 
 function SetupItem({ item }) {

@@ -61,7 +61,7 @@ export async function POST(request) {
   const message = cleanString(
     body.message,
     500
-  ) || 'this is THE LOBBY. Your driver subscription fee is pending. Please pay it to keep your profile active and visible to riders. Thank you.';
+  ) || 'Your driver subscription fee for THE LOBBY is pending. Please complete your payment to keep your profile active and visible to riders. Thank you.';
 
   try {
     const { data: drivers = [], error: driversError } = await supabaseAdmin
