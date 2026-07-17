@@ -6,18 +6,18 @@ export default function Hero() {
     <section className="lobby-home-gradient dark-section relative w-full overflow-hidden pt-30 pb-28 md:pt-34">
 
       {/* Background gradients */}
-      <div className="absolute inset-0 bg-linear-to-b from-black/20 via-[#121212]/50 to-[#090909]/95"></div>
+      <div className="absolute inset-0 bg-linear-to-b from-black/20 via-[#121212]/50 to-[#0B0B0B]/95"></div>
       <div className="lobby-home-sketch pointer-events-none absolute inset-0"></div>
 
       {/* Content */}
       <div className="relative px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
 
         {/* Badge */}
-        <div className="mb-8 inline-flex items-center gap-2 md:gap-3 px-3 md:px-5 py-1.5 md:py-2 rounded-full bg-[#181818]/80 backdrop-blur-sm border border-white/10 text-[#1ED760] text-[9px] md:text-xs font-semibold uppercase tracking-[0.12em] md:tracking-[0.15em] shadow-sm">
+        <div className="mb-8 inline-flex items-center gap-2 md:gap-3 px-3 md:px-5 py-1.5 md:py-2 rounded-full bg-[#181818]/80 backdrop-blur-sm border border-white/10 text-[#FFC857] text-[9px] md:text-xs font-semibold uppercase tracking-[0.12em] md:tracking-[0.15em] shadow-sm">
 
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1ED760] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#1ED760]"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FFC857] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FFC857]"></span>
           </span>
 
           Live in the capital
@@ -26,7 +26,7 @@ export default function Hero() {
         {/* Headline */}
         <h1 className="max-w-5xl text-5xl md:text-8xl font-[Proxima_Nova_Semibold] tracking-tight text-white leading-[0.95] mb-8">
           Get There.
-          <span className="block text-[#1ED760] font-[Sailors_Slant_Normal]">
+          <span className="block text-[#FFC857] font-[Sailors_Slant_Normal]">
             The Local Way.
           </span>
         </h1>
@@ -47,7 +47,7 @@ export default function Hero() {
               
               {/* Map Pin Icon - Smaller on mobile */}
               <div className="w-10 h-10 md:w-14 md:h-14 bg-[#121212] md:bg-[#242424] rounded-lg md:rounded-2xl flex items-center justify-center shrink-0 shadow-sm md:shadow-none">
-                <MapPin className="text-[#1ED760] w-5 h-5 md:w-6 md:h-6" />
+                <MapPin className="text-[#FFC857] w-5 h-5 md:w-6 md:h-6" />
               </div>
 
               {/* Text Input - Slightly shorter on mobile */}
@@ -66,7 +66,7 @@ export default function Hero() {
             <TaxiStandDropdown variant="hero" />
 
             {/* Search Button */}
-            <button type="submit" className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#1DB954] hover:bg-[#1ED760] text-[#06120a] rounded-xl md:rounded-2xl font-bold transition-all shadow-lg shadow-[#1DB954]/25 flex items-center justify-center gap-2 shrink-0 text-sm md:text-base">
+            <button type="submit" className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#FFC857] hover:bg-[#F59E0B] text-[#1A1205] rounded-xl md:rounded-2xl font-bold transition-all shadow-lg shadow-[#FFC857]/25 flex items-center justify-center gap-2 shrink-0 text-sm md:text-base">
               Search <ArrowRight size={18} className="md:w-5 md:h-5" />
             </button>
           </div>
@@ -90,7 +90,7 @@ export default function Hero() {
 function FeatureItem({ text }) {
   return (
     <span className="flex items-center gap-2 text-[13px] md:text-sm font-semibold text-[#b3b3b3]">
-      <CheckCircle2 className="text-[#1ED760] w-4 h-4 md:w-4.5 md:h-4.5" strokeWidth={2.5} />
+      <CheckCircle2 className="text-[#FFC857] w-4 h-4 md:w-4.5 md:h-4.5" strokeWidth={2.5} />
       {text}
     </span>
   );

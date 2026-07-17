@@ -75,7 +75,7 @@ export default function Navbar() {
   return (
     <>
       {/* --- TOP NAVBAR (Stays at top for both Mobile & PC) --- */}
-      <nav className="fixed top-0 w-full z-40 bg-[#090909]/82 backdrop-blur-xl border-b border-white/10 shadow-sm">
+      <nav className="fixed top-0 w-full z-40 bg-[#0B0B0B]/82 backdrop-blur-xl border-b border-white/10 shadow-sm">
         <div className="max-w-7xl mx-auto px-5 md:px-6 h-16 md:h-20 flex items-center justify-between">
           
           {/* Logo (Top Left) */}
@@ -84,36 +84,36 @@ export default function Navbar() {
             className="text-xl md:text-2xl font-['Sailors_Slant_Normal'] tracking-tight text-white relative z-50"
           >
             THE LOBBY
-            <span className="text-[#1ED760]">.</span>
+            <span className="text-[#FFC857]">.</span>
           </Link>
 
           {/* --- DESKTOP NAVIGATION (Hidden on Mobile) --- */}
           <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-sm font-semibold text-[#b3b3b3]">
             {/* 1. VIEW: SIGNED OUT */}
             <Show when="signed-out">
-              <Link href="/search" className="hover:text-[#1ED760] transition">Find a Ride</Link>
-              <Link href="/drive" className="hover:text-[#1ED760] transition">For Drivers</Link>
-              <Link href="/support" className="hover:text-[#1ED760] transition">Support</Link>
+              <Link href="/search" className="hover:text-[#FFC857] transition">Find a Ride</Link>
+              <Link href="/drive" className="hover:text-[#FFC857] transition">For Drivers</Link>
+              <Link href="/support" className="hover:text-[#FFC857] transition">Support</Link>
             </Show>
 
             <Show when="signed-in">
               {/* 2. VIEW: LOGGED IN AS RIDER (or no role yet) */}
               {userRole !== "driver" && (
                 <>
-                  <Link href="/search" className="hover:text-[#1ED760] transition">All Services</Link>
-                  <Link href="/favourites" className="hover:text-[#1ED760] transition">Favourites</Link>
-                  <Link href="/account" className="hover:text-[#1ED760] transition">Profile</Link>
-                  <Link href="/support" className="hover:text-[#1ED760] transition">Support</Link>
+                  <Link href="/search" className="hover:text-[#FFC857] transition">All Services</Link>
+                  <Link href="/favourites" className="hover:text-[#FFC857] transition">Favourites</Link>
+                  <Link href="/account" className="hover:text-[#FFC857] transition">Profile</Link>
+                  <Link href="/support" className="hover:text-[#FFC857] transition">Support</Link>
                 </>
               )}
 
               {/* 3. VIEW: LOGGED IN AS DRIVER */}
               {userRole === "driver" && (
                 <>
-                  <Link href="/drive/dashboard" className="hover:text-[#1ED760] transition">Profile</Link>
-                  <Link href="/drive/earnings" className="hover:text-[#1ED760] transition">Analytics</Link>
-                  <Link href="/drive/TripHistory" className="hover:text-[#1ED760] transition">Trip History</Link>
-                  <Link href="/support" className="hover:text-[#1ED760] transition">Support</Link>
+                  <Link href="/drive/dashboard" className="hover:text-[#FFC857] transition">Profile</Link>
+                  <Link href="/drive/earnings" className="hover:text-[#FFC857] transition">Analytics</Link>
+                  <Link href="/drive/TripHistory" className="hover:text-[#FFC857] transition">Trip History</Link>
+                  <Link href="/support" className="hover:text-[#FFC857] transition">Support</Link>
                 </>
               )}
             </Show>
@@ -130,7 +130,7 @@ export default function Navbar() {
 
             <Show when="signed-out">
               <SignInButton mode="modal">
-                <button className="text-sm font-bold text-white hover:text-[#1ED760] transition">
+                <button className="text-sm font-bold text-white hover:text-[#FFC857] transition">
                   Log In
                 </button>
               </SignInButton>
@@ -139,9 +139,9 @@ export default function Navbar() {
                 href="/search"
                 className="
                   hidden md:block
-                  bg-[#1DB954] hover:bg-[#1ED760]
-                  text-[#06120a] px-5 py-2.5 rounded-full text-sm font-bold
-                  shadow-lg shadow-[#1DB954]/25 hover:scale-105 transition
+                  bg-[#FFC857] hover:bg-[#F59E0B]
+                  text-[#1A1205] px-5 py-2.5 rounded-full text-sm font-bold
+                  shadow-lg shadow-[#FFC857]/25 hover:scale-105 transition
                 "
               >
                 Book Now
@@ -199,7 +199,7 @@ export default function Navbar() {
 function BottomNavLink({ href, icon, label, isActive, isDarkBg }) {
   
   // Dynamic color logic based on the background!
-  const activeColor = isDarkBg ? "text-[#1ED760]" : "text-[#1ED760]";
+  const activeColor = isDarkBg ? "text-[#FFC857]" : "text-[#FFC857]";
   const inactiveColor = isDarkBg ? "text-[#b3b3b3] hover:text-white" : "text-[#b3b3b3] hover:text-white";
   const activeBg = isDarkBg ? "bg-[#242424]/90" : "bg-[#242424]/90";
 

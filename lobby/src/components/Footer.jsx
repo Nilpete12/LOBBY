@@ -13,7 +13,7 @@ export default function Footer() {
           {/* Column 1: Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="text-2xl font-[Sailors_Slant_Normal] tracking-tight text-white block mb-4">
-             THE LOBBY<span className="text-[#1ED760]">.</span>
+             THE LOBBY<span className="text-[#FFC857]">.</span>
             </Link>
 
             <p className="text-sm font-medium text-slate-400 leading-relaxed mb-6">
@@ -31,10 +31,10 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-6">Platform</h4>
             <ul className="space-y-4 text-sm font-medium">
-              <li><Link href="/search" className="hover:text-[#1ED760] transition">Find a Ride</Link></li>
-              <li><Link href="/drive" className="hover:text-[#1ED760] transition">Driver Sign Up</Link></li>
-              <li><Link href="/sign-in" className="hover:text-[#1ED760] transition">Log In</Link></li>
-              <li><Link href="/search" className="hover:text-[#1ED760] transition">Popular Routes</Link></li>
+              <li><Link href="/search" className="hover:text-[#FFC857] transition">Find a Ride</Link></li>
+              <li><Link href="/drive" className="hover:text-[#FFC857] transition">Driver Sign Up</Link></li>
+              <li><Link href="/sign-in" className="hover:text-[#FFC857] transition">Log In</Link></li>
+              <li><Link href="/search" className="hover:text-[#FFC857] transition">Popular Routes</Link></li>
             </ul>
           </div>
 
@@ -42,10 +42,10 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-6">Company</h4>
             <ul className="space-y-4 text-sm font-medium">
-              <li><Link href="/about" className="hover:text-[#1ED760] transition">About Us</Link></li>
-              <li><Link href="/admin" className="hover:text-[#1ED760] transition">Admin Login</Link></li>
-              <li><Link href="/privacypolicy" className="hover:text-[#1ED760] transition">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-[#1ED760] transition">Terms of Service</Link></li>
+              <li><Link href="/about" className="hover:text-[#FFC857] transition">About Us</Link></li>
+              <li><Link href="/admin" className="hover:text-[#FFC857] transition">Admin Login</Link></li>
+              <li><Link href="/privacypolicy" className="hover:text-[#FFC857] transition">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-[#FFC857] transition">Terms of Service</Link></li>
             </ul>
           </div>
 
@@ -54,7 +54,7 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-6">Location</h4>
             <ul className="space-y-4 text-sm font-medium">
               <li className="flex items-start gap-3">
-                <MapPin size={18} className="text-[#1ED760] mt-0.5" />
+                <MapPin size={18} className="text-[#FFC857] mt-0.5" />
                 <span>
                   In Your Neighbourhood,<br />
                   Kohima, Nagaland<br />
@@ -68,7 +68,7 @@ export default function Footer() {
 
         {/* Bottom Section: Copyright */}
         <div className="pt-8 border-t border-white/10 flex flex-row justify-between items-center gap-3 text-xs text-[#b3b3b3] font-[proxima_nova_regular]"> <p>&copy; {new Date().getFullYear()} <span className="font-[Sailors_Slant_Normal]">THE LOBBY</span> Platform. All rights reserved.</p> 
-        <p className="flex items-center gap-1">Made with <Heart size={16} className="text-[#1ED760]" /> in the hills.</p> 
+        <p className="flex items-center gap-1">Made with <Heart size={16} className="text-[#FFC857]" /> in the hills.</p>
         </div>
 
 

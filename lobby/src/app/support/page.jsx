@@ -356,7 +356,7 @@ export default function ContactPage() {
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="w-full cursor-pointer bg-[#1db954] text-white font-bold py-4 rounded-xl hover:bg-[#1ed760] transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full cursor-pointer bg-[#FFC857] text-[#1A1205] font-bold py-4 rounded-xl hover:bg-[#F59E0B] transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 aria-busy={isSubmitting}
               >
                 {isSubmitting ? 'Sending...' : 'Send Message'}

@@ -1,22 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: #090909;
+  --background: #0b0b0b;
   --foreground: #f5f5f5;
   --lobby-papaya: #181818;
-  --lobby-papaya-soft: #121212;
-  --lobby-blue: #1db954;
-  --lobby-blue-strong: #1ed760;
-  --lobby-blue-soft: rgb(29 185 84 / 0.14);
-  --lobby-pink: #1db954;
-  --lobby-pink-soft: rgb(29 185 84 / 0.12);
-  --lobby-green: #1db954;
-  --lobby-green-bright: #1ed760;
+  --lobby-papaya-soft: #111111;
+  --lobby-blue: #ffc857;
+  --lobby-blue-strong: #f59e0b;
+  --lobby-blue-soft: rgb(255 200 87 / 0.14);
+  --lobby-pink: #ffc857;
+  --lobby-pink-soft: rgb(255 200 87 / 0.12);
+  --lobby-amber: #ffc857;
+  --lobby-amber-deep: #f59e0b;
+  --lobby-green: #ffc857;
+  --lobby-green-bright: #f59e0b;
   --lobby-ink: #f5f5f5;
-  --lobby-muted: #b3b3b3;
+  --lobby-muted: #c7c7c7;
   --lobby-border: #2a2a2a;
   --lobby-surface: #121212;
-  --lobby-card: #181818;
+  --lobby-card: #1a1a1a;
   --lobby-elevated: #242424;
   --lobby-glass: rgb(24 24 24 / 0.82);
 }
@@ -30,9 +32,9 @@
 
 body {
   background:
-    radial-gradient(circle at top left, rgb(29 185 84 / 0.22), transparent 30rem),
+    radial-gradient(circle at top left, rgb(255 200 87 / 0.18), transparent 30rem),
     radial-gradient(circle at top right, rgb(255 255 255 / 0.08), transparent 28rem),
-    linear-gradient(180deg, #121212 0%, #090909 58%, #050505 100%),
+    linear-gradient(180deg, #141414 0%, #0b0b0b 58%, #050505 100%),
     var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
@@ -41,39 +43,39 @@ body {
 }
 
 ::selection {
-  background: rgb(30 215 96 / 0.34);
-  color: #ffffff;
+  background: rgb(255 200 87 / 0.34);
+  color: #1a1205;
 }
 
 .lobby-home-gradient {
   background:
-    radial-gradient(circle at 18% 0%, rgb(29 185 84 / 0.32), transparent 30rem),
+    radial-gradient(circle at 18% 0%, rgb(255 200 87 / 0.28), transparent 30rem),
     radial-gradient(circle at 88% 18%, rgb(255 255 255 / 0.1), transparent 24rem),
-    linear-gradient(145deg, #050505 0%, #121212 42%, #252525 72%, #0d2d19 100%);
+    linear-gradient(145deg, #050505 0%, #121212 42%, #252525 72%, #3a2407 100%);
 }
 
 .lobby-dashboard-gradient {
   background:
-    radial-gradient(circle at top left, rgb(29 185 84 / 0.2), transparent 25rem),
+    radial-gradient(circle at top left, rgb(255 200 87 / 0.16), transparent 25rem),
     radial-gradient(circle at bottom right, rgb(255 255 255 / 0.08), transparent 24rem),
-    linear-gradient(160deg, #0a0a0a 0%, #121212 44%, #1f1f1f 74%, #0e2618 100%);
+    linear-gradient(160deg, #0a0a0a 0%, #121212 44%, #1f1f1f 74%, #2f210e 100%);
 }
 
 .lobby-command-gradient {
   background:
-    radial-gradient(circle at top right, rgb(30 215 96 / 0.24), transparent 18rem),
-    linear-gradient(135deg, #050505 0%, #121212 42%, #252525 74%, #10391f 100%);
+    radial-gradient(circle at top right, rgb(255 200 87 / 0.22), transparent 18rem),
+    linear-gradient(135deg, #050505 0%, #121212 42%, #252525 74%, #3b2609 100%);
 }
 
 .lobby-admin-gradient {
   background:
-    radial-gradient(circle at 10% 0%, rgb(29 185 84 / 0.18), transparent 28rem),
+    radial-gradient(circle at 10% 0%, rgb(255 200 87 / 0.16), transparent 28rem),
     radial-gradient(circle at 100% 12%, rgb(255 255 255 / 0.07), transparent 24rem),
-    linear-gradient(180deg, #0b0b0b 0%, #121212 56%, #090909 100%);
+    linear-gradient(180deg, #0b0b0b 0%, #121212 56%, #050505 100%);
 }
 
 .lobby-admin-topbar-gradient {
-  background: linear-gradient(135deg, rgb(18 18 18 / 0.96) 0%, rgb(31 31 31 / 0.92) 64%, rgb(29 185 84 / 0.14) 100%);
+  background: linear-gradient(135deg, rgb(18 18 18 / 0.96) 0%, rgb(31 31 31 / 0.92) 64%, rgb(255 200 87 / 0.14) 100%);
 }
 
 .lobby-home-sketch {
@@ -111,7 +113,7 @@ body {
   background: #181818;
 }
 
-/* Spotify-style compatibility layer for older hard-coded utility colors. */
+/* Taxi-amber compatibility layer for older hard-coded utility colors. */
 [class~="bg-white"],
 [class~="bg-white/95"],
 [class~="bg-white/90"],
@@ -141,7 +143,7 @@ body {
 [class~="bg-[#2F80ED]"],
 [class~="bg-green-600"] {
   background-color: var(--lobby-green) !important;
-  color: #06120a !important;
+  color: #1a1205 !important;
 }
 
 [class~="hover:bg-[#2F80ED]"]:hover,
@@ -152,7 +154,7 @@ body {
 [class~="hover:bg-green-600"]:hover,
 [class~="hover:bg-green-100"]:hover {
   background-color: var(--lobby-green-bright) !important;
-  color: #06120a !important;
+  color: #1a1205 !important;
 }
 
 [class~="text-[#2F80ED]"],
@@ -215,13 +217,13 @@ body {
 [class~="hover:border-[#58A6FF]/20"]:hover,
 [class~="hover:border-[#58A6FF]/30"]:hover,
 .group:hover [class~="group-hover:border-[#CFE4FF]"] {
-  border-color: rgb(29 185 84 / 0.42) !important;
+  border-color: rgb(255 200 87 / 0.42) !important;
 }
 
 [class~="ring-slate-100"],
 [class~="ring-[#CFE4FF]"],
 [class~="ring-green-100"] {
-  --tw-ring-color: rgb(29 185 84 / 0.26) !important;
+  --tw-ring-color: rgb(255 200 87 / 0.26) !important;
 }
 
 [class~="focus:border-[#58A6FF]"]:focus,
@@ -231,13 +233,13 @@ body {
 
 [class~="focus:ring-[#58A6FF]/10"]:focus,
 [class~="focus:ring-[#58A6FF]/20"]:focus {
-  --tw-ring-color: rgb(30 215 96 / 0.24) !important;
+  --tw-ring-color: rgb(255 200 87 / 0.24) !important;
 }
 
 [class~="shadow-[#58A6FF]/10"],
 [class~="shadow-[#58A6FF]/20"],
 [class~="shadow-[#58A6FF]/30"] {
-  --tw-shadow-color: rgb(29 185 84 / 0.28) !important;
+  --tw-shadow-color: rgb(255 200 87 / 0.28) !important;
 }
 
 [class~="from-[#58A6FF]"] {
@@ -247,7 +249,7 @@ body {
 [class~="from-[#58A6FF]/40"],
 [class~="from-[#58A6FF]/35"],
 [class~="from-[#58A6FF]/20"] {
-  --tw-gradient-from: rgb(29 185 84 / 0.24) !important;
+  --tw-gradient-from: rgb(255 200 87 / 0.24) !important;
 }
 
 [class~="to-[#FF6B6B]"] {
@@ -256,7 +258,7 @@ body {
 
 [class~="to-[#58A6FF]"],
 [class~="to-[#58A6FF]/20"] {
-  --tw-gradient-to: rgb(29 185 84 / 0.16) !important;
+  --tw-gradient-to: rgb(255 200 87 / 0.16) !important;
 }
 
 [class~="from-[#FFEDD5]"],
@@ -277,15 +279,15 @@ body {
 [class~="to-white"] {
   --tw-gradient-from: rgb(31 31 31 / 0.94) !important;
   --tw-gradient-via: rgb(24 24 24 / 0.88) !important;
-  --tw-gradient-to: rgb(29 185 84 / 0.18) !important;
+  --tw-gradient-to: rgb(255 200 87 / 0.18) !important;
 }
 
 [class~="via-[#FF6B6B]"] {
-  --tw-gradient-via: rgb(29 185 84 / 0.32) !important;
+  --tw-gradient-via: rgb(255 200 87 / 0.32) !important;
 }
 
 .group:hover [class~="group-hover:bg-[#EAF4FF]"] {
-  background-color: rgb(29 185 84 / 0.16) !important;
+  background-color: rgb(255 200 87 / 0.16) !important;
 }
 
 [class~="bg-[#58A6FF]"][class~="text-slate-950"],
@@ -295,7 +297,7 @@ body {
 [class~="bg-gradient-to-r"][class~="from-[#58A6FF]"],
 button[class~="bg-[#58A6FF]"],
 a[class~="bg-[#58A6FF]"] {
-  color: #06120a !important;
+  color: #1a1205 !important;
 }
 
 @font-face {

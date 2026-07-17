@@ -37,7 +37,7 @@ export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLo
         
         {/* Header */}
         <div className="h-20 flex items-center justify-between px-6 border-b border-white/10">
-          <span className="text-xl font-black tracking-tighter">THE LOBBY<span className="text-[#1ED760]">.</span></span>
+          <span className="text-xl font-black tracking-tighter">THE LOBBY<span className="text-[#FFC857]">.</span></span>
           <button onClick={onClose} className="md:hidden text-slate-400 hover:text-white">
             <X size={24} />
           </button>
@@ -51,7 +51,7 @@ export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLo
               onClick={() => { setActiveTab(item.id); onClose(); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition font-medium text-sm ${
                 activeTab === item.id 
-                  ? 'bg-[#1DB954] text-[#06120a] shadow-lg shadow-[#1DB954]/30'
+                  ? 'bg-[#FFC857] text-[#1A1205] shadow-lg shadow-[#FFC857]/30'
                   : 'text-[#b3b3b3] hover:bg-[#181818] hover:text-white'
               }`}
             >

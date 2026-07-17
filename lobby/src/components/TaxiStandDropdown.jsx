@@ -14,7 +14,7 @@ const VARIANT_STYLES = {
   },
   search: {
     root: 'w-full',
-    button: 'min-h-14 rounded-2xl border border-white/10 bg-[#181818] px-4 shadow-sm focus:border-[#1ED760] focus:ring-2 focus:ring-[#1ED760]/20',
+    button: 'min-h-14 rounded-2xl border border-white/10 bg-[#181818] px-4 shadow-sm focus:border-[#FFC857] focus:ring-2 focus:ring-[#FFC857]/20',
     iconWrap: 'h-9 w-9 rounded-xl bg-[#242424]',
     label: 'text-base',
   },
@@ -123,7 +123,7 @@ export default function TaxiStandDropdown({
           setIsOpen((current) => !current);
         }}
       >
-        <span className={`flex shrink-0 items-center justify-center text-[#1ED760] ${styles.iconWrap}`}>
+        <span className={`flex shrink-0 items-center justify-center text-[#FFC857] ${styles.iconWrap}`}>
           <Car size={20} />
         </span>
 
@@ -140,7 +140,7 @@ export default function TaxiStandDropdown({
 
         <ChevronDown
           size={18}
-          className={`shrink-0 text-[#b3b3b3] transition ${isOpen ? 'rotate-180 text-[#1ED760]' : ''}`}
+          className={`shrink-0 text-[#b3b3b3] transition ${isOpen ? 'rotate-180 text-[#FFC857]' : ''}`}
         />
       </button>
 
@@ -185,11 +185,11 @@ function TaxiStandOption({ name, location, status, statusColor, isSelected, onSe
       onClick={onSelect}
       className={`mb-1 flex w-full items-center gap-3 rounded-2xl p-3 text-left transition last:mb-0 ${
         isSelected
-          ? 'bg-[#1DB954]/15 text-[#1ED760]'
+          ? 'bg-[#FFC857]/15 text-[#FFC857]'
           : 'text-[#d4d4d4] hover:bg-[#242424]'
       }`}
     >
-      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isSelected ? 'bg-[#242424] text-[#1ED760]' : 'bg-[#242424] text-[#b3b3b3]'}`}>
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isSelected ? 'bg-[#242424] text-[#FFC857]' : 'bg-[#242424] text-[#b3b3b3]'}`}>
         {isSelected ? <Check size={18} /> : <MapPin size={18} />}
       </span>
 

@@ -49,8 +49,8 @@ export default function DriverHero({ userName = "Nilesh", clerkId, initialIsOnli
       <div 
         className={`absolute inset-0 transition-all duration-700 pointer-events-none ${
           isOnline && isVerified
-            ? "bg-linear-to-br from-[#1DB954]/28 via-[#242424]/45 to-[#050505]/20"
-            : "bg-linear-to-br from-[#1DB954]/16 via-[#181818]/55 to-[#050505]/30"
+            ? "bg-linear-to-br from-[#FFC857]/28 via-[#242424]/45 to-[#050505]/20"
+            : "bg-linear-to-br from-[#FFC857]/16 via-[#181818]/55 to-[#050505]/30"
         }`}
       />
 
@@ -63,11 +63,11 @@ export default function DriverHero({ userName = "Nilesh", clerkId, initialIsOnli
           <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white border border-slate-200/80 shadow-xs mb-6 transition-all">
             <span className="relative flex h-2.5 w-2.5">
               {isOnline && isVerified && (
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1ED760] opacity-75"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FFC857] opacity-75"></span>
               )}
               <span 
                 className={`relative inline-flex rounded-full h-2.5 w-2.5 transition-colors duration-300 ${
-                  !isVerified ? "bg-amber-500" : isOnline ? "bg-[#1ED760]" : "bg-slate-400"
+                  !isVerified ? "bg-amber-500" : isOnline ? "bg-[#FFC857]" : "bg-slate-400"
                 }`}
               />
             </span>
@@ -78,7 +78,7 @@ export default function DriverHero({ userName = "Nilesh", clerkId, initialIsOnli
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-slate-900 mb-4 leading-tight">
             Ready to drive, <br className="hidden sm:block" />
-            <span className={isOnline && isVerified ? "text-[#1ED760]" : "text-slate-400"}>
+            <span className={isOnline && isVerified ? "text-[#FFC857]" : "text-slate-400"}>
               {userName}?
             </span>
           </h1>
@@ -97,7 +97,7 @@ export default function DriverHero({ userName = "Nilesh", clerkId, initialIsOnli
               
               <div className="flex items-center gap-3.5 text-left">
                 <div className={`p-3.5 rounded-2xl transition-colors duration-300 ${
-                   !isVerified ? "bg-amber-50 text-amber-500" : isOnline ? "bg-[#1DB954]/15 text-[#1ED760]" : "bg-slate-100 text-slate-400"
+                   !isVerified ? "bg-amber-50 text-amber-500" : isOnline ? "bg-[#FFC857]/15 text-[#FFC857]" : "bg-slate-100 text-slate-400"
                 }`}>
                   {!isVerified ? <Lock size={26} /> : <Radio size={26} className={isOnline ? "animate-pulse" : ""} />}
                 </div>
@@ -120,7 +120,7 @@ export default function DriverHero({ userName = "Nilesh", clerkId, initialIsOnli
                     ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
                     : isOnline
                     ? "bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/60 shadow-rose-500/10 active:scale-95 cursor-pointer"
-                    : "bg-[#1DB954] hover:bg-[#1ED760] text-[#06120a] shadow-[#1DB954]/20 hover:shadow-lg hover:shadow-[#1DB954]/30 active:scale-95 cursor-pointer"
+                    : "bg-[#FFC857] hover:bg-[#F59E0B] text-[#1A1205] shadow-[#FFC857]/20 hover:shadow-lg hover:shadow-[#FFC857]/30 active:scale-95 cursor-pointer"
                 }`}
               >
                 {!isVerified ? <Lock size={18} /> : <Power size={18} />}
@@ -132,11 +132,11 @@ export default function DriverHero({ userName = "Nilesh", clerkId, initialIsOnli
 
           <div className="mt-8 flex items-center justify-center md:justify-start gap-6 text-xs font-bold text-slate-400">
             <span className="flex items-center gap-1.5">
-              <ShieldCheck size={16} className="text-[#1ED760]" /> Zero Commission
+              <ShieldCheck size={16} className="text-[#FFC857]" /> Zero Commission
             </span>
             <span>•</span>
             <span className="flex items-center gap-1.5">
-              <MapPin size={16} className="text-[#1ED760]" /> Kohima Region
+              <MapPin size={16} className="text-[#FFC857]" /> Kohima Region
             </span>
           </div>
 

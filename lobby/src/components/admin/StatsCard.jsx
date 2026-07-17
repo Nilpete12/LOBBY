@@ -5,16 +5,16 @@ export default function StatsCard({ title, value, icon: Icon, trend, color }) {
   
   // Dynamic color classes based on the 'color' prop
   const colorClasses = {
-    blue: "bg-[#1DB954]/15 text-[#1ED760]",
+    blue: "bg-[#FFC857]/15 text-[#FFC857]",
     indigo: "bg-indigo-50 text-indigo-600",
-    green: "bg-[#1DB954]/15 text-[#1ED760]",
+    green: "bg-[#FFC857]/15 text-[#FFC857]",
     orange: "bg-orange-50 text-orange-600",
   };
 
   const activeColor = colorClasses[color] || colorClasses.blue;
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-[#181818]/90 p-4 shadow-sm transition hover:border-[#1DB954]/30 hover:shadow-md sm:p-6">
+    <div className="rounded-3xl border border-white/10 bg-[#181818]/90 p-4 shadow-sm transition hover:border-[#FFC857]/30 hover:shadow-md sm:p-6">
       <div className="mb-4 flex items-start justify-between gap-2">
         <div className={`rounded-2xl p-2.5 sm:p-3 ${activeColor}`}>
           <Icon size={22} />
