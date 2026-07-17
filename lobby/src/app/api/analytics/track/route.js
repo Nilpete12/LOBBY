@@ -8,7 +8,7 @@ const CONTACT_EVENT_TYPES = new Set(['call_click', 'whatsapp_click']);
 const OPTIONAL_ANALYTICS_COLUMNS = new Set(['lead_status']);
 
 export async function POST(request) {
-  const limited = rateLimit(request, {
+  const limited = await rateLimit(request, {
     keyPrefix: 'analytics-track',
     limit: 30,
     windowMs: 60 * 1000,

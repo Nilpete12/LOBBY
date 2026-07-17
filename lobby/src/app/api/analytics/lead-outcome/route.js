@@ -16,7 +16,7 @@ function leadStatusForOutcome(outcome) {
 }
 
 export async function POST(request) {
-  const limited = rateLimit(request, {
+  const limited = await rateLimit(request, {
     keyPrefix: 'lead-outcome',
     limit: 20,
     windowMs: 10 * 60 * 1000,

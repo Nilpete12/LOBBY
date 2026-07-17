@@ -2,14 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from "@/lib/supabase";
 import { MapPin, Navigation, User, CheckCircle, XCircle, Phone, Clock } from "lucide-react";
-
-// Initialize Supabase Client for frontend subscriptions
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 export default function IncomingRideAlert() {
   const { isLoaded, isSignedIn, user } = useUser();

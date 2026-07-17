@@ -8,7 +8,7 @@ function cleanString(value, maxLength = 5000) {
 }
 
 export async function POST(request) {
-  const limited = rateLimit(request, {
+  const limited = await rateLimit(request, {
     keyPrefix: 'support-notify',
     limit: 5,
     windowMs: 10 * 60 * 1000,
