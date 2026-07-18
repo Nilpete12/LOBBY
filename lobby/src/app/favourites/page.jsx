@@ -5,19 +5,38 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { CheckCircle2, Hash, Heart, MapPin, Phone, Search, Star, Trash2, X } from 'lucide-react';
+import { CheckCircle2, Hash, Heart, MapPin, MessageCircle, Phone, Plus, Search, Star, Trash2, X } from 'lucide-react';
 import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
-import { saveRecentDriverContact } from '@/lib/recentContacts';
+import { loadRecentDriverContacts, saveRecentDriverContact } from '@/lib/recentContacts';
 
 const STORAGE_KEY = 'lobby:favourite-drivers';
+
+function driverId(driver = {}) {
+  return String(driver._id || driver.id || driver.clerkId || driver.phone || '').trim();
+}
 
 function loadFavourites() {
   try {
     const parsed = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]');
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.filter((driver) => driverId(driver)) : [];
   } catch {
     return [];
   }
+}
+
+function saveFavourites(drivers = []) {
+  const deduped = [];
+  const seen = new Set();
+
+  for (const driver of drivers) {
+    const id = driverId(driver);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    deduped.push({ ...driver, _id: id });
+  }
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(deduped));
+  return deduped;
 }
 
 export default function FavouritesPage() {
@@ -25,6 +44,9 @@ export default function FavouritesPage() {
   const router = useRouter();
   const [favourites, setFavourites] = useState(() =>
     typeof window === 'undefined' ? [] : loadFavourites()
+  );
+  const [recentContacts, setRecentContacts] = useState(() =>
+    typeof window === 'undefined' ? [] : loadRecentDriverContacts()
   );
   const [toast, setToast] = useState('');
 
@@ -54,11 +76,49 @@ export default function FavouritesPage() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const removeFavourite = (driverId) => {
-    const removedDriver = favourites.find((driver) => (driver._id || driver.id) === driverId);
-    const next = favourites.filter((driver) => (driver._id || driver.id) !== driverId);
+  useEffect(() => {
+    let cancelled = false;
+    const syncRecentContacts = () => {
+      if (!cancelled) setRecentContacts(loadRecentDriverContacts());
+    };
+
+    window.queueMicrotask(syncRecentContacts);
+    window.addEventListener('storage', syncRecentContacts);
+    window.addEventListener('lobby:recent-driver-contacts', syncRecentContacts);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('storage', syncRecentContacts);
+      window.removeEventListener('lobby:recent-driver-contacts', syncRecentContacts);
+    };
+  }, []);
+
+  const addFavourite = (driver) => {
+    const id = driverId(driver);
+    if (!id) return;
+
+    if (favourites.some((item) => driverId(item) === id)) {
+      setToast(`${driver.fullName || 'Driver'} is already in favourites.`);
+      return;
+    }
+
+    const next = saveFavourites([
+      {
+        ...driver,
+        _id: id,
+        favouriteAddedAt: new Date().toISOString(),
+      },
+      ...favourites,
+    ]);
+
     setFavourites(next);
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setToast(`${driver.fullName || 'Driver'} added to favourites.`);
+  };
+
+  const removeFavourite = (targetDriverId) => {
+    const removedDriver = favourites.find((driver) => driverId(driver) === targetDriverId);
+    const next = saveFavourites(favourites.filter((driver) => driverId(driver) !== targetDriverId));
+    setFavourites(next);
     setToast(`${removedDriver?.fullName || 'Driver'} removed from favourites.`);
   };
 
@@ -66,6 +126,9 @@ export default function FavouritesPage() {
     saveRecentDriverContact(driver, 'call');
     setToast(`${driver.fullName || 'Driver'} added to Recently Contacted.`);
   };
+
+  const favouriteIds = new Set(favourites.map(driverId));
+  const recentToAdd = recentContacts.filter((driver) => !favouriteIds.has(driverId(driver))).slice(0, 6);
 
   if (!isLoaded) {
     return (
@@ -106,6 +169,38 @@ export default function FavouritesPage() {
           </div>
         </section>
 
+        {recentContacts.length > 0 && (
+          <section className="mb-6 rounded-[1.5rem] border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-[2rem] sm:p-6">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-wide text-slate-400">Recently Contacted</p>
+                <h2 className="mt-1 text-lg font-extrabold tracking-tight text-slate-900">
+                  Add trusted drivers fast
+                </h2>
+              </div>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500">
+                {recentToAdd.length} new
+              </span>
+            </div>
+
+            {recentToAdd.length === 0 ? (
+              <div className="rounded-2xl bg-green-50 p-4 text-sm font-bold text-green-700 ring-1 ring-green-100">
+                Every recently contacted driver is already in your favourites.
+              </div>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2">
+                {recentToAdd.map((driver) => (
+                  <RecentlyContactedFavouriteCard
+                    key={driverId(driver)}
+                    driver={driver}
+                    onAdd={() => addFavourite(driver)}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
         {favourites.length === 0 ? (
           <section className="rounded-[1.5rem] border border-slate-200 bg-white/85 px-5 py-14 text-center shadow-sm backdrop-blur-sm sm:rounded-[2rem]">
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
@@ -115,7 +210,7 @@ export default function FavouritesPage() {
               No favourites saved yet
             </h2>
             <p className="mx-auto mt-2 max-w-xs text-sm font-medium text-slate-500">
-              Find a driver and keep the ones you trust close.
+              Find a driver, or save one from your recently contacted list above.
             </p>
             <Link
               href="/search"
@@ -128,14 +223,14 @@ export default function FavouritesPage() {
         ) : (
           <section className="grid gap-3 sm:gap-4 md:grid-cols-2">
             {favourites.map((driver) => {
-              const driverId = driver._id || driver.id;
+              const currentDriverId = driverId(driver);
               const routes = Array.isArray(driver.routes) && driver.routes.length > 0
                 ? driver.routes
                 : ['Local City Run'];
 
               return (
                 <article
-                  key={driverId}
+                  key={currentDriverId}
                   className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-lg sm:p-5"
                 >
                   <div className="flex gap-3">
@@ -181,7 +276,7 @@ export default function FavouritesPage() {
 
                         <button
                           type="button"
-                          onClick={() => removeFavourite(driverId)}
+                          onClick={() => removeFavourite(currentDriverId)}
                           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition hover:bg-rose-50 hover:text-rose-500"
                           aria-label="Remove favourite"
                         >
@@ -220,5 +315,82 @@ export default function FavouritesPage() {
         )}
       </div>
     </main>
+  );
+}
+
+function RecentlyContactedFavouriteCard({ driver, onAdd }) {
+  const lastContacted = driver.lastContacted || driver.lastCalled;
+  const method = driver.contactMethod === 'whatsapp' ? 'WhatsApp' : 'Call';
+
+  return (
+    <article className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-slate-900 text-white">
+          {driver.profilePic ? (
+            <Image
+              src={driver.profilePic}
+              alt={driver.fullName || 'Driver'}
+              fill
+              sizes="48px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-base font-bold">
+              {driver.fullName?.charAt(0) || 'D'}
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="truncate font-bold tracking-tight text-slate-900">
+                {driver.fullName || 'Driver'}
+              </h3>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
+                <span className="inline-flex items-center gap-1">
+                  {method === 'WhatsApp' ? <MessageCircle size={12} /> : <Phone size={12} />}
+                  {method}
+                </span>
+                {lastContacted && (
+                  <span>
+                    {new Date(lastContacted).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {driver.isVerified !== false && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-black text-green-700 ring-1 ring-green-100">
+                <CheckCircle2 size={10} />
+                Verified
+              </span>
+            )}
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-500">
+              <Hash size={11} />
+              <span className="truncate">{driver.vehiclePlate || 'Plate not added'}</span>
+            </span>
+            {(driver.currentStand || driver.taxiStands?.[0]) && (
+              <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-500">
+                <MapPin size={11} />
+                <span className="truncate">{driver.currentStand || driver.taxiStands[0]}</span>
+              </span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={onAdd}
+            className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-rose-50 px-4 text-sm font-black text-rose-600 ring-1 ring-rose-100 transition hover:bg-rose-100"
+          >
+            <Plus size={16} />
+            Add to Favourites
+          </button>
+        </div>
+      </div>
+    </article>
   );
 }
