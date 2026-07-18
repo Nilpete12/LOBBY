@@ -14,7 +14,7 @@ const EXPORTS = {
   riders: {
     table: 'users',
     fileName: 'lobby-riders.csv',
-    columns: ['id', 'clerk_id', 'full_name', 'email', 'phone', 'account_status', 'created_at'],
+    columns: ['id', 'clerk_id', 'full_name', 'email', 'phone', 'email_verified_at', 'phone_verified_at', 'contact_verified_at', 'account_status', 'created_at'],
     apply: (query) => query.eq('role', 'rider'),
   },
   bookings: {

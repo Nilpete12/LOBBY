@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useUser, useClerk } from '@clerk/nextjs';
-import { Phone, Clock, LogOut, History, CheckCircle2, AlertCircle, X, Hash, MessageCircle } from 'lucide-react';
+import { Phone, Clock, LogOut, History, CheckCircle2, AlertCircle, X, Hash, MessageCircle, Mail, ShieldCheck } from 'lucide-react';
 import API_BASE_URL from '@/config';
 import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
 import { loadRecentDriverContacts, saveRecentDriverContact } from '@/lib/recentContacts';
@@ -129,6 +129,11 @@ export default function RiderDashboard() {
 
   if (!user) return null;
 
+  const profileEmail = primaryEmailContact(user);
+  const profilePhone = primaryPhoneContact(user);
+  const profileEmailValue = profileEmail?.emailAddress || '';
+  const profilePhoneValue = profilePhone?.phoneNumber || '';
+
   return (
     <div className="lobby-dashboard-gradient min-h-screen px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-4xl">
@@ -159,7 +164,7 @@ export default function RiderDashboard() {
                 {user.fullName || "Rider"}
               </h1>
               <p className="mt-1 break-all text-xs font-medium text-slate-500 sm:text-sm">
-                Rider Account • {user.primaryEmailAddress?.emailAddress}
+                Rider Account • {profileEmailValue || 'Contact not added'}
               </p>
             </div>
           </div>
@@ -172,6 +177,37 @@ export default function RiderDashboard() {
             Logout
           </button>
         </div>
+
+        <section className="mb-6 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:mb-8 sm:rounded-4xl sm:p-6">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-[#FFEDD5] to-[#DCEBFF] text-[#2F80ED] shadow-sm">
+              <ShieldCheck size={22} />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-lg font-extrabold tracking-tight text-slate-900 sm:text-xl">
+                Verified Contact
+              </h2>
+              <p className="text-xs font-semibold text-slate-500 sm:text-sm">
+                Used for ride updates, support, and account recovery.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <VerifiedContactBlock
+              icon={Mail}
+              label="Email"
+              value={profileEmailValue || 'Not added'}
+              verified={contactVerified(profileEmail)}
+            />
+            <VerifiedContactBlock
+              icon={Phone}
+              label="Phone"
+              value={profilePhoneValue || 'Not added'}
+              verified={contactVerified(profilePhone)}
+            />
+          </div>
+        </section>
 
         {/* Recent Contacts */}
         <div className="min-h-104 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-4xl sm:p-8">
@@ -311,6 +347,50 @@ export default function RiderDashboard() {
         )}
 
       </div>
+    </div>
+  );
+}
+
+function contactVerified(contact = {}) {
+  return contact?.verification?.status === 'verified' || contact?.verified === true;
+}
+
+function primaryEmailContact(user) {
+  const emails = user?.emailAddresses || [];
+  return user?.primaryEmailAddress ||
+    emails.find((email) => email.id === user?.primaryEmailAddressId) ||
+    emails[0] ||
+    null;
+}
+
+function primaryPhoneContact(user) {
+  const phones = user?.phoneNumbers || [];
+  return user?.primaryPhoneNumber ||
+    phones.find((phone) => phone.id === user?.primaryPhoneNumberId) ||
+    phones[0] ||
+    null;
+}
+
+function VerifiedContactBlock({ icon: Icon, label, value, verified }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-slate-400">
+          <Icon size={16} />
+          {label}
+        </div>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black ${
+            verified
+              ? 'bg-green-50 text-green-700 ring-1 ring-green-100'
+              : 'bg-amber-50 text-amber-700 ring-1 ring-amber-100'
+          }`}
+        >
+          {verified && <CheckCircle2 size={12} />}
+          {verified ? 'Verified' : 'Needs OTP'}
+        </span>
+      </div>
+      <p className="break-all text-sm font-extrabold text-slate-950">{value}</p>
     </div>
   );
 }

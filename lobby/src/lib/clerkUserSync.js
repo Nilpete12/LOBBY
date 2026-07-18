@@ -5,10 +5,14 @@ import { writeWithColumnFallback } from '@/lib/supabaseColumnFallback';
 const ALLOWED_ROLES = new Set(['rider', 'driver']);
 const OPTIONAL_USER_COLUMNS = new Set([
   'email',
+  'phone',
   'image_url',
   'account_status',
   'verification_status',
   'subscription_status',
+  'email_verified_at',
+  'phone_verified_at',
+  'contact_verified_at',
 ]);
 
 function cleanString(value, maxLength = 500) {
@@ -27,6 +31,34 @@ function getPrimaryEmail(user = {}) {
     emailAddresses[0]?.email_address ||
     ''
   );
+}
+
+function getPrimaryPhone(user = {}) {
+  const phoneNumbers = user.phoneNumbers || user.phone_numbers || [];
+  const primaryPhoneNumberId = user.primaryPhoneNumberId || user.primary_phone_number_id;
+  const primaryPhone = phoneNumbers.find((phone) => phone.id === primaryPhoneNumberId);
+
+  return (
+    primaryPhone?.phoneNumber ||
+    primaryPhone?.phone_number ||
+    phoneNumbers[0]?.phoneNumber ||
+    phoneNumbers[0]?.phone_number ||
+    ''
+  );
+}
+
+function isVerifiedContact(contact = {}) {
+  return contact?.verification?.status === 'verified' || contact?.verified === true;
+}
+
+function hasVerifiedEmail(user = {}) {
+  const emailAddresses = user.emailAddresses || user.email_addresses || [];
+  return emailAddresses.some(isVerifiedContact);
+}
+
+function hasVerifiedPhone(user = {}) {
+  const phoneNumbers = user.phoneNumbers || user.phone_numbers || [];
+  return phoneNumbers.some(isVerifiedContact);
 }
 
 function getPublicMetadata(user = {}) {
@@ -59,7 +91,11 @@ export function clerkUserToRow(user = {}, overrides = {}) {
     clerk_id: user.id,
     full_name: fullName,
     email: cleanString(getPrimaryEmail(user), 254),
+    phone: cleanString(getPrimaryPhone(user), 40),
     image_url: cleanString(user.imageUrl || user.image_url, 1000),
+    ...(hasVerifiedEmail(user) ? { email_verified_at: new Date().toISOString() } : {}),
+    ...(hasVerifiedPhone(user) ? { phone_verified_at: new Date().toISOString() } : {}),
+    ...(hasVerifiedEmail(user) && hasVerifiedPhone(user) ? { contact_verified_at: new Date().toISOString() } : {}),
     ...(role ? { role } : {}),
   };
 }
@@ -80,8 +116,12 @@ export async function syncClerkUserToSupabase(user, overrides = {}) {
     const updateRow = {
       ...baseRow,
       email: baseRow.email || existing.email || '',
+      phone: baseRow.phone || existing.phone || '',
       image_url: baseRow.image_url || existing.image_url || '',
       role: baseRow.role || existing.role || 'rider',
+      email_verified_at: baseRow.email_verified_at || existing.email_verified_at || null,
+      phone_verified_at: baseRow.phone_verified_at || existing.phone_verified_at || null,
+      contact_verified_at: baseRow.contact_verified_at || existing.contact_verified_at || null,
     };
 
     const data = await writeWithColumnFallback(updateRow, OPTIONAL_USER_COLUMNS, (row) =>
