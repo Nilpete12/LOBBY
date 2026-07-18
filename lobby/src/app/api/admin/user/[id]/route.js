@@ -12,6 +12,7 @@ import { adminUnauthorized, isAdminAuthenticated } from '@/lib/adminAuth';
 import { deleteClerkUserAccount, updateClerkUserRole } from '@/lib/clerkUserSync';
 import { TAXI_STAND_NAMES } from '@/lib/taxiStands';
 import { normalizeVehicleType } from '@/lib/vehicleTypes';
+import { getDriverReadiness } from '@/lib/driverReadiness';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -207,6 +208,20 @@ export async function PATCH(request, context) {
       }
 
       updates.isAvailable = Boolean(body.isAvailable);
+      if (updates.isAvailable) {
+        const readiness = getDriverReadiness(user);
+        if (!readiness.ready) {
+          return adminJson(
+            {
+              success: false,
+              message: `Driver cannot be marked online yet. Missing: ${readiness.missingText}.`,
+              missing: readiness.missing,
+            },
+            { status: 400 }
+          );
+        }
+      }
+
       if (!updates.isAvailable) {
         updates.currentStand = null;
         updates.currentStandUpdatedAt = null;

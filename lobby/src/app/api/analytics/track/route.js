@@ -3,9 +3,13 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { rateLimit } from '@/lib/rateLimit';
 import { writeWithColumnFallback } from '@/lib/supabaseColumnFallback';
 
-const ALLOWED_EVENT_TYPES = new Set(['profile_view', 'call_click', 'whatsapp_click']);
+const ALLOWED_EVENT_TYPES = new Set(['search', 'profile_view', 'call_click', 'whatsapp_click']);
 const CONTACT_EVENT_TYPES = new Set(['call_click', 'whatsapp_click']);
-const OPTIONAL_ANALYTICS_COLUMNS = new Set(['lead_status']);
+const OPTIONAL_ANALYTICS_COLUMNS = new Set(['lead_status', 'destination', 'requested_stand', 'vehicle_type_filter']);
+
+function cleanString(value, maxLength = 500) {
+  return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
+}
 
 export async function POST(request) {
   const limited = await rateLimit(request, {
@@ -34,6 +38,11 @@ export async function POST(request) {
     };
 
     if (CONTACT_EVENT_TYPES.has(type)) eventRow.lead_status = 'pending';
+    if (type === 'search') {
+      eventRow.destination = cleanString(body.destination, 160) || null;
+      eventRow.requested_stand = cleanString(body.taxiStand, 120) || null;
+      eventRow.vehicle_type_filter = cleanString(body.vehicleTypeFilter, 40) || null;
+    }
 
     const event = await writeWithColumnFallback(
       eventRow,

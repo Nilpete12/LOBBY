@@ -4,6 +4,7 @@ import {
   BarChart3,
   BookOpenCheck,
   Car,
+  ClipboardCheck,
   LayoutDashboard,
   LogOut,
   MessagesSquare,
@@ -17,6 +18,7 @@ export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLo
   
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'pilot', label: 'Pilot Readiness', icon: ClipboardCheck },
     { id: 'verifications', label: 'Verifications', icon: ShieldCheck },
     { id: 'bookings', label: 'Bookings', icon: BookOpenCheck },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },

@@ -31,7 +31,7 @@ export default function InstantBook({ destination = "Kohima Town Center", taxiSt
     const bookingPhone = (phoneNumber || profilePhone).trim();
 
     if (bookingPhone.replace(/\D/g, "").length < 7) {
-      setErrorMessage("Add a phone number so the driver can call you after accepting.");
+      setErrorMessage("Add a phone number so the driver can call you after accepting, or use Call/WhatsApp from a driver card.");
       return;
     }
 
@@ -46,13 +46,13 @@ export default function InstantBook({ destination = "Kohima Town Center", taxiSt
         },
         (error) => {
           console.error("Location error:", error);
-          setErrorMessage("Please enable location access so nearby drivers can find your pickup point.");
+          setErrorMessage("Please enable location access for instant booking, or call/WhatsApp a driver directly from search.");
           setStatus("idle");
         },
         { enableHighAccuracy: true, maximumAge: 10000, timeout: 12000 }
       );
     } else {
-      setErrorMessage("This browser does not support location booking. Please call a driver directly.");
+      setErrorMessage("This browser does not support location booking. Please call or WhatsApp a driver directly from search.");
       setStatus("idle");
     }
   };
@@ -82,7 +82,7 @@ export default function InstantBook({ destination = "Kohima Town Center", taxiSt
       setStatus("waiting");
     } catch (error) {
       console.error("Booking failed:", error);
-      setErrorMessage(error.message || "Booking failed. Please try again.");
+      setErrorMessage(error.message || "Booking failed. Please use manual search and call/WhatsApp a driver directly.");
       setStatus("idle");
     }
   };

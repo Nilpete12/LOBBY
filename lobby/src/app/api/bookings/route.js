@@ -4,11 +4,41 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { formatBooking } from '@/lib/supabaseFormat';
 import { writeWithColumnFallback } from '@/lib/supabaseColumnFallback';
 import { getPlatformSettings } from '@/lib/platformSettings';
+import { isDriverPilotReady } from '@/lib/driverReadiness';
 
 const OPTIONAL_BOOKING_COLUMNS = new Set(['requested_stand']);
 
 function cleanString(value, maxLength = 500) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
+}
+
+function matchesRequestedStand(driver = {}, requestedStand = '') {
+  const stand = cleanString(requestedStand, 120).toLowerCase();
+  if (!stand) return true;
+
+  const currentStand = cleanString(driver.current_stand, 120).toLowerCase();
+  const taxiStands = Array.isArray(driver.taxi_stands) ? driver.taxi_stands : [];
+  const routes = Array.isArray(driver.routes) ? driver.routes : [];
+
+  return currentStand === stand ||
+    taxiStands.some((item) => cleanString(item, 120).toLowerCase() === stand) ||
+    routes.some((route) => cleanString(route, 120).toLowerCase().includes(stand));
+}
+
+async function loadBookableDrivers(requestedStand = '') {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('role', 'driver')
+    .eq('is_available', true)
+    .eq('is_verified', true)
+    .or('account_status.is.null,account_status.neq.suspended');
+
+  if (error) throw error;
+
+  return (data || [])
+    .filter(isDriverPilotReady)
+    .filter((driver) => matchesRequestedStand(driver, requestedStand));
 }
 
 export async function POST(req) {
@@ -42,6 +72,19 @@ export async function POST(req) {
 
     if (cleanPhone.replace(/\D/g, '').length < 7) {
       return NextResponse.json({ success: false, message: 'A phone number is required for driver callback' }, { status: 400 });
+    }
+
+    const bookableDrivers = await loadBookableDrivers(cleanRequestedStand);
+    if (bookableDrivers.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: cleanRequestedStand
+            ? `No verified drivers are online at ${cleanRequestedStand} right now. Try another taxi stand or call/WhatsApp a driver from search.`
+            : 'No verified drivers are online right now. Try again later or call/WhatsApp a driver from search.',
+        },
+        { status: 409 }
+      );
     }
 
     const bookingRow = {

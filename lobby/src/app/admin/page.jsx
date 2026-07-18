@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Activity, AlertCircle, Ban, Bell, BookOpenCheck, Car, CheckCircle2, Clock, 
   CreditCard, Eye, Flag, Menu, MessageCircle, Phone, RefreshCw, RotateCcw, 
-  Download, Save, ShieldCheck, ToggleRight, Users, X, XCircle,
+  Download, Save, Search, ShieldCheck, ToggleRight, Users, X, XCircle,
 } from 'lucide-react';
 
 import UserTable from '@/components/admin/UserTable';
@@ -15,6 +15,7 @@ import Sidebar from '@/components/admin/Sidebar';
 import API_BASE_URL from '@/config';
 import { TAXI_STANDS } from '@/lib/taxiStands';
 import { VEHICLE_TYPES, vehicleTypeLabel } from '@/lib/vehicleTypes';
+import { getDriverReadiness } from '@/lib/driverReadiness';
 
 const EMPTY_STATS = {
   totalUsers: 0,
@@ -29,11 +30,26 @@ const EMPTY_STATS = {
   totalCalls: 0,
   totalProfileViews: 0,
   totalWhatsAppClicks: 0,
+  totalSearches: 0,
   reportedCompletedRides: 0,
   riderConfirmedRides: 0,
   bookingStatus: {},
   topDestinations: [],
   recentActivity: [],
+  pilotReadiness: {
+    driversReady: 0,
+    verifiedDrivers: 0,
+    pendingDocuments: 0,
+    ridersRegistered: 0,
+    openComplaints: 0,
+    brokenProfiles: 0,
+    withoutPhone: 0,
+    withoutPlate: 0,
+    withoutStand: 0,
+    readinessPercent: 0,
+    blockers: [],
+    driverIssues: [],
+  },
 };
 
 const DEFAULT_SETTINGS = {
@@ -73,6 +89,7 @@ async function requestAdminSession(signal) {
 
 const MOBILE_TABS = [
   { id: 'dashboard', label: 'Home' },
+  { id: 'pilot', label: 'Pilot' },
   { id: 'verifications', label: 'Verify' },
   { id: 'bookings', label: 'Bookings' },
   { id: 'analytics', label: 'Analytics' },
@@ -839,6 +856,7 @@ export default function AdminPage() {
         <StatsCard title="Users" value={stats.totalUsers} icon={Users} color="blue" />
         <StatsCard title="Drivers" value={stats.totalDrivers} icon={Car} color="indigo" />
         <StatsCard title="Pending" value={stats.pendingVerificationRequests} icon={ShieldCheck} trend="Review" color="orange" />
+        <StatsCard title="Searches" value={stats.totalSearches || 0} icon={Eye} trend="Rider intent" color="blue" />
         <StatsCard title="Calls" value={stats.totalCalls} icon={Phone} trend="Leads" color="green" />
         <StatsCard title="Reports" value={stats.activeDriverReports} icon={Flag} trend="Active" color="orange" />
         <StatsCard title="Paid" value={stats.paidSubscriptions} icon={CreditCard} trend="Drivers" color="blue" />
@@ -867,6 +885,7 @@ export default function AdminPage() {
         <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <SectionHeader title="Operations" subtitle={`${stats.activeDrivers} drivers online`} />
           <div className="grid gap-3">
+            <QuickAction icon={ShieldCheck} label={`${stats.pilotReadiness?.driversReady || 0} pilot-ready drivers`} onClick={() => setActiveTab('pilot')} />
             <QuickAction icon={BookOpenCheck} label={`${stats.bookingStatus?.pending || 0} pending bookings`} onClick={() => setActiveTab('bookings')} />
             <QuickAction icon={Flag} label={`${stats.activeDriverReports || 0} active driver reports`} onClick={() => setActiveTab('complaints')} />
             <QuickAction icon={CreditCard} label={`${stats.paidSubscriptions || 0} paid subscriptions`} onClick={() => setActiveTab('drivers')} />
@@ -883,6 +902,114 @@ export default function AdminPage() {
 
       <UserTable limit={5} refreshKey={usersRefreshKey} onChanged={refreshAdminData} onSelectUser={openUserDetail} />
     </div>
+    );
+  };
+
+  const renderPilotReadiness = () => {
+    const pilot = stats.pilotReadiness || EMPTY_STATS.pilotReadiness;
+    const blockers = Array.isArray(pilot.blockers) ? pilot.blockers : [];
+    const driverIssues = Array.isArray(pilot.driverIssues) ? pilot.driverIssues : [];
+    const readinessPercent = Math.max(0, Math.min(100, pilot.readinessPercent || 0));
+    const unpaidDriverCount = Math.max(0, (stats.totalDrivers || 0) - (stats.paidSubscriptions || 0));
+
+    return (
+      <div className="space-y-6">
+        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="bg-slate-950 p-5 text-white sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-wide text-white/45">Pilot Readiness Mode</p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
+                  {pilot.driversReady || 0} of {stats.totalDrivers || 0} drivers ready
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/60">
+                  A driver is pilot-ready only when phone, vehicle type, number plate, taxi stand, vehicle photo,
+                  license photo, verification, and account status are all clean.
+                </p>
+              </div>
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-[#FFC857] text-2xl font-black text-[#1A1205]">
+                {readinessPercent}%
+              </div>
+            </div>
+            <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
+              <div className="h-full rounded-full bg-[#FFC857] transition-all" style={{ width: `${readinessPercent}%` }} />
+            </div>
+          </div>
+        </section>
+
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-6">
+          <PilotMetricCard label="Drivers Ready" value={pilot.driversReady || 0} tone="green" />
+          <PilotMetricCard label="Verified Drivers" value={pilot.verifiedDrivers || 0} tone="blue" />
+          <PilotMetricCard label="Pending Docs" value={pilot.pendingDocuments || 0} tone="amber" />
+          <PilotMetricCard label="Riders Registered" value={pilot.ridersRegistered || stats.totalRiders || 0} tone="slate" />
+          <PilotMetricCard label="Open Complaints" value={pilot.openComplaints || 0} tone="red" />
+          <PilotMetricCard label="Broken Profiles" value={pilot.brokenProfiles || 0} tone="amber" />
+          <PilotMetricCard label="No Phone" value={pilot.withoutPhone || 0} tone="red" />
+          <PilotMetricCard label="No Plate/Stand" value={(pilot.withoutPlate || 0) + (pilot.withoutStand || 0)} tone="red" />
+        </div>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+          <SectionHeader title="Fix First" subtitle="The fastest path to a clean 80-driver pilot." />
+          {blockers.length ? (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {blockers.map((blocker) => (
+                <PilotBlockerButton
+                  key={blocker.key}
+                  blocker={blocker}
+                  onClick={() => setActiveTab(blocker.tab || 'drivers')}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState label="No pilot blockers found. Keep the driver list fresh before launch." />
+          )}
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+          <SectionHeader
+            title="Broken Driver Profiles"
+            subtitle="Tap a driver to fix missing pilot fields."
+            actionLabel="Open Drivers"
+            onAction={() => setActiveTab('drivers')}
+          />
+          {driverIssues.length ? (
+            <div className="grid gap-3 lg:grid-cols-2">
+              {driverIssues.map((driver) => (
+                <PilotDriverIssue
+                  key={driver.id || driver.clerkId}
+                  driver={driver}
+                  onOpen={() => openUserDetail(driver.id || driver.clerkId)}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState label="No broken driver profiles in the first 1,000 users." />
+          )}
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+          <SectionHeader title="Emergency Mobile Controls" subtitle="Quick actions for running the pilot from your phone." />
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            <PilotControlButton icon={Car} label="Drivers" onClick={() => setActiveTab('drivers')} />
+            <PilotControlButton icon={ShieldCheck} label="Verify / Reject" onClick={() => setActiveTab('verifications')} />
+            <PilotControlButton icon={Flag} label="Complaints" onClick={() => setActiveTab('complaints')} />
+            <PilotControlButton icon={Activity} label="Call Leads" onClick={() => setActiveTab('analytics')} />
+            <PilotControlButton icon={Download} label="Export Drivers" onClick={() => downloadExport('drivers')} />
+            <PilotControlButton icon={Download} label="Export Riders" onClick={() => downloadExport('riders')} />
+            <PilotControlButton icon={MessageCircle} label="Payment Reminder" onClick={sendSubscriptionReminders} disabled={subscriptionReminderState.status === 'loading' || unpaidDriverCount === 0} />
+            <PilotControlButton icon={RefreshCw} label="Sync & Refresh" onClick={syncAndRefreshAdminWorkspace} disabled={syncState.status === 'loading'} />
+          </div>
+          {subscriptionReminderState.message && (
+            <p className={`mt-3 rounded-2xl border p-3 text-sm font-black ${
+              subscriptionReminderState.status === 'error'
+                ? 'border-red-100 bg-red-50 text-red-700'
+                : 'border-green-100 bg-green-50 text-green-700'
+            }`}>
+              {subscriptionReminderState.message}
+            </p>
+          )}
+        </section>
+      </div>
     );
   };
 
@@ -943,6 +1070,7 @@ export default function AdminPage() {
   const renderAnalytics = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-6">
+        <StatsCard title="Searches" value={stats.totalSearches || 0} icon={Search} color="blue" />
         <StatsCard title="Profile Views" value={stats.totalProfileViews || 0} icon={Eye} color="blue" />
         <StatsCard title="Call Clicks" value={stats.totalCalls || 0} icon={Phone} color="green" />
         <StatsCard title="WhatsApp" value={stats.totalWhatsAppClicks || 0} icon={MessageCircle} color="indigo" />
@@ -1084,6 +1212,8 @@ export default function AdminPage() {
         return <UserTable role="rider" exportType="riders" refreshKey={usersRefreshKey} onChanged={refreshAdminData} onSelectUser={openUserDetail} />;
       case 'drivers':
         return <UserTable role="driver" exportType="drivers" refreshKey={usersRefreshKey} onChanged={refreshAdminData} onSelectUser={openUserDetail} />;
+      case 'pilot':
+        return renderPilotReadiness();
       case 'verifications':
         return renderVerifications();
       case 'bookings':
@@ -1323,6 +1453,89 @@ function QuickAction({ icon: Icon, label, onClick }) {
     >
       <span>{label}</span>
       <Icon size={18} className="text-slate-400" />
+    </button>
+  );
+}
+
+function PilotMetricCard({ label, value, tone = 'slate' }) {
+  const tones = {
+    green: 'bg-green-50 text-green-700 ring-green-100',
+    blue: 'bg-[#EAF4FF] text-[#2F80ED] ring-[#CFE4FF]',
+    amber: 'bg-amber-50 text-amber-700 ring-amber-100',
+    red: 'bg-red-50 text-red-700 ring-red-100',
+    slate: 'bg-slate-50 text-slate-800 ring-slate-100',
+  };
+
+  return (
+    <div className={`rounded-3xl p-4 shadow-sm ring-1 sm:p-5 ${tones[tone] || tones.slate}`}>
+      <p className="text-xs font-black uppercase tracking-wide opacity-70">{label}</p>
+      <p className="mt-2 text-3xl font-black tracking-tight">{value}</p>
+    </div>
+  );
+}
+
+function PilotBlockerButton({ blocker, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex min-h-24 items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-[#58A6FF]/30 hover:bg-white"
+    >
+      <div className="min-w-0">
+        <p className="text-sm font-black text-slate-900">{blocker.label}</p>
+        <p className="mt-1 text-xs font-semibold text-slate-500">Tap to review</p>
+      </div>
+      <span className="flex h-12 min-w-12 shrink-0 items-center justify-center rounded-2xl bg-white px-3 text-lg font-black text-red-600 ring-1 ring-slate-100">
+        {blocker.count}
+      </span>
+    </button>
+  );
+}
+
+function PilotControlButton({ icon: Icon, label, onClick, disabled = false }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 text-sm font-black text-white transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+    >
+      <Icon size={17} />
+      {label}
+    </button>
+  );
+}
+
+function PilotDriverIssue({ driver, onOpen }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-[#58A6FF]/30 hover:bg-white"
+    >
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="truncate font-black text-slate-950">{driver.fullName || 'Unnamed driver'}</h3>
+          <p className="mt-1 text-xs font-semibold text-slate-500">{driver.phone || 'No phone added'}</p>
+        </div>
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${
+          driver.isAvailable ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-100' : 'bg-slate-100 text-slate-500'
+        }`}>
+          {driver.isAvailable ? 'Hidden until fixed' : 'Offline'}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {(driver.missing || []).slice(0, 5).map((item) => (
+          <span key={item} className="rounded-full bg-white px-2.5 py-1 text-xs font-black text-red-600 ring-1 ring-red-100">
+            {item}
+          </span>
+        ))}
+        {(driver.missing || []).length > 5 && (
+          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-black text-slate-500 ring-1 ring-slate-100">
+            +{driver.missing.length - 5}
+          </span>
+        )}
+      </div>
     </button>
   );
 }
@@ -1661,6 +1874,8 @@ function UserDetailDrawer({
   const isSuspended = user.accountStatus === 'suspended';
   const subscriptionStatus = user.subscriptionStatus || 'unpaid';
   const isSaving = saveState?.status === 'saving';
+  const driverReadiness = user.role === 'driver' ? getDriverReadiness(user) : null;
+  const canMarkOnline = user.role !== 'driver' || user.isAvailable || (!isSuspended && driverReadiness?.ready);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-3 sm:items-center sm:p-4" onClick={onClose}>
@@ -1755,10 +1970,16 @@ function UserDetailDrawer({
                   />
                 </div>
 
+                {driverReadiness && !driverReadiness.ready && (
+                  <p className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-3 text-sm font-bold leading-relaxed text-amber-800">
+                    Missing before this driver can go online: {driverReadiness.missingText}.
+                  </p>
+                )}
+
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
                   <button
                     onClick={() => onAvailabilityChange(!user.isAvailable)}
-                    disabled={isSuspended}
+                    disabled={isSuspended || !canMarkOnline}
                     className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#58A6FF] px-4 py-3 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
                   >
                     <ToggleRight size={16} />

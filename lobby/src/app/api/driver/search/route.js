@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { formatUser } from '@/lib/supabaseFormat';
+import { isDriverPilotReady } from '@/lib/driverReadiness';
 
 const SEARCH_DRIVER_COLUMNS = [
   'id',
@@ -92,6 +93,8 @@ export async function GET(req) {
 
     if (error) throw error;
 
+    drivers = (drivers || []).filter(isDriverPilotReady);
+
     // Optional: Filter by route if the rider typed a destination
     if (query && drivers) {
       drivers = drivers.filter(driver =>
@@ -127,6 +130,12 @@ export async function GET(req) {
 
   } catch (error) {
     console.error("Driver Search Error:", error);
-    return NextResponse.json({ success: false, message: "Search failed" }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: "We could not load drivers right now. Try refreshing, choose another taxi stand, or contact support.",
+      },
+      { status: 500 }
+    );
   }
 }

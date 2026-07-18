@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { CheckCircle, Clock, Download, Eye, Trash2, Search, RefreshCw } from 'lucide-react';
 import API_BASE_URL from '@/config';
 import { vehicleTypeLabel } from '@/lib/vehicleTypes';
+import { getDriverReadiness } from '@/lib/driverReadiness';
 
 function getStatus(user) {
   if (user.accountStatus === 'suspended') return { label: 'Suspended', tone: 'red', icon: Clock };
@@ -28,6 +29,21 @@ function StatusBadge({ user }) {
       {Icon && <Icon size={12} />}
       {status.label}
     </span>
+  );
+}
+
+function PilotReadinessLine({ user }) {
+  if (user.role !== 'driver') return null;
+
+  const readiness = getDriverReadiness(user);
+  if (readiness.ready) {
+    return <div className="mt-1 text-xs font-black text-green-700">Pilot ready</div>;
+  }
+
+  return (
+    <div className="mt-1 text-xs font-black text-red-600">
+      Missing: {readiness.missing.slice(0, 3).join(', ')}{readiness.missing.length > 3 ? ` +${readiness.missing.length - 3}` : ''}
+    </div>
   );
 }
 
@@ -207,6 +223,7 @@ export default function UserTable({ role, limit, refreshKey = 0, exportType, onC
                       <div className="text-xs font-black text-slate-500">Plate: {user.vehiclePlate || 'Not added'}</div>
                       <div className="text-xs font-black text-slate-500">Stand: {user.currentStand || 'Not checked in'}</div>
                       <div className="text-xs font-black text-slate-500">{user.isAvailable ? 'Online' : 'Offline'}</div>
+                      <PilotReadinessLine user={user} />
                     </div>
                   ) : <span className="text-xs font-semibold text-slate-400">Rider</span>}
                 </td>
@@ -272,6 +289,7 @@ export default function UserTable({ role, limit, refreshKey = 0, exportType, onC
                       <span className="mt-1 block text-sm font-black text-slate-800">
                         {user.isAvailable ? 'Online' : 'Offline'}{user.currentStand ? ` at ${user.currentStand}` : ''}
                       </span>
+                      <PilotReadinessLine user={user} />
                     </div>
                   </>
                 )}

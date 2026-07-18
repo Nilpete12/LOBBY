@@ -40,7 +40,7 @@ const EXPORTS = {
   analytics: {
     table: 'analytics',
     fileName: 'lobby-analytics.csv',
-    columns: ['id', 'event_type', 'driver_id', 'rider_id', 'lead_status', 'driver_outcome', 'rider_outcome', 'created_at'],
+    columns: ['id', 'event_type', 'driver_id', 'rider_id', 'destination', 'requested_stand', 'vehicle_type_filter', 'lead_status', 'driver_outcome', 'rider_outcome', 'created_at'],
   },
 };
 

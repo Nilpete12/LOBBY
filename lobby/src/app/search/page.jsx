@@ -106,7 +106,13 @@ export default function SearchPage() {
   const [isSubmittingFollowUp, setSubmittingFollowUp] = useState(false);
   const activeFetchRef = useRef(0);
   const abortRef = useRef(null);
+  const riderIdRef = useRef(null);
+  const lastTrackedSearchRef = useRef('');
   const riderId = user?.id || null;
+
+  useEffect(() => {
+    riderIdRef.current = riderId;
+  }, [riderId]);
 
   const visibleDrivers = useMemo(() => {
     if (activeFilter === 'top_rated') {
@@ -149,9 +155,38 @@ export default function SearchPage() {
     } catch (err) {
       if (err.name === 'AbortError') return;
       console.error("Fetch error:", err);
-      if (!cachedDrivers) setError("Could not connect to server. Is it running?");
+      if (!cachedDrivers) {
+        setError("We could not load drivers right now. Try refreshing, choose another taxi stand, or contact support.");
+      }
     } finally {
       if (activeFetchRef.current === fetchId) setLoading(false);
+    }
+  }, []);
+
+  const trackSearchEvent = useCallback(async (query = '', taxiStand = '', vehicleTypeFilter = 'all') => {
+    const normalizedQuery = query.trim();
+    const normalizedStand = taxiStand.trim();
+    const key = `${normalizedQuery.toLowerCase()}|${normalizedStand.toLowerCase()}|${vehicleTypeFilter}`;
+
+    if (!normalizedQuery && !normalizedStand && vehicleTypeFilter === 'all') return;
+    if (lastTrackedSearchRef.current === key) return;
+
+    lastTrackedSearchRef.current = key;
+
+    try {
+      await fetch(`${API_BASE_URL}/analytics/track`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'search',
+          destination: normalizedQuery,
+          taxiStand: normalizedStand,
+          vehicleTypeFilter,
+          riderId: riderIdRef.current,
+        }),
+      });
+    } catch (err) {
+      console.error("Search tracking failed", err);
     }
   }, []);
 
@@ -161,14 +196,17 @@ export default function SearchPage() {
     const initialQuery = getInitialSearchQuery();
     const initialTaxiStand = getInitialTaxiStand();
     window.queueMicrotask(() => {
-      if (!cancelled) fetchDrivers(initialQuery, initialTaxiStand, { preferCache: true });
+      if (!cancelled) {
+        fetchDrivers(initialQuery, initialTaxiStand, { preferCache: true });
+        trackSearchEvent(initialQuery, initialTaxiStand);
+      }
     });
 
     return () => {
       cancelled = true;
       abortRef.current?.abort();
     };
-  }, [fetchDrivers]);
+  }, [fetchDrivers, trackSearchEvent]);
 
   // Keep availability fresh without hammering the search API while riders linger.
   useEffect(() => {
@@ -225,6 +263,7 @@ export default function SearchPage() {
     setToast(query || selectedTaxiStand ? 'Finding matching drivers...' : 'Showing available drivers.');
     router.push(`/search${params.toString() ? `?${params.toString()}` : ''}`);
     fetchDrivers(query, selectedTaxiStand, { preferCache: true });
+    trackSearchEvent(query, selectedTaxiStand, 'all');
   };
 
   useEffect(() => {
@@ -450,7 +489,15 @@ export default function SearchPage() {
               <Search size={32} />
             </div>
             <p className="text-lg font-bold text-red-600">{error}</p>
-            <p className="mt-2 text-sm text-red-500">Please check your connection and try again.</p>
+            <p className="mx-auto mt-2 max-w-xs text-sm text-red-500">
+              Please refresh, try another taxi stand, or contact support so we can help you find a driver.
+            </p>
+            <a
+              href="/support"
+              className="mt-5 inline-flex rounded-2xl bg-white px-5 py-3 text-sm font-black text-red-600 ring-1 ring-red-100"
+            >
+              Contact Support
+            </a>
           </div>
         ) : visibleDrivers.length === 0 ? (
           <div className="py-16 text-center sm:py-20">
@@ -463,18 +510,42 @@ export default function SearchPage() {
             <p className="mx-auto mt-1 max-w-xs text-slate-500">
               {drivers.length === 0
                 ? selectedTaxiStand
-                  ? `No verified drivers are online at ${selectedTaxiStand} right now. Try another stand or check back later.`
-                  : 'Try searching for a different location or check back later.'
+                  ? `No verified drivers are online at ${selectedTaxiStand} right now. Try another stand or contact support.`
+                  : 'Try another taxi stand, change the destination, or contact support.'
                 : 'Try another search or switch back to all rides.'}
             </p>
-            {activeFilter !== 'all' && (
-              <button
-                onClick={() => setActiveFilter('all')}
-                className="mt-5 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-black"
+            <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:flex-row">
+              {selectedTaxiStand && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const query = searchQuery.trim();
+                    setSelectedTaxiStand('');
+                    setActiveFilter('all');
+                    router.push(query ? `/search?q=${encodeURIComponent(query)}` : '/search');
+                    fetchDrivers(query, '', { preferCache: true });
+                    trackSearchEvent(query, '', 'all');
+                  }}
+                  className="w-full rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-black sm:w-auto"
+                >
+                  Try All Taxi Stands
+                </button>
+              )}
+              {activeFilter !== 'all' && (
+                <button
+                  onClick={() => setActiveFilter('all')}
+                  className="w-full rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-black sm:w-auto"
+                >
+                  Show All Rides
+                </button>
+              )}
+              <a
+                href="/support"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 sm:w-auto"
               >
-                Show All Rides
-              </button>
-            )}
+                Contact Support
+              </a>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">

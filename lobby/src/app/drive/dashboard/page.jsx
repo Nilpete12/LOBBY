@@ -9,6 +9,7 @@ import API_BASE_URL from '@/config';
 import IncomingRideAlert from '@/components/IncomingRideAlert';
 import { TAXI_STANDS } from '@/lib/taxiStands';
 import { VEHICLE_TYPES, vehicleTypeLabel } from '@/lib/vehicleTypes';
+import { getDriverReadiness } from '@/lib/driverReadiness';
 
 const DRIVER_PROFILE_CACHE_TTL = 60 * 1000;
 const CLIENT_UPLOAD_TARGET_BYTES = 3.5 * 1024 * 1024;
@@ -253,7 +254,7 @@ export default function DriverDashboard() {
       }
     } catch (err) {
       console.error(err);
-      showNotice('error', 'Upload failed', 'The license could not be uploaded. Please try again.');
+      showNotice('error', 'Upload failed', 'Try a smaller license image or a different photo, then upload again.');
     } finally {
       setUploadingLicense(false);
     }
@@ -369,7 +370,19 @@ export default function DriverDashboard() {
   ];
   const completedSetupCount = setupItems.filter(item => item.done).length;
   const completionPercent = Math.round((completedSetupCount / setupItems.length) * 100);
-  const nextStep = isVerified
+  const pilotReadiness = getDriverReadiness({
+    ...driverDbData,
+    phone: formData.phone,
+    vehicleType: formData.vehicleType,
+    vehiclePlate: formData.vehiclePlate,
+    taxiStands: selectedTaxiStands,
+    currentStand,
+  });
+  const canGoOnline = pilotReadiness.ready;
+  const availabilityLocked = !isOnline && !canGoOnline;
+  const nextStep = !canGoOnline
+    ? `Complete before going online: ${pilotReadiness.missingText}.`
+    : isVerified
     ? isOnline
       ? currentStand
         ? `You are visible to riders near ${currentStand}.`
@@ -458,23 +471,27 @@ export default function DriverDashboard() {
               <div>
                 <p className="text-xs font-black uppercase tracking-wide text-white/40">Availability</p>
                 <p className="mt-1 text-3xl font-black tracking-tight">
-                  {!isVerified ? 'Locked' : isOnline ? 'Online' : 'Offline'}
+                  {availabilityLocked ? 'Locked' : isOnline ? 'Online' : 'Offline'}
                 </p>
               </div>
 
               <button
-                onClick={isVerified ? toggleStatus : undefined}
-                disabled={!isVerified || isSaving}
+                onClick={
+                  availabilityLocked
+                    ? () => showNotice('error', 'Complete checklist', `Missing: ${pilotReadiness.missingText}.`)
+                    : toggleStatus
+                }
+                disabled={isSaving}
                 className={`inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl px-5 text-base font-black transition ${
-                  !isVerified
-                    ? 'cursor-not-allowed bg-white/10 text-white/45'
+                  availabilityLocked
+                    ? 'bg-white/10 text-white/60 hover:bg-white/15'
                     : isOnline
                       ? 'bg-white text-slate-950 hover:bg-slate-100'
                       : 'bg-[#58A6FF] text-slate-950 hover:bg-[#2F80ED]'
                 } disabled:opacity-70`}
               >
-                {isSaving ? <Loader2 size={21} className="animate-spin" /> : !isVerified ? <Lock size={21} /> : <Power size={22} />}
-                {!isVerified ? 'Waiting for approval' : isOnline ? 'Go offline' : 'Go online'}
+                {isSaving ? <Loader2 size={21} className="animate-spin" /> : availabilityLocked ? <Lock size={21} /> : <Power size={22} />}
+                {availabilityLocked ? 'Complete checklist' : isOnline ? 'Go offline' : 'Go online'}
               </button>
             </div>
           </div>
@@ -506,6 +523,12 @@ export default function DriverDashboard() {
           <div className="mb-4 h-2 overflow-hidden rounded-full bg-slate-100">
             <div className="h-full rounded-full bg-[#58A6FF] transition-all" style={{ width: `${completionPercent}%` }} />
           </div>
+
+          {!canGoOnline && (
+            <div className="mb-4 rounded-2xl border border-amber-100 bg-amber-50 p-3 text-sm font-bold leading-relaxed text-amber-800">
+              Complete these before you can go online: {pilotReadiness.missingText}.
+            </div>
+          )}
 
           <div className="grid gap-2 sm:grid-cols-2">
             {setupItems.map((item) => (
@@ -1097,7 +1120,7 @@ function uploadStatusMessage(status) {
   if (status === 403) return 'Only driver accounts can upload vehicle documents.';
   if (status === 404) return 'Driver profile or upload storage was not found.';
   if (status === 413) return 'That image is too large. Try a smaller photo.';
-  return 'Upload failed. Please try again.';
+  return 'Upload failed. Try a smaller image or a different photo.';
 }
 
 function loadImageElement(file) {
@@ -1195,7 +1218,7 @@ async function handleImageUpload(file, type, clerkId, onDriverUpdated, showNotic
     }
   } catch (err) {
     console.error(err);
-    showNotice('error', 'Upload failed', 'The image could not be uploaded. Please try again.');
+    showNotice('error', 'Upload failed', 'Try a smaller image or a different photo, then upload again.');
   } finally {
     setUploadingImageType('');
   }

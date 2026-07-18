@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { formatUser } from '@/lib/supabaseFormat';
 import { TAXI_STAND_NAMES } from '@/lib/taxiStands';
 import { normalizeVehicleType } from '@/lib/vehicleTypes';
+import { getDriverReadiness } from '@/lib/driverReadiness';
 
 function cleanString(value, maxLength = 500) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -54,6 +55,31 @@ export async function POST(req) {
       updates.current_stand_updated_at = updates.current_stand ? new Date().toISOString() : null;
     }
     if (isAvailable !== undefined) updates.is_available = Boolean(isAvailable);
+
+    if (updates.is_available === true) {
+      const { data: existingDriver, error: existingError } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .eq('clerk_id', cleanClerkId)
+        .maybeSingle();
+
+      if (existingError) throw existingError;
+      if (!existingDriver) {
+        return NextResponse.json({ success: false, message: 'Driver profile not found. Please complete driver onboarding first.' }, { status: 404 });
+      }
+
+      const readiness = getDriverReadiness({ ...existingDriver, ...updates });
+      if (!readiness.ready) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Complete your pilot checklist before going online: ${readiness.missingText}.`,
+            missing: readiness.missing,
+          },
+          { status: 400 }
+        );
+      }
+    }
 
     // Update the row in Supabase
     const { data, error } = await supabaseAdmin
