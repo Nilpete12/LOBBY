@@ -156,7 +156,6 @@ export default function AdminPage() {
     links: [],
     skippedWhatsappCount: 0,
   });
-  const [isManualRefreshing, setManualRefreshing] = useState(false);
   const [usersRefreshKey, setUsersRefreshKey] = useState(0);
   const [loading, setLoading] = useState({
     complaints: false,
@@ -293,22 +292,13 @@ export default function AdminPage() {
     ]);
   }, [loadActivity, loadBookings, loadComplaints, refreshAdminData, refreshUserTables]);
 
-  const refreshAdminManually = useCallback(async () => {
-    setManualRefreshing(true);
+  const syncAndRefreshAdminWorkspace = useCallback(async () => {
+    if (syncState.status === 'loading') return;
 
-    try {
-      await refreshAdminWorkspace();
-      showNotice('success', 'Admin data refreshed.');
-    } catch (error) {
-      console.error('Manual admin refresh failed', error);
-      showNotice('error', 'Could not refresh admin data.');
-    } finally {
-      setManualRefreshing(false);
-    }
-  }, [refreshAdminWorkspace, showNotice]);
-
-  const syncClerkUsers = useCallback(async () => {
-    setSyncState({ status: 'loading', message: '' });
+    setSyncState({
+      status: 'loading',
+      message: 'Syncing Clerk users and refreshing admin data...',
+    });
 
     try {
       const res = await fetch(`${API_BASE_URL}/admin/sync-clerk-users`, {
@@ -319,18 +309,34 @@ export default function AdminPage() {
 
       if (!res.ok || !data.success) throw new Error(data.message || 'User sync failed');
 
+      await refreshAdminWorkspace();
+
+      const message = `Synced ${data.total || 0} Clerk users and refreshed admin data.`;
       setSyncState({
         status: 'success',
-        message: `Synced ${data.total || 0} users (${data.created || 0} new).`,
+        message: `${message} ${data.created || 0} new.`,
       });
-      showNotice('success', `Synced ${data.total || 0} Clerk users.`);
-      await refreshAdminWorkspace();
+      showNotice('success', message);
     } catch (error) {
-      console.error('Failed to sync Clerk users', error);
-      setSyncState({ status: 'error', message: 'Could not sync Clerk users.' });
-      showNotice('error', 'Could not sync Clerk users. Check Clerk secret key and try again.');
+      console.error('Failed to sync and refresh admin data', error);
+
+      try {
+        await refreshAdminWorkspace();
+        setSyncState({
+          status: 'error',
+          message: 'Could not sync Clerk users, but admin data was refreshed.',
+        });
+        showNotice('error', 'Could not sync Clerk users, but admin data was refreshed.');
+      } catch (refreshError) {
+        console.error('Fallback admin refresh failed', refreshError);
+        setSyncState({
+          status: 'error',
+          message: 'Could not sync Clerk users or refresh admin data.',
+        });
+        showNotice('error', 'Could not sync Clerk users or refresh admin data.');
+      }
     }
-  }, [refreshAdminWorkspace, showNotice]);
+  }, [refreshAdminWorkspace, showNotice, syncState.status]);
 
   const sendSubscriptionReminders = useCallback(async () => {
     if (subscriptionReminderState.status === 'loading') return;
@@ -1127,21 +1133,12 @@ export default function AdminPage() {
 
             <div className="flex items-center gap-2">
               <button
-                onClick={refreshAdminManually}
-                disabled={isManualRefreshing}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
-              >
-                <RefreshCw size={17} className={isManualRefreshing ? 'animate-spin' : ''} />
-                <span className="hidden sm:inline">{isManualRefreshing ? 'Refreshing' : 'Refresh'}</span>
-              </button>
-
-              <button
-                onClick={syncClerkUsers}
+                onClick={syncAndRefreshAdminWorkspace}
                 disabled={syncState.status === 'loading'}
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
               >
                 <RefreshCw size={17} className={syncState.status === 'loading' ? 'animate-spin' : ''} />
-                <span className="hidden sm:inline">{syncState.status === 'loading' ? 'Syncing' : 'Sync Users'}</span>
+                <span className="hidden sm:inline">{syncState.status === 'loading' ? 'Syncing' : 'Sync & Refresh'}</span>
               </button>
 
               <button
