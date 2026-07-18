@@ -41,9 +41,10 @@ export default function Hero() {
           
           {/* Input Row */}
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
+            <TaxiStandDropdown variant="hero" />
             
             {/* INLINE WRAPPER: Keeps the Pin and Input on the SAME row on mobile to save vertical space */}
-            <div className="flex w-full items-center gap-2 bg-[#242424] md:bg-transparent rounded-xl md:rounded-none p-1 md:p-0">
+            <div className="flex w-full flex-1 items-center gap-2 bg-[#242424] md:bg-transparent rounded-xl md:rounded-none p-1 md:p-0">
               
               {/* Map Pin Icon - Smaller on mobile */}
               <div className="w-10 h-10 md:w-14 md:h-14 bg-[#121212] md:bg-[#242424] rounded-lg md:rounded-2xl flex items-center justify-center shrink-0 shadow-sm md:shadow-none">
@@ -63,11 +64,9 @@ export default function Hero() {
               />
             </div>
 
-            <TaxiStandDropdown variant="hero" />
-
             {/* Search Button */}
             <button type="submit" className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#FFC857] hover:bg-[#F59E0B] text-[#1A1205] rounded-xl md:rounded-2xl font-bold transition-all shadow-lg shadow-[#FFC857]/25 flex items-center justify-center gap-2 shrink-0 text-sm md:text-base">
-              Search <ArrowRight size={18} className="md:w-5 md:h-5" />
+              Find Driver <ArrowRight size={18} className="md:w-5 md:h-5" />
             </button>
           </div>
 

@@ -1,4 +1,4 @@
-import { Star, Phone, MapPin, Hash } from 'lucide-react';
+import { Star, Phone, MapPin, Hash, CheckCircle2 } from 'lucide-react';
 
 export default function RideCard({ driver }) {
   return (
@@ -25,16 +25,21 @@ export default function RideCard({ driver }) {
                 <Star size={12} fill="currentColor" />
                 {driver.rating}
               </span>
+
+              {driver.isVerified !== false && (
+                <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-black text-green-700 ring-1 ring-green-100">
+                  <CheckCircle2 size={12} />
+                  Verified
+                </span>
+              )}
             </div>
 
             <div className="mb-3 flex flex-wrap items-center gap-2 text-sm font-medium text-slate-500">
               <span>{driver.vehicle} • {driver.seats} Seats</span>
-              {driver.vehiclePlate && (
-                <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-slate-700">
-                  <Hash size={11} />
-                  <span className="truncate">{driver.vehiclePlate}</span>
-                </span>
-              )}
+              <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-slate-700 ring-1 ring-slate-200">
+                <Hash size={11} />
+                <span className="truncate">{driver.vehiclePlate || 'Plate not added'}</span>
+              </span>
             </div>
 
             {/* Route Tags */}

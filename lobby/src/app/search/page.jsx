@@ -1,6 +1,6 @@
 "use client";
 import Image from 'next/image';
-import { Search, MapPin, Star, Phone, X, Car, Loader2, Flag, MessageCircle, Hash } from 'lucide-react';
+import { Search, MapPin, Star, Phone, X, Car, Loader2, Flag, MessageCircle, Hash, CheckCircle2, Clock } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
@@ -9,6 +9,7 @@ import API_BASE_URL from '@/config';
 import InstantBook from '@/components/InstantBook';
 import TaxiStandDropdown from '@/components/TaxiStandDropdown';
 import { normalizeVehicleType, vehicleTypeLabel } from '@/lib/vehicleTypes';
+import { loadRecentDriverContacts, saveRecentDriverContact } from '@/lib/recentContacts';
 
 const FILTERS = [
   { id: 'all', label: 'All Rides' },
@@ -100,6 +101,7 @@ export default function SearchPage() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [toast, setToast] = useState('');
+  const [recentContacts, setRecentContacts] = useState([]);
   const [leadFollowUp, setLeadFollowUp] = useState(null);
   const [isSubmittingFollowUp, setSubmittingFollowUp] = useState(false);
   const activeFetchRef = useRef(0);
@@ -218,11 +220,35 @@ export default function SearchPage() {
     if (query) params.set('q', query);
     if (selectedTaxiStand) params.set('stand', selectedTaxiStand);
 
-    setActiveFilter('All Rides');
+    setActiveFilter('all');
     setSelectedDriver(null);
+    setToast(query || selectedTaxiStand ? 'Finding matching drivers...' : 'Showing available drivers.');
     router.push(`/search${params.toString() ? `?${params.toString()}` : ''}`);
     fetchDrivers(query, selectedTaxiStand, { preferCache: true });
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const handleRecentContacts = () => {
+      if (!cancelled) setRecentContacts(loadRecentDriverContacts());
+    };
+
+    window.queueMicrotask(handleRecentContacts);
+    window.addEventListener('storage', handleRecentContacts);
+    window.addEventListener('lobby:recent-driver-contacts', handleRecentContacts);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('storage', handleRecentContacts);
+      window.removeEventListener('lobby:recent-driver-contacts', handleRecentContacts);
+    };
+  }, []);
+
+  const rememberDriverContact = useCallback((driver, method) => {
+    const nextContacts = saveRecentDriverContact(driver, method);
+    setRecentContacts(nextContacts);
+  }, []);
 
   const trackDriverEvent = useCallback(async (driver, type) => {
     if (!driver?._id) return null;
@@ -245,7 +271,8 @@ export default function SearchPage() {
   }, [riderId]);
 
   const trackCall = async (driver) => {
-    setToast(`${driver.fullName || 'Driver'} added to recent contacts`);
+    rememberDriverContact(driver, 'call');
+    setToast(`Calling ${driver.fullName || 'driver'}. Added to Recently Contacted.`);
     const result = await trackDriverEvent(driver, 'call_click');
     if (result?.leadId) {
       setLeadFollowUp({
@@ -257,7 +284,8 @@ export default function SearchPage() {
   };
 
   const trackWhatsApp = async (driver) => {
-    setToast(`Opening WhatsApp for ${driver.fullName || 'driver'}`);
+    rememberDriverContact(driver, 'whatsapp');
+    setToast(`WhatsApp message ready for ${driver.fullName || 'driver'}. Added to Recently Contacted.`);
     const result = await trackDriverEvent(driver, 'whatsapp_click');
     if (result?.leadId) {
       setLeadFollowUp({
@@ -331,8 +359,14 @@ export default function SearchPage() {
         {/* Search Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="mb-2 text-3xl font-bold text-slate-900">Find a Ride</h1>
-          <form action="/search" onSubmit={handleSearch} className="space-y-3">
-            <div className="relative flex items-center">
+          <form action="/search" onSubmit={handleSearch} className="space-y-3 rounded-3xl border border-slate-200 bg-white p-3 shadow-sm">
+            <TaxiStandDropdown
+              value={selectedTaxiStand}
+              onChange={setSelectedTaxiStand}
+              variant="search"
+            />
+
+            <div className="relative flex items-center rounded-2xl border border-slate-200 bg-slate-50 transition focus-within:border-[#58A6FF] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#58A6FF]/10">
               <MapPin className="absolute left-4 text-slate-400" size={20} />
               <input
                 type="search"
@@ -342,25 +376,20 @@ export default function SearchPage() {
                 autoCorrect="off"
                 spellCheck={false}
                 placeholder="Where do you want to go? (e.g. Dawki)"
-                className="w-full rounded-2xl border border-slate-200 py-4 pl-12 pr-14 text-base font-medium shadow-sm outline-none transition focus:border-[#58A6FF] focus:ring-2 focus:ring-[#58A6FF]/10 sm:text-lg"
+                className="w-full bg-transparent py-4 pl-12 pr-4 text-base font-medium text-slate-950 outline-none placeholder:text-slate-400 sm:text-lg"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button
-                type="submit"
-                aria-label="Search drivers"
-                disabled={loading}
-                className="absolute right-2 flex h-11 w-11 items-center justify-center rounded-xl bg-[#FFC857] text-[#1A1205] transition hover:bg-[#F59E0B] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {loading ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} />}
-              </button>
             </div>
 
-            <TaxiStandDropdown
-              value={selectedTaxiStand}
-              onChange={setSelectedTaxiStand}
-              variant="search"
-            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex min-h-13 w-full items-center justify-center gap-2 rounded-2xl bg-[#FFC857] px-5 text-sm font-black text-[#1A1205] shadow-lg shadow-[#FFC857]/20 transition hover:bg-[#F59E0B] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {loading ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} />}
+              Find Driver
+            </button>
           </form>
           {selectedTaxiStand && (
             <p className="mt-2 text-sm font-semibold text-[#2F80ED]">
@@ -368,6 +397,13 @@ export default function SearchPage() {
             </p>
           )}
         </div>
+
+        {recentContacts.length > 0 && (
+          <RecentlyContactedStrip
+            drivers={recentContacts.slice(0, 4)}
+            onSelect={(driver) => setSelectedDriver(driver)}
+          />
+        )}
 
         {/* Filters */}
         <div className="mb-6 flex gap-3 overflow-x-auto pb-2 sm:mb-8">
@@ -458,6 +494,8 @@ export default function SearchPage() {
         <DriverDetailsSheet
           driver={selectedDriver}
           rider={user}
+          destination={searchQuery}
+          taxiStand={selectedTaxiStand}
           onClose={() => setSelectedDriver(null)}
           onCall={() => trackCall(selectedDriver)}
           onWhatsApp={() => trackWhatsApp(selectedDriver)}
@@ -474,8 +512,12 @@ export default function SearchPage() {
       )}
 
       {toast && (
-        <div className="fixed inset-x-4 bottom-28 z-60 mx-auto max-w-sm rounded-2xl border border-[#FFEDD5] bg-white px-4 py-3 text-center text-sm font-bold text-[#2F80ED] shadow-xl shadow-slate-900/10 md:bottom-8">
-          {toast}
+        <div className="fixed inset-x-4 bottom-28 z-60 mx-auto flex max-w-sm items-center gap-3 rounded-2xl border border-[#FFEDD5] bg-white px-4 py-3 text-sm font-bold text-[#2F80ED] shadow-xl shadow-slate-900/10 md:bottom-8">
+          <CheckCircle2 size={18} className="shrink-0" />
+          <span className="min-w-0 flex-1">{toast}</span>
+          <button type="button" onClick={() => setToast('')} className="rounded-full p-1 text-slate-400 hover:bg-slate-100" aria-label="Dismiss message">
+            <X size={16} />
+          </button>
         </div>
       )}
     </div>
@@ -518,6 +560,90 @@ function getDriverVehicleTypeId(driver = {}) {
 
 function getDriverVehicleType(driver = {}) {
   return vehicleTypeLabel(driver.vehicleType || driver.vehicle_type || '');
+}
+
+function isDriverVerified(driver = {}) {
+  return driver.isVerified !== false;
+}
+
+function formatContactTime(value) {
+  if (!value) return 'Just now';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Recently';
+
+  const diffMinutes = Math.max(0, Math.round((Date.now() - date.getTime()) / 60000));
+  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffMinutes < 1440) return `${Math.round(diffMinutes / 60)}h ago`;
+  return date.toLocaleDateString();
+}
+
+function VerifiedDriverBadge({ compact = false }) {
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full bg-green-50 font-black text-green-700 ring-1 ring-green-100 ${compact ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs'}`}>
+      <CheckCircle2 size={compact ? 11 : 13} />
+      Verified
+    </span>
+  );
+}
+
+function PlateBadge({ plate, compact = false }) {
+  return (
+    <span className={`inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 font-black uppercase tracking-wide text-slate-800 ring-1 ring-slate-200 ${compact ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs'}`}>
+      <Hash size={compact ? 10 : 12} />
+      <span className="truncate">{plate || 'Plate not added'}</span>
+    </span>
+  );
+}
+
+function RecentlyContactedStrip({ drivers = [], onSelect }) {
+  return (
+    <section className="mb-6 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-black uppercase tracking-wide text-slate-400">Recently contacted</p>
+          <h2 className="text-base font-black text-slate-950">Quickly reopen a driver</h2>
+        </div>
+        <Clock size={18} className="text-slate-300" />
+      </div>
+
+      <div className="flex gap-3 overflow-x-auto pb-1">
+        {drivers.map((driver) => {
+          const plate = getDriverVehiclePlate(driver);
+          const contactMethod = driver.contactMethod === 'whatsapp' ? 'WhatsApp' : 'Call';
+
+          return (
+            <button
+              key={driver._id || driver.id || driver.phone}
+              type="button"
+              onClick={() => onSelect(driver)}
+              className="min-w-60 rounded-2xl border border-slate-100 bg-slate-50 p-3 text-left transition hover:border-[#58A6FF]/30 hover:bg-white"
+            >
+              <div className="flex items-center gap-3">
+                <DriverAvatar driver={driver} size={42} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1">
+                    <p className="truncate text-sm font-black text-slate-950">{driver.fullName || 'Driver'}</p>
+                    {isDriverVerified(driver) && <CheckCircle2 size={13} className="shrink-0 text-green-600" />}
+                  </div>
+                  <p className="truncate text-xs font-bold text-slate-500">
+                    {contactMethod} • {formatContactTime(driver.lastContacted || driver.lastCalled)}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <PlateBadge plate={plate} compact />
+                <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-black text-slate-500 ring-1 ring-slate-200">
+                  {driver.vehicle || 'Standard Taxi'}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
 }
 
 function DriverAvatar({ driver, size = 64 }) {
@@ -563,9 +689,12 @@ function DriverResultCard({ driver, onSelect }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h3 className="truncate text-lg font-bold text-slate-900 transition group-hover:text-[#2F80ED]">
-                {driver.fullName || 'Driver'}
-              </h3>
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <h3 className="truncate text-lg font-bold text-slate-900 transition group-hover:text-[#2F80ED]">
+                  {driver.fullName || 'Driver'}
+                </h3>
+                {isDriverVerified(driver) && <VerifiedDriverBadge compact />}
+              </div>
 
               <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-500">
                 <span className="flex items-center gap-1 font-bold text-slate-900">
@@ -579,12 +708,7 @@ function DriverResultCard({ driver, onSelect }) {
                     <span className="truncate">{vehicleType}</span>
                   </span>
                 )}
-                {vehiclePlate && (
-                  <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-slate-700">
-                    <Hash size={11} />
-                    <span className="truncate">{vehiclePlate}</span>
-                  </span>
-                )}
+                <PlateBadge plate={vehiclePlate} compact />
                 {currentStand && (
                   <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-black text-green-700">
                     <MapPin size={11} />
@@ -627,12 +751,31 @@ function DriverResultCard({ driver, onSelect }) {
   );
 }
 
-function getWhatsAppHref(phone) {
-  const digits = String(phone || '').replace(/\D/g, '');
-  return digits ? `https://wa.me/${digits}` : null;
+function getWhatsAppHref(driver, destination = '', rider = null, taxiStand = '') {
+  const digits = String(driver?.phone || '').replace(/\D/g, '');
+  if (!digits) return null;
+
+  const driverName = driver?.fullName || 'there';
+  const riderName = rider?.firstName || rider?.fullName || '';
+  const vehiclePlate = getDriverVehiclePlate(driver);
+  const destinationText = String(destination || '').trim();
+  const standText = String(taxiStand || getDriverCurrentStand(driver) || '').trim();
+  const message = [
+    `Hi ${driverName}, I found you on THE LOBBY.`,
+    riderName ? `This is ${riderName}.` : '',
+    destinationText
+      ? `I am looking for a ride to ${destinationText}.`
+      : standText
+        ? `I am checking for a ride from ${standText}.`
+        : 'Are you available for a ride?',
+    vehiclePlate ? `I can see your vehicle plate as ${vehiclePlate}.` : '',
+    'Please reply with your availability and fare estimate. Thank you.',
+  ].filter(Boolean).join(' ');
+
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
 
-function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
+function DriverDetailsSheet({ driver, rider, destination = '', taxiStand = '', onClose, onCall, onWhatsApp }) {
   const vehicle = driver.vehicle || 'Standard Taxi';
   const vehiclePlate = getDriverVehiclePlate(driver);
   const vehicleType = getDriverVehicleType(driver);
@@ -640,7 +783,7 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
   const taxiStands = getDriverTaxiStands(driver);
   const currentStand = getDriverCurrentStand(driver);
   const phoneHref = driver.phone ? `tel:${driver.phone}` : undefined;
-  const whatsappHref = getWhatsAppHref(driver.phone);
+  const whatsappHref = getWhatsAppHref(driver, destination, rider, taxiStand);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [reportText, setReportText] = useState('');
   const [reportNotice, setReportNotice] = useState('');
@@ -707,6 +850,10 @@ function DriverDetailsSheet({ driver, rider, onClose, onCall, onWhatsApp }) {
               <h2 className="truncate text-2xl font-extrabold tracking-tight text-slate-900">
                 {driver.fullName || 'Driver'}
               </h2>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                {isDriverVerified(driver) && <VerifiedDriverBadge />}
+                <PlateBadge plate={vehiclePlate} />
+              </div>
               <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-slate-500">
                 <span className="flex items-center gap-1 text-slate-900">
                   <Star size={14} className="fill-yellow-400 text-yellow-400" />

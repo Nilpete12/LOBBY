@@ -11,12 +11,18 @@ const VARIANT_STYLES = {
     button: 'min-h-14 rounded-xl md:rounded-2xl bg-[#242424] md:bg-transparent p-1 md:p-0',
     iconWrap: 'h-10 w-10 md:h-14 md:w-14 rounded-lg md:rounded-2xl bg-[#121212] md:bg-[#242424] shadow-sm md:shadow-none',
     label: 'text-base md:text-sm',
+    labelColor: 'text-white',
+    subLabelColor: 'text-slate-400',
+    chevron: 'text-[#b3b3b3]',
   },
   search: {
     root: 'w-full',
-    button: 'min-h-14 rounded-2xl border border-white/10 bg-[#181818] px-4 shadow-sm focus:border-[#FFC857] focus:ring-2 focus:ring-[#FFC857]/20',
-    iconWrap: 'h-9 w-9 rounded-xl bg-[#242424]',
+    button: 'min-h-14 rounded-2xl border border-slate-200 bg-slate-50 px-4 shadow-sm focus:border-[#58A6FF] focus:bg-white focus:ring-2 focus:ring-[#58A6FF]/10',
+    iconWrap: 'h-9 w-9 rounded-xl bg-white shadow-sm',
     label: 'text-base',
+    labelColor: 'text-slate-950',
+    subLabelColor: 'text-slate-500',
+    chevron: 'text-slate-400',
   },
 };
 
@@ -128,11 +134,11 @@ export default function TaxiStandDropdown({
         </span>
 
         <span className="min-w-0 flex-1 px-1">
-          <span className={`block truncate font-black text-white ${styles.label}`}>
+          <span className={`block truncate font-black ${styles.labelColor} ${styles.label}`}>
             {selectedStand?.name || 'Taxi Stands'}
           </span>
           {selectedStand && (
-            <span className="mt-0.5 block truncate text-xs font-semibold text-slate-400">
+            <span className={`mt-0.5 block truncate text-xs font-semibold ${styles.subLabelColor}`}>
               {selectedStand.location}
             </span>
           )}
@@ -140,7 +146,7 @@ export default function TaxiStandDropdown({
 
         <ChevronDown
           size={18}
-          className={`shrink-0 text-[#b3b3b3] transition ${isOpen ? 'rotate-180 text-[#FFC857]' : ''}`}
+          className={`shrink-0 transition ${styles.chevron} ${isOpen ? 'rotate-180 text-[#FFC857]' : ''}`}
         />
       </button>
 

@@ -5,7 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { Hash, Heart, MapPin, Phone, Search, Star, Trash2 } from 'lucide-react';
+import { CheckCircle2, Hash, Heart, MapPin, Phone, Search, Star, Trash2, X } from 'lucide-react';
+import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
+import { saveRecentDriverContact } from '@/lib/recentContacts';
 
 const STORAGE_KEY = 'lobby:favourite-drivers';
 
@@ -24,6 +26,7 @@ export default function FavouritesPage() {
   const [favourites, setFavourites] = useState(() =>
     typeof window === 'undefined' ? [] : loadFavourites()
   );
+  const [toast, setToast] = useState('');
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -44,16 +47,32 @@ export default function FavouritesPage() {
     }
   }, [isLoaded, isSignedIn, user, router]);
 
+  useEffect(() => {
+    if (!toast) return;
+
+    const timer = window.setTimeout(() => setToast(''), 3500);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
   const removeFavourite = (driverId) => {
+    const removedDriver = favourites.find((driver) => (driver._id || driver.id) === driverId);
     const next = favourites.filter((driver) => (driver._id || driver.id) !== driverId);
     setFavourites(next);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setToast(`${removedDriver?.fullName || 'Driver'} removed from favourites.`);
+  };
+
+  const rememberFavouriteCall = (driver) => {
+    saveRecentDriverContact(driver, 'call');
+    setToast(`${driver.fullName || 'Driver'} added to Recently Contacted.`);
   };
 
   if (!isLoaded) {
     return (
-      <div className="lobby-dashboard-gradient flex min-h-screen items-center justify-center font-semibold text-slate-400">
-        Loading favourites...
+      <div className="lobby-dashboard-gradient min-h-screen px-4 pb-28 pt-20 sm:px-6 sm:pt-24">
+        <div className="mx-auto max-w-4xl">
+          <SearchResultsSkeletons count={3} />
+        </div>
       </div>
     );
   }
@@ -61,6 +80,16 @@ export default function FavouritesPage() {
   return (
     <main className="lobby-dashboard-gradient min-h-screen px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:pb-12">
       <div className="mx-auto max-w-4xl">
+        {toast && (
+          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#FFEDD5] bg-white px-4 py-3 text-sm font-bold text-[#2F80ED] shadow-sm">
+            <CheckCircle2 size={18} />
+            <span className="min-w-0 flex-1">{toast}</span>
+            <button type="button" onClick={() => setToast('')} className="rounded-full p-1 text-slate-400 hover:bg-slate-100" aria-label="Dismiss message">
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
         <section className="mb-6 rounded-[1.5rem] border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-sm sm:rounded-[2rem] sm:p-8">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-500">
@@ -132,18 +161,22 @@ export default function FavouritesPage() {
                           <h2 className="truncate font-bold tracking-tight text-slate-900">
                             {driver.fullName || 'Driver'}
                           </h2>
+                          {driver.isVerified !== false && (
+                            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-black text-green-700 ring-1 ring-green-100">
+                              <CheckCircle2 size={10} />
+                              Verified
+                            </span>
+                          )}
                           <p className="mt-1 flex items-center gap-1 text-sm font-semibold text-slate-500">
                             <Star size={14} className="fill-yellow-400 text-yellow-400" />
                             {driver.rating || 5.0}
                             <span className="text-slate-300">•</span>
                             <span className="truncate">{driver.vehicle || 'Standard Taxi'}</span>
                           </p>
-                          {driver.vehiclePlate && (
-                            <p className="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-slate-700">
-                              <Hash size={11} />
-                              <span className="truncate">{driver.vehiclePlate}</span>
-                            </p>
-                          )}
+                          <p className="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-slate-700 ring-1 ring-slate-200">
+                            <Hash size={11} />
+                            <span className="truncate">{driver.vehiclePlate || 'Plate not added'}</span>
+                          </p>
                         </div>
 
                         <button
@@ -171,6 +204,7 @@ export default function FavouritesPage() {
                       {driver.phone && (
                         <a
                           href={`tel:${driver.phone}`}
+                          onClick={() => rememberFavouriteCall(driver)}
                           className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-[#58A6FF] px-4 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-[#58A6FF]/20 transition hover:bg-[#2F80ED]"
                         >
                           <Phone size={17} />

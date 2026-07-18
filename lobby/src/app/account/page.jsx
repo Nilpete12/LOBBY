@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useUser, useClerk } from '@clerk/nextjs';
-import { Phone, Clock, LogOut, History, CheckCircle2, AlertCircle, X, Hash } from 'lucide-react';
+import { Phone, Clock, LogOut, History, CheckCircle2, AlertCircle, X, Hash, MessageCircle } from 'lucide-react';
 import API_BASE_URL from '@/config';
+import { SearchResultsSkeletons } from '@/components/SkeletonLoader';
+import { loadRecentDriverContacts, saveRecentDriverContact } from '@/lib/recentContacts';
 
 export default function RiderDashboard() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -75,23 +77,34 @@ export default function RiderDashboard() {
       return;
     }
 
-    const fetchHistory = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/rider/history`);
-        const data = await res.json();
-
-        if (data.success) {
-          setHistory(data.history);
-        }
-      } catch (err) {
-        console.error("Failed to load history", err);
-      } finally {
-        setLoading(false);
-      }
+    let cancelled = false;
+    const handleRecentContacts = () => {
+      if (!cancelled) setHistory(loadRecentDriverContacts());
     };
 
-    fetchHistory();
+    window.queueMicrotask(() => {
+      handleRecentContacts();
+      if (!cancelled) setLoading(false);
+    });
+
+    window.addEventListener('storage', handleRecentContacts);
+    window.addEventListener('lobby:recent-driver-contacts', handleRecentContacts);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('storage', handleRecentContacts);
+      window.removeEventListener('lobby:recent-driver-contacts', handleRecentContacts);
+    };
   }, [isLoaded, isSignedIn, user, router]);
+
+  const rememberContactAgain = (driver) => {
+    saveRecentDriverContact(driver, 'call');
+    setHistory(loadRecentDriverContacts());
+    setReportNotice({
+      type: 'success',
+      message: `${driver.fullName || 'Driver'} is back at the top of Recently Contacted.`,
+    });
+  };
 
   useEffect(() => {
     if (!reportNotice) return;
@@ -106,8 +119,10 @@ export default function RiderDashboard() {
 
   if (!isLoaded) {
     return (
-      <div className="lobby-dashboard-gradient min-h-screen flex items-center justify-center font-semibold text-slate-400">
-        Loading Dashboard...
+      <div className="lobby-dashboard-gradient min-h-screen px-4 pb-28 pt-20 sm:px-6 sm:pt-24">
+        <div className="mx-auto max-w-4xl">
+          <SearchResultsSkeletons count={3} />
+        </div>
       </div>
     );
   }
@@ -171,9 +186,7 @@ export default function RiderDashboard() {
           </div>
 
           {loading ? (
-            <div className="text-center py-10 text-slate-400">
-              Loading history...
-            </div>
+            <SearchResultsSkeletons count={2} />
           ) : history.length === 0 ? (
             <div className="py-10 text-center sm:py-12">
               <p className="mx-auto mb-4 max-w-xs text-slate-400">
@@ -220,20 +233,20 @@ export default function RiderDashboard() {
 
                       <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
                         <span className="max-w-full truncate">{driver.vehicle}</span>
-                        {driver.vehiclePlate && (
-                          <>
-                            <span>•</span>
-                            <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-black uppercase tracking-wide text-slate-700">
-                              <Hash size={10} />
-                              <span className="truncate">{driver.vehiclePlate}</span>
-                            </span>
-                          </>
+                        {driver.isVerified !== false && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 font-black text-green-700 ring-1 ring-green-100">
+                            <CheckCircle2 size={10} />
+                            Verified
+                          </span>
                         )}
-                        <span>•</span>
+                        <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-black uppercase tracking-wide text-slate-700 ring-1 ring-slate-200">
+                          <Hash size={10} />
+                          <span className="truncate">{driver.vehiclePlate || 'Plate not added'}</span>
+                        </span>
 
                         <span className="flex items-center gap-1">
-                          <Clock size={10} />
-                          {new Date(driver.lastCalled).toLocaleDateString()}
+                          {driver.contactMethod === 'whatsapp' ? <MessageCircle size={10} /> : <Clock size={10} />}
+                          {new Date(driver.lastContacted || driver.lastCalled).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
@@ -241,6 +254,7 @@ export default function RiderDashboard() {
                     <a
                       href={`tel:${driver.phone}`}
                       aria-label={`Call ${driver.fullName}`}
+                      onClick={() => rememberContactAgain(driver)}
                       className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#58A6FF] text-slate-950 shadow-lg shadow-[#58A6FF]/20 transition hover:scale-105"
                     >
                       <Phone size={18} />
