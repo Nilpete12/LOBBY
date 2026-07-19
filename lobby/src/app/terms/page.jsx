@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle, FileText, ShieldCheck } from 'lucide-react'
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-linear-to-bl from-[#DCEBFF]/70 to-white pt-24 pb-20">
+    <div className="min-h-screen bg-linear-to-bl from-[#DCEBFF]/70 to-white pt-30 pb-20">
       <div className="max-w-3xl mx-auto px-6">
         <div className="mb-12 border-b border-slate-100 pb-8">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Terms of Service</h1>
@@ -32,7 +32,7 @@ export default function TermsPage() {
               transport carrier, vehicle owner, employer, agent of drivers, or party to the ride agreement
               between a rider and a driver.
             </p>
-            <div className="shadow p-4 rounded-xl border border-slate-200 mb-4 text-sm">
+            <div className="shadow p-4 rounded-xl border border-slate-200 bg-slate-50 mb-4 text-sm">
               <strong>Important:</strong> Any ride, fare, route, waiting time, cancellation, pickup, drop-off,
               or safety arrangement is agreed directly between the rider and the driver. We may provide tools
               for discovery, verification, lead tracking, support, and admin review, but we do not guarantee

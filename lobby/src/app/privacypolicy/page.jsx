@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle, Eye, Lock, Shield } from 'lucide-react';
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen bg-linear-to-bl from-[#DCEBFF]/70 to-white pt-24 pb-20">
+    <div className="min-h-screen bg-linear-to-bl from-[#DCEBFF]/70 to-white pt-30 pb-20">
       <div className="max-w-3xl mx-auto px-6">
         <div className="mb-12 border-b border-slate-100 pb-8">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Privacy Policy</h1>
@@ -60,8 +60,8 @@ export default function PrivacyPolicy() {
               <li>To comply with applicable law, lawful requests, audits, tax, accounting, security, and record-keeping obligations.</li>
               <li>To improve reliability, performance, user experience, search quality, and abuse prevention.</li>
             </ul>
-            <div className="shadow p-4 rounded-xl border border-[#CFE4FF] mb-4 text-sm bg-[#EAF4FF]">
-              <strong className="text-[#172033]">Our commitment:</strong> We do not sell personal data to advertisers.
+            <div className="shadow p-4 rounded-xl border border-slate-200 mb-4 text-sm bg-slate-50">
+              <strong className="text-slate-900">Our commitment:</strong> We do not sell personal data to advertisers.
               We do not record the audio content of direct phone calls unless a future feature clearly says so and
               obtains any consent required by law.
             </div>
@@ -122,7 +122,7 @@ export default function PrivacyPolicy() {
               of sensitive admin actions. No platform can guarantee perfect security, but we work to reduce risk and
               respond quickly to suspected misuse or incidents.
             </p>
-            <p className="text-sm mt-4 p-3 rounded-lg border border-amber-200 bg-amber-50">
+            <p className="text-sm mt-4 p-3 rounded-lg border border-slate-200 bg-slate-50">
               Please keep your login secure and report suspected unauthorised access immediately.
             </p>
           </section>
@@ -237,7 +237,7 @@ export default function PrivacyPolicy() {
 
           <section className="mb-10">
             <h3 className="text-xl font-bold text-slate-900 mb-3">Related Documents</h3>
-            <div className="p-4 rounded-lg bg-[#EAF4FF] border border-[#CFE4FF]">
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
               <p className="text-sm">
                 <Link href="/terms" className="text-[#2F80ED] font-bold underline">Terms of Service</Link>
               </p>

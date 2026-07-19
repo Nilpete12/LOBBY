@@ -2,13 +2,13 @@ import { Star, Phone, MapPin, Hash, CheckCircle2 } from 'lucide-react';
 
 export default function RideCard({ driver }) {
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-[2rem] p-6 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group">
+    <div className="bg-white/80 backdrop-blur-sm rounded-4xl p-6 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group">
       <div className="flex flex-col md:flex-row justify-between gap-6">
         
         {/* Driver Info */}
         <div className="flex gap-4">
           {/* Avatar */}
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FFEDD5] to-[#DCEBFF] overflow-hidden shrink-0 shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-linear-to-br from-[#FFEDD5] to-[#DCEBFF] overflow-hidden shrink-0 shadow-sm">
             {/* Placeholder Image */}
             <div className="w-full h-full flex items-center justify-center text-[#2F80ED] font-bold text-xl">
               {driver.name.charAt(0)}
