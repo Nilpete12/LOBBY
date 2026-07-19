@@ -8,12 +8,12 @@ import { TAXI_STANDS } from '@/lib/taxiStands';
 const VARIANT_STYLES = {
   hero: {
     root: 'w-full md:w-64',
-    button: 'min-h-14 rounded-xl md:rounded-2xl bg-[#242424] md:bg-transparent p-1 md:p-0',
-    iconWrap: 'h-10 w-10 md:h-14 md:w-14 rounded-lg md:rounded-2xl bg-[#121212] md:bg-[#242424] shadow-sm md:shadow-none',
+    button: 'min-h-14 rounded-xl md:rounded-2xl bg-[#F1F3F4] md:bg-transparent p-1 md:p-0',
+    iconWrap: 'h-10 w-10 md:h-14 md:w-14 rounded-lg md:rounded-2xl bg-[#E8F0FE] shadow-sm md:shadow-none',
     label: 'text-base md:text-sm',
-    labelColor: 'text-white',
+    labelColor: 'text-slate-950',
     subLabelColor: 'text-slate-400',
-    chevron: 'text-[#b3b3b3]',
+    chevron: 'text-slate-400',
   },
   search: {
     root: 'w-full',
@@ -129,7 +129,7 @@ export default function TaxiStandDropdown({
           setIsOpen((current) => !current);
         }}
       >
-        <span className={`flex shrink-0 items-center justify-center text-[#FFC857] ${styles.iconWrap}`}>
+        <span className={`flex shrink-0 items-center justify-center text-[#1A73E8] ${styles.iconWrap}`}>
           <Car size={20} />
         </span>
 
@@ -146,7 +146,7 @@ export default function TaxiStandDropdown({
 
         <ChevronDown
           size={18}
-          className={`shrink-0 transition ${styles.chevron} ${isOpen ? 'rotate-180 text-[#FFC857]' : ''}`}
+          className={`shrink-0 transition ${styles.chevron} ${isOpen ? 'rotate-180 text-[#1A73E8]' : ''}`}
         />
       </button>
 
@@ -156,7 +156,7 @@ export default function TaxiStandDropdown({
            id={listId}
            role="listbox"
            style={panelStyle}
-           className="fixed z-80 overflow-y-auto rounded-3xl border border-white/10 bg-[#181818] p-2 text-left shadow-2xl shadow-black/40 md:min-w-87.5 scrollbar-none [&::-webkit-scrollbar]:hidden"
+           className="fixed z-80 overflow-y-auto rounded-3xl border border-slate-200 bg-white p-2 text-left shadow-2xl shadow-slate-900/15 md:min-w-87.5 scrollbar-none [&::-webkit-scrollbar]:hidden"
          >
            <TaxiStandOption
              name="Taxi Stands"
@@ -191,11 +191,11 @@ function TaxiStandOption({ name, location, status, statusColor, isSelected, onSe
       onClick={onSelect}
       className={`mb-1 flex w-full items-center gap-3 rounded-2xl p-3 text-left transition last:mb-0 ${
         isSelected
-          ? 'bg-[#FFC857]/15 text-[#FFC857]'
-          : 'text-[#d4d4d4] hover:bg-[#242424]'
+          ? 'bg-[#E8F0FE] text-[#1A73E8]'
+          : 'text-slate-700 hover:bg-[#F1F3F4]'
       }`}
     >
-      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isSelected ? 'bg-[#242424] text-[#FFC857]' : 'bg-[#242424] text-[#b3b3b3]'}`}>
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isSelected ? 'bg-white text-[#1A73E8]' : 'bg-[#F1F3F4] text-slate-500'}`}>
         {isSelected ? <Check size={18} /> : <MapPin size={18} />}
       </span>
 

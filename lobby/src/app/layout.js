@@ -16,14 +16,14 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: '#0B0B0B',
+  themeColor: '#F8FAFD',
 };
 
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className="min-h-screen bg-[#0B0B0B] font-sans text-white antialiased flex flex-col">
+        <body className="min-h-screen font-sans antialiased flex flex-col">
           <ServiceWorkerRegister />
 
           <ClientLayout>

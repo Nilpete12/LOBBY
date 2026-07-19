@@ -35,12 +35,12 @@ export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLo
       {isOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={onClose}></div>}
 
       {/* Sidebar Container */}
-      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#050505] text-white transform transition-transform duration-200 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 flex flex-col`}>
+      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-64 border-r border-slate-200 bg-white text-slate-950 transform transition-transform duration-200 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 flex flex-col`}>
         
         {/* Header */}
         <div className="h-20 flex items-center justify-between px-6 border-b border-white/10">
-          <span className="text-xl font-black tracking-tighter">THE LOBBY<span className="text-[#FFC857]">.</span></span>
-          <button onClick={onClose} className="md:hidden text-slate-400 hover:text-white">
+          <span className="text-xl font-black tracking-tighter">THE LOBBY<span className="text-[#1A73E8]">.</span></span>
+          <button onClick={onClose} className="md:hidden text-slate-400 hover:text-slate-950">
             <X size={24} />
           </button>
         </div>
@@ -53,8 +53,8 @@ export default function Sidebar({ isOpen, onClose, activeTab, setActiveTab, onLo
               onClick={() => { setActiveTab(item.id); onClose(); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition font-medium text-sm ${
                 activeTab === item.id 
-                  ? 'bg-[#FFC857] text-[#1A1205] shadow-lg shadow-[#FFC857]/30'
-                  : 'text-[#b3b3b3] hover:bg-[#181818] hover:text-white'
+                  ? 'bg-[#E8F0FE] text-[#1A73E8] shadow-sm'
+                  : 'text-slate-600 hover:bg-[#F1F3F4] hover:text-slate-950'
               }`}
             >
               <item.icon size={20} />

@@ -54,11 +54,11 @@ export default function AdminLogin({ onLogin }) {
     <div className="lobby-command-gradient min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#181818] text-[#FFC857] mb-6 border border-white/10 shadow-xl">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#E8F0FE] text-[#1A73E8] mb-6 border border-slate-200 shadow-xl">
             <Shield size={32} />
           </div>
 
-          <h1 className="text-3xl font-[Sailors_Slant_Normal] text-white tracking-tight">
+          <h1 className="text-3xl font-[Sailors_Slant_Normal] text-slate-950 tracking-tight">
             System Access
           </h1>
 
@@ -67,7 +67,7 @@ export default function AdminLogin({ onLogin }) {
           </p>
         </div>
 
-        <div className="bg-[#181818]/82 backdrop-blur-sm border border-white/10 rounded-3xl p-8 shadow-2xl">
+        <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
@@ -85,7 +85,7 @@ export default function AdminLogin({ onLogin }) {
                 value={email}
                 disabled={isLoading}
                 onChange={(e) => setEmail(e.target.value)}
-                className="dark-autofill w-full bg-[#121212] border border-white/10 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#121212_inset] px-4 py-3.5 rounded-xl outline-none focus:border-[#FFC857] focus:ring-1 focus:ring-[#FFC857] transition"
+                className="w-full bg-[#F1F3F4] border border-slate-200 text-slate-950 px-4 py-3.5 rounded-xl outline-none focus:border-[#1A73E8] focus:ring-1 focus:ring-[#1A73E8] transition"
                 placeholder="admin@lobby.com"
               />
             </div>
@@ -107,7 +107,7 @@ export default function AdminLogin({ onLogin }) {
                   value={password}
                   disabled={isLoading}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="dark-autofill w-full bg-[#121212] border border-white/10 text-white! [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_30px_#121212_inset] px-4 py-3.5 rounded-xl outline-none focus:border-[#FFC857] focus:ring-1 focus:ring-[#FFC857] transition font-mono text-sm disabled:opacity-60"
+                  className="w-full bg-[#F1F3F4] border border-slate-200 text-slate-950 px-4 py-3.5 rounded-xl outline-none focus:border-[#1A73E8] focus:ring-1 focus:ring-[#1A73E8] transition font-mono text-sm disabled:opacity-60"
                   placeholder="••••••••"
                 />
 
@@ -127,7 +127,7 @@ export default function AdminLogin({ onLogin }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#FFC857] hover:bg-[#F59E0B] text-[#1A1205] font-bold py-4 rounded-xl transition shadow-lg shadow-[#FFC857]/25 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full bg-[#1A73E8] hover:bg-[#0B57D0] text-white font-bold py-4 rounded-xl transition shadow-lg shadow-[#1A73E8]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading ? "Verifying..." : "Authenticate"}
             </button>
