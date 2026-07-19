@@ -904,15 +904,15 @@ function DriverDetailsSheet({ driver, rider, destination = '', taxiStand = '', o
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-3 sm:items-center sm:p-4"
-      onClick={onClose}
-    >
+    className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-3 sm:items-center sm:p-4"
+    onClick={onClose}
+  >
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-4xl border border-slate-200 bg-white p-5 shadow-2xl sm:rounded-4xl sm:p-6"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-slate-200 sm:hidden"></div>
-
+      onClick={(event) => event.stopPropagation()}
+      /* Cleaned up layout utilities to natively mask the y-axis scrollbar tracks */
+      className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-4xl border border-slate-200 bg-white p-5 shadow-2xl sm:rounded-4xl sm:p-6 scrollbar-none [&::-webkit-scrollbar]:hidden"
+    >
+      <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-slate-200 sm:hidden"></div>
         <div className="mb-5 flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
             <DriverAvatar driver={driver} size={68} />
