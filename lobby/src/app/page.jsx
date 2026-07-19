@@ -26,7 +26,7 @@ export default async function HomePage() {
     const isOnline = driverDoc?.is_available || false;
 
     return (
-      <main className="lobby-dashboard-gradient min-h-screen text-slate-950">
+      <main className="min-h-screen bg-[#0B0B0B] text-white">
         <IncomingRideAlert />
         <DriverHero 
           userName={user?.firstName || "Driver"} 
@@ -46,7 +46,7 @@ export default async function HomePage() {
 
   // 3. RIDER / GUEST VIEW
   return (
-    <div className="lobby-home-gradient text-slate-950">
+    <div className="bg-[#0B0B0B] text-white">
       <Hero />      
       <Features />
       <HowItWorks />
