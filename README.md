@@ -22,6 +22,26 @@ THE LOBBY is a specialized ride-hailing web application designed for direct driv
 - **Verification Portal:** Review and manually approve new driver applications.
 - **Platform Controls:** Manage system settings and view platform logs.
 
+## AI-Assisted Optimization
+
+Codex and GPT-5.6 were used as development assistants to review, optimize, and harden THE LOBBY during the pilot-readiness phase. The AI workflow helped turn the app from a basic direct-connect ride platform into a more complete mobile-first PWA for riders, drivers, and admins.
+
+### How Codex Was Used
+- **Repository scanning:** Codex inspected the Next.js codebase, identified weak flows, and helped prioritize changes for rider onboarding, driver onboarding, admin controls, and search reliability.
+- **Mobile-first UI improvements:** Codex helped refine the rider homepage, driver dashboard, search flow, dropdown filters, profile cards, and admin dashboard so the app is easier to use on smaller screens.
+- **Admin operations:** Codex added and refined admin tools for driver verification, user management, complaints, payment reminders, pilot-readiness checks, exports, and driver data completeness.
+- **Driver and rider flows:** Codex helped improve driver profile setup, vehicle details, number plate visibility, taxi stand selection, vehicle type filtering, recently contacted drivers, favourites, and rider-to-driver WhatsApp copy.
+- **Pilot launch checks:** Codex was used to reason through whether the app could support a pilot with 60-80 founding drivers and a growing rider base, focusing on search volume, profile views, upload pressure, and admin sync/export actions.
+- **Validation:** Codex ran lint/build checks after major changes to catch broken imports, route errors, and production build failures before pushing updates.
+
+### How GPT-5.6 Was Used
+- **Product strategy:** GPT-5.6 helped shape pilot-readiness priorities, including driver completeness rules, WhatsApp fallback flows, emergency admin controls, and simple analytics.
+- **UX review:** GPT-5.6 was used to think through the first-time experience for riders in Kohima and the daily workflow for local taxi drivers.
+- **Feature planning:** GPT-5.6 helped compare THE LOBBY against ride-hailing competitors and suggest local-first features such as taxi stand filtering, direct call/WhatsApp connection, verified driver visibility, and admin-led pilot operations.
+- **Copy and policy support:** GPT-5.6 assisted with clearer app messages, failure states, WhatsApp templates, terms, privacy policy wording, and admin-facing documentation.
+
+All AI-assisted changes were reviewed, edited, and validated before being committed. Codex and GPT-5.6 supported implementation and decision-making, but the app's final product direction, launch choices, and operational rules remain human-controlled.
+
 ## 🛠️ Tech Stack
 
 - **Frontend:** React.js, Tailwind CSS, Lucide Icons, Framer Motion
