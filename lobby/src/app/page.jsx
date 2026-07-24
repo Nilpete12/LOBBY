@@ -7,6 +7,7 @@ import TaxiStands from '@/components/TaxiStands';
 import DriverHero from '@/components/DriverHero'; 
 import DriverStatsSnapshot from '@/components/DriverStatsSnapshot'; 
 import IncomingRideAlert from '@/components/IncomingRideAlert';
+import FleetShowcase from '@/components/FleetShowcase';
 
 export default async function HomePage() {
   const user = await currentUser();
@@ -49,6 +50,7 @@ export default async function HomePage() {
     <div className="bg-[#0B0B0B] text-white">
       <Hero />      
       <Features />
+      <FleetShowcase />
       <HowItWorks />
     </div>
   );

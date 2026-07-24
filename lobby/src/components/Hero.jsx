@@ -3,7 +3,7 @@ import TaxiStandDropdown from '@/components/TaxiStandDropdown';
 
 export default function Hero() {
   return (
-    <section className="lobby-home-gradient dark-section relative w-full overflow-hidden pt-30 pb-28 md:pt-34">
+    <section className="lobby-home-gradient dark-section h-screen relative w-full overflow-hidden pt-30 pb-28 md:pt-34">
 
       {/* Background gradients */}
       <div className="absolute inset-0 bg-linear-to-b from-black/20 via-[#121212]/50 to-[#0B0B0B]/95"></div>
